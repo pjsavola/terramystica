@@ -54,7 +54,7 @@ public class Pool extends JPanel {
 
     @Override
     public void paint(Graphics g) {
-        final boolean setup = bons.size() != 3;
+        final boolean showCoins = bons.size() == 3 && bonusCoins != null;
         g.setFont(new Font("Arial", Font.BOLD, 16));
         int y = 4;
         int x = 5;
@@ -64,7 +64,7 @@ public class Pool extends JPanel {
         }
         int items = 0;
         for (int i = 0; i < bons.size(); ++i) {
-            Bons.drawBon(g, x, y, bons.get(i), setup ? 0 : bonusCoins[i]);
+            Bons.drawBon(g, x, y, bons.get(i), showCoins ? bonusCoins[i] : 0);
             x += 105;
             if (++items == 10) {
                 items = 0;

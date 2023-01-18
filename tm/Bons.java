@@ -32,7 +32,7 @@ public abstract class Bons {
         g.setFont(new Font("Arial", Font.PLAIN, 12));
         String title = "BON" + bon;
         if (coins > 0) {
-            title += "[" + coins + "c]";
+            title += " [" + coins + "c]";
         }
         g.drawString(title, x + 3, y + 14);
 

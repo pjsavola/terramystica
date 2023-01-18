@@ -1,6 +1,7 @@
 package tm;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class Main {
     public static Hex.Type getType(String type) {
@@ -29,15 +30,24 @@ public class Main {
                 "B,S,U,I,I,I,I,I,I,B,G,S",
                 "K,R,G,S,K,S,G,K,R,Y,U,R,Y",
         };
-        final JPanel game = new Game(1, mapData);
+        final Game game = new Game(1, mapData);
+
+        final Menu actionMenu = new Menu("Actions");
+        final MenuItem passAction = new MenuItem("Pass");
+        passAction.addActionListener(l -> game.passClicked());
+        actionMenu.add(passAction);
+
+        final MenuBar menuBar = new MenuBar();
+        menuBar.add(actionMenu);
+
         int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
         int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
         final JScrollPane jsp = new JScrollPane(game, v, h);
 
-
         final JFrame frame = new JFrame();
         frame.setTitle("Terra Mystica");
         frame.setContentPane(jsp);
+        frame.setMenuBar(menuBar);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.pack();

@@ -116,7 +116,7 @@ public class Player extends JPanel {
 
         ++dwellings;
         points += round.d;
-        if (ownedFavors[11]) {
+        if (ownedFavors[10]) {
             points += 2;
         }
         pay(faction.getDwellingCost());
@@ -133,7 +133,7 @@ public class Player extends JPanel {
         ++tradingPosts;
         --dwellings;
         points += round.tp;
-        if (ownedFavors[10]) {
+        if (ownedFavors[9]) {
             points += 3;
         }
         pay(expensive ? faction.getExpensiveTradingPostCost() : faction.getTradingPostCost());
@@ -499,7 +499,7 @@ public class Player extends JPanel {
             case 9 -> points += dwellings;
             case 10 -> points += 3 * shipping;
         }
-        if (ownedFavors[12]) {
+        if (ownedFavors[11]) {
             final int[] fav12 = { 0, 2, 3, 3, 4 };
             points += fav12[tradingPosts];
         }
@@ -523,6 +523,7 @@ public class Player extends JPanel {
             int dy = 5;
             g.setFont(new Font("Arial", Font.PLAIN, 14));
             Color factionColor = faction.getHomeType().getBuildingColor();
+            final boolean passed = Player.this.passed && game.phase != Game.Phase.END;
             if (passed) {
                 factionColor = new Color(factionColor.getRed(), factionColor.getGreen(), factionColor.getBlue(), 50);
             }

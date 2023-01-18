@@ -10,6 +10,11 @@ public class Engineers extends Faction {
     }
 
     @Override
+    public Resources getInitialIncome() {
+        return new Resources(10, 2, 0, 9);
+    }
+
+    @Override
     public Resources getBaseIncome() {
         return Resources.zero;
     }

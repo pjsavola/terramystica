@@ -1,5 +1,6 @@
 package tm;
 
+import tm.action.PassAction;
 import tm.action.PlaceInitialDwellingAction;
 import tm.action.SelectBonAction;
 import tm.faction.*;
@@ -131,8 +132,12 @@ public class Game extends JPanel {
     public void start() {
     }
 
-    public List<Integer> getAvailableBons() {
-        return bons;
+    public boolean isValidBonIndex(int index) {
+        return index >= 0 && index < bons.size();
+    }
+
+    public int getRound() {
+        return round;
     }
 
     public void selectBon(Player player, int bonIndex) {
@@ -151,19 +156,26 @@ public class Game extends JPanel {
     }
 
     public void nextRound() {
-        for (int i = 0; i < 6; ++i) {
-            usedPowerActions[i] = false;
-        }
-        for (Player player : players) {
-            player.startRound(rounds.get(round));
-        }
-        for (int i = 0; i < bonusCoins.length; ++i) {
-            ++bonusCoins[i];
-        }
         ++round;
         roundPanel.round = round;
         turnOrder.addAll(nextTurnOrder);
         nextTurnOrder.clear();
+        if (round == 1) {
+            phase = Phase.ACTIONS;
+        }
+        if (round > 6) {
+            phase = Phase.END;
+        } else {
+            for (int i = 0; i < 6; ++i) {
+                usedPowerActions[i] = false;
+            }
+            for (int i = 0; i < bonusCoins.length; ++i) {
+                ++bonusCoins[i];
+            }
+            for (Player player : players) {
+                player.startRound(rounds.get(round - 1));
+            }
+        }
     }
 
     public boolean cultOccupied(int cult) {
@@ -195,19 +207,28 @@ public class Game extends JPanel {
     }
 
     public void bonClicked(int index) {
-        if (phase == Phase.INITIAL_BONS && !turnOrder.isEmpty()) {
-            final Action action = new SelectBonAction(turnOrder.get(0), this, index);
-            if (action.canExecute()) {
-                action.execute();
-                turnOrder.remove(0);
-                if (turnOrder.isEmpty()) {
-                    turnOrder.addAll(nextTurnOrder);
-                    nextTurnOrder.clear();
-                    phase = Phase.ACTIONS;
-                    nextRound();
-                }
-                repaint();
+        if (!turnOrder.isEmpty()) {
+            resolvePass(new SelectBonAction(turnOrder.get(0), this, index));
+        }
+    }
+
+    public void passClicked() {
+        if (!turnOrder.isEmpty()) {
+            resolvePass(new PassAction(turnOrder.get(0), this));
+        }
+    }
+
+    private void resolvePass(Action action) {
+        if (action.canExecute()) {
+            action.execute();
+            final Player player = turnOrder.remove(0);
+            if (phase == Phase.ACTIONS) {
+                nextTurnOrder.add(player);
             }
+            if (turnOrder.isEmpty()) {
+                nextRound();
+            }
+            repaint();
         }
     }
 }

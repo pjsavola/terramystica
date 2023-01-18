@@ -17,7 +17,7 @@ public class SelectBonAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return bonIndex >= 0 && bonIndex < game.getAvailableBons().size();
+        return game.isValidBonIndex(bonIndex) && game.phase == Game.Phase.INITIAL_BONS || (game.phase == Game.Phase.ACTIONS && game.getRound() < 6);
     }
 
     @Override
