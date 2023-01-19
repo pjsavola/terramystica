@@ -1,6 +1,7 @@
 package tm;
 
 import tm.Bons;
+import tm.action.SelectBonAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,7 +38,7 @@ public class Pool extends JPanel {
                     final int col = px / 105;
                     final int row = py / 105;
                     if (10 * row + col < bons.size() && px % 105 >= 5 && py % 105 >= 5) {
-                        game.bonClicked(10 * row + col);
+                        game.resolveAction(new SelectBonAction(10 * row + col));
                     }
                 }
 

@@ -15,7 +15,7 @@ public class Cults extends JPanel {
     private final static Font cultFont = new Font("Arial", Font.PLAIN, 9);
 
     public Cults(List<Player> players) {
-        this.players = players;
+        this.players = new ArrayList<>(players);
     }
 
     public static Color getCultColor(int cult) {

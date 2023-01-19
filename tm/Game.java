@@ -1,8 +1,7 @@
 package tm;
 
-import tm.action.PassAction;
-import tm.action.PlaceInitialDwellingAction;
-import tm.action.SelectBonAction;
+import tm.action.*;
+import tm.action.Action;
 import tm.faction.*;
 
 import javax.swing.*;
@@ -11,33 +10,50 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.IntStream;
-import tm.action.Action;
 
 public class Game extends JPanel {
-    public enum Phase { INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, END };
+    public enum Phase { PICK_FACTIONS, AUCTION_FACTIONS, INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, CONFIRM_ACTION, END };
 
-    private final List<Player> players = new ArrayList<>();
-    private final Random random = new Random();
-    private final List<Integer> bons;
-    private final List<Round> rounds;
-    private final int[] bonusCoins;
-    private final List<Integer> favs;
-    private final List<Integer> towns;
-    final boolean[] usedPowerActions = new boolean[6];
-    private final Grid mapPanel;
-    private final Cults cultPanel;
-    private final PowerActions powerActionPanel;
-    private final TurnOrder turnOrderPanel;
-    private final Rounds roundPanel;
-    private final Pool pool;
+    private List<Player> players;
+    private List<Integer> bons;
+    private List<Round> rounds;
+    private int[] bonusCoins;
+    private List<Integer> favs;
+    private List<Integer> towns;
+    boolean[] usedPowerActions;
+    private Grid mapPanel;
+    private Cults cultPanel;
+    private PowerActions powerActionPanel;
+    private TurnOrder turnOrderPanel;
+    private Rounds roundPanel;
+    private Pool pool;
     private int round;
 
-    private final List<Player> turnOrder = new ArrayList<>();
-    private final List<Player> nextTurnOrder = new ArrayList<>();
+    private List<Player> turnOrder;
+    private List<Player> nextTurnOrder;
+    private List<Action> history;
+    private List<Action> newActions;
+    private boolean pendingPass;
 
-    public Phase phase = Phase.INITIAL_DWELLINGS;
+    public Phase phase;
 
-    public Game(int playerCount, String[] mapData) {
+    public Game(int playerCount, String[] mapData, int seed) {
+        init(playerCount, mapData, seed);
+    }
+
+    private void init(int playerCount, String[] mapData, int seed) {
+        players = new ArrayList<>();
+        turnOrder = new ArrayList<>();
+        nextTurnOrder = new ArrayList<>();
+        history = new ArrayList<>();
+        newActions = new ArrayList<>();
+        usedPowerActions = new boolean[6];
+        phase = Phase.INITIAL_DWELLINGS;
+        round = 0;
+        pendingPass = false;
+
+        final Random random = new Random(seed);
+
         final List<Integer> allBons = new ArrayList<>(IntStream.range(1, 11).boxed().toList());
         Collections.shuffle(allBons, random);
         bons = new ArrayList<>(allBons.stream().limit(playerCount + 3).sorted().toList());
@@ -104,6 +120,10 @@ public class Game extends JPanel {
         roundPanel = new Rounds(rounds);
         pool = new Pool(this, bons, bonusCoins, favs, towns);
 
+        addComponents();
+    }
+
+    private void addComponents() {
         final JPanel mapAndCults = new JPanel();
         mapAndCults.add(mapPanel);
         mapAndCults.add(cultPanel);
@@ -117,8 +137,8 @@ public class Game extends JPanel {
         final JPanel actsTurnOrderAndRounds = new JPanel();
         actsTurnOrderAndRounds.add(actsAndTurnOrder);
         actsTurnOrderAndRounds.add(roundPanel);
-
         add(actsTurnOrderAndRounds);
+
         for (Player player : players) {
             player.setBackground(new Color(0xDDDDDD));
             player.setBorder(new LineBorder(Color.BLACK));
@@ -126,10 +146,19 @@ public class Game extends JPanel {
         }
         add(pool);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        start();
     }
 
-    public void start() {
+    public void rewind(String[] mapData, int seed) {
+        final List<Action> history = this.history;
+        removeAll();
+        init(players.size(), mapData, seed);
+        for (Action action : history) {
+            resolveAction(action);
+            if (phase == Phase.CONFIRM_ACTION) {
+                confirmTurn();
+            }
+        }
+        repaint();
     }
 
     public boolean isValidBonIndex(int index) {
@@ -156,6 +185,15 @@ public class Game extends JPanel {
     }
 
     public void nextRound() {
+        if (phase == Phase.INITIAL_DWELLINGS) {
+            turnOrder.addAll(nextTurnOrder);
+            nextTurnOrder.clear();
+            for (int i = turnOrder.size() - 1; i >= 0; --i) {
+                nextTurnOrder.add(turnOrder.get(i));
+            }
+            phase = Phase.INITIAL_BONS;
+            return;
+        }
         ++round;
         roundPanel.round = round;
         turnOrder.addAll(nextTurnOrder);
@@ -172,6 +210,8 @@ public class Game extends JPanel {
             for (int i = 0; i < bonusCoins.length; ++i) {
                 ++bonusCoins[i];
             }
+            players.clear();
+            players.addAll(turnOrder);
             for (Player player : players) {
                 player.startRound(rounds.get(round - 1));
             }
@@ -188,47 +228,82 @@ public class Game extends JPanel {
     }
 
     public void hexClicked(int row, int col) {
-        if (phase == Phase.INITIAL_DWELLINGS && !turnOrder.isEmpty()) {
-            final Action action = new PlaceInitialDwellingAction(turnOrder.get(0), mapPanel, row, col);
-            if (action.canExecute()) {
-                action.execute();
-                turnOrder.remove(0);
-                if (turnOrder.isEmpty()) {
-                    turnOrder.addAll(nextTurnOrder);
-                    nextTurnOrder.clear();
-                    for (int i = turnOrder.size() - 1; i >= 0; --i) {
-                        nextTurnOrder.add(turnOrder.get(i));
-                    }
-                    phase = Phase.INITIAL_BONS;
-                }
-                repaint();
+        if (phase == Phase.INITIAL_DWELLINGS) {
+            resolveAction(new PlaceInitialDwellingAction(row, col));
+        } else if (phase == Phase.ACTIONS) {
+            final Hex hex = mapPanel.getHex(row, col);
+            final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
+            if (options.size() == 1) {
+                resolveAction(new BuildAction(row, col, options.get(0)));
+            } else if (!options.isEmpty()) {
+                // Which upgrade?
             }
         }
     }
 
-    public void bonClicked(int index) {
-        if (!turnOrder.isEmpty()) {
-            resolvePass(new SelectBonAction(turnOrder.get(0), this, index));
-        }
+    public Hex getHex(int row, int col) {
+        return mapPanel.getHex(row, col);
     }
 
-    public void passClicked() {
-        if (!turnOrder.isEmpty()) {
-            resolvePass(new PassAction(turnOrder.get(0), this));
-        }
-    }
+    public void resolveAction(Action action) {
+        if (turnOrder.isEmpty()) return;
 
-    private void resolvePass(Action action) {
-        if (action.canExecute()) {
+        action.setData(this, turnOrder.get(0));
+        if (action.validatePhase() && action.canExecute()) {
             action.execute();
-            final Player player = turnOrder.remove(0);
+            newActions.add(action);
+            if (!action.isFree()) {
+                pendingPass = action.isPass();
+                if (action.needsConfirm()) {
+                    phase = Phase.CONFIRM_ACTION;
+                    repaint();
+                } else {
+                    endTurn();
+                }
+            }
+        }
+    }
+
+    public void confirmTurn() {
+        if (phase == Phase.CONFIRM_ACTION) {
+            phase = Phase.ACTIONS;
+            endTurn();
+        }
+    }
+
+    public void endTurn() {
+        history.addAll(newActions);
+        newActions.clear();
+        final Player player = turnOrder.remove(0);
+        if (pendingPass) {
             if (phase == Phase.ACTIONS) {
                 nextTurnOrder.add(player);
             }
             if (turnOrder.isEmpty()) {
                 nextRound();
             }
-            repaint();
+        } else {
+            turnOrder.add(player);
         }
+        repaint();
+    }
+
+    public void leechTriggered(Map<Hex.Type, Integer> leech) {
+        final Player activePlayer = turnOrder.get(0);
+        final int activePlayerIndex = players.indexOf(activePlayer);
+        for (int i = 1; i < players.size(); ++i) {
+            final Player otherPlayer = players.get(activePlayerIndex % players.size());
+            if (otherPlayer.canLeech()) {
+                final int leechAmount = leech.getOrDefault(otherPlayer.getHomeType(), 0);
+                if (leechAmount > 0) {
+                    // TODO: Actually make a decision
+                    otherPlayer.leech(leechAmount);
+                }
+            }
+        }
+    }
+
+    public boolean isMyTurn(Player player) {
+        return turnOrder.get(0) == player;
     }
 }

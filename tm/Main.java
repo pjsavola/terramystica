@@ -1,7 +1,12 @@
 package tm;
 
+import tm.action.PassAction;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.Random;
 
 public class Main {
     public static Hex.Type getType(String type) {
@@ -30,18 +35,20 @@ public class Main {
                 "B,S,U,I,I,I,I,I,I,B,G,S",
                 "K,R,G,S,K,S,G,K,R,Y,U,R,Y",
         };
-        final Game game = new Game(1, mapData);
+        final int seed = new Random().nextInt();
+        final int playerCount = 1;
+        final Game game = new Game(playerCount, mapData, seed);
 
         final Menu actionMenu = new Menu("Actions");
         final MenuItem passAction = new MenuItem("Pass");
-        passAction.addActionListener(l -> game.passClicked());
+        passAction.addActionListener(l -> game.resolveAction(new PassAction()));
         actionMenu.add(passAction);
 
         final MenuBar menuBar = new MenuBar();
         menuBar.add(actionMenu);
 
-        int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
-        int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+        final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
+        final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
         final JScrollPane jsp = new JScrollPane(game, v, h);
 
         final JFrame frame = new JFrame();
@@ -51,6 +58,27 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.pack();
+        frame.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                switch (e.getKeyChar()) {
+                    case 'c' -> game.confirmTurn();
+                    case 'n' -> game.confirmTurn();
+                    case 'q' -> {
+                        game.rewind(mapData, seed);
+                        frame.pack(); // do this so that it does not reset scroll bar etc :(
+                    }
+                }
+            }
+        });
         frame.setVisible(true);
     }
 }

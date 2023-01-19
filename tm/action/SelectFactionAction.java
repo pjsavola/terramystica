@@ -1,5 +1,6 @@
 package tm.action;
 
+import tm.Game;
 import tm.Player;
 import tm.faction.Faction;
 
@@ -7,9 +8,13 @@ public class SelectFactionAction extends Action {
 
     private final Faction faction;
 
-    public SelectFactionAction(Player player, Faction faction) {
-        super(player);
+    public SelectFactionAction(Faction faction) {
         this.faction = faction;
+    }
+
+    @Override
+    public boolean validatePhase() {
+        return game.phase == Game.Phase.INITIAL_DWELLINGS;
     }
 
     @Override
@@ -20,5 +25,9 @@ public class SelectFactionAction extends Action {
     @Override
     public void execute() {
         player.selectFaction(faction, 20);
+    }
+
+    public boolean needsConfirm() {
+        return true;
     }
 }

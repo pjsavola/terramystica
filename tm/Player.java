@@ -301,6 +301,10 @@ public class Player extends JPanel {
         points += 6;
     }
 
+    public boolean canLeech() {
+        return power[0] > 0 || power[1] > 0;
+    }
+
     public void leech(int amount) {
         final int unused = addPower(amount);
         if (unused < amount) {
@@ -481,7 +485,7 @@ public class Player extends JPanel {
 
         coins -= r.coins;
         workers -= r.workers;
-        priests -= r.workers;
+        priests -= r.priests;
         payPower(r.power);
     }
 
@@ -523,15 +527,22 @@ public class Player extends JPanel {
             int dy = 5;
             g.setFont(new Font("Arial", Font.PLAIN, 14));
             Color factionColor = faction.getHomeType().getBuildingColor();
+            final boolean myTurn = game.isMyTurn(Player.this);
             final boolean passed = Player.this.passed && game.phase != Game.Phase.END;
-            if (passed) {
+            if (passed && !myTurn) {
                 factionColor = new Color(factionColor.getRed(), factionColor.getGreen(), factionColor.getBlue(), 50);
             }
             g.setColor(factionColor);
             g.fillRect(dx, dy, 300, 16);
             g.setColor(faction.getHomeType().getFontColor());
             String factionName = faction.getName();
-            if (passed) {
+            if (myTurn) {
+                if (game.phase == Game.Phase.CONFIRM_ACTION) {
+                    factionName += " - CONFIRM TURN";
+                } else {
+                    factionName = "> " + factionName;
+                }
+            } else if (passed) {
                 factionName += ", passed";
             }
             g.drawString(factionName, dx + 3, dy + 12);

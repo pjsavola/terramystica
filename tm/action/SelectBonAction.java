@@ -6,18 +6,20 @@ import tm.faction.Faction;
 
 public class SelectBonAction extends Action {
 
-    private final Game game;
     private final int bonIndex;
 
-    public SelectBonAction(Player player, Game game, int bonIndex) {
-        super(player);
-        this.game = game;
+    public SelectBonAction(int bonIndex) {
         this.bonIndex = bonIndex;
     }
 
     @Override
+    public boolean validatePhase() {
+        return game.phase == Game.Phase.INITIAL_BONS || game.phase == Game.Phase.ACTIONS;
+    }
+
+    @Override
     public boolean canExecute() {
-        return game.isValidBonIndex(bonIndex) && game.phase == Game.Phase.INITIAL_BONS || (game.phase == Game.Phase.ACTIONS && game.getRound() < 6);
+        return game.isValidBonIndex(bonIndex) && game.getRound() < 6;
     }
 
     @Override
@@ -26,5 +28,15 @@ public class SelectBonAction extends Action {
             player.pass();
         }
         game.selectBon(player, bonIndex);
+    }
+
+    @Override
+    public boolean isPass() {
+        return true;
+    }
+
+    @Override
+    public boolean needsConfirm() {
+        return game.phase == Game.Phase.ACTIONS;
     }
 }

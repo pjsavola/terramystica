@@ -139,7 +139,7 @@ public class Hex {
                 g.drawPolygon(shapex, shapey, 5);
             } else if (structure == Structure.TRADING_POST) {
                 final int[] shapex = { x - 10, x, x + 10, x + 10, x + 20, x + 20, x - 10 };
-                final int[] shapey = { y - 10, y - 20, y, y - 10, y, y, y + 10, y + 10 };
+                final int[] shapey = { y - 10, y - 20, y - 10, y, y, y + 10, y + 10 };
                 g.setColor(type.getBuildingColor());
                 g.fillPolygon(shapex, shapey, 7);
                 g.setColor(type.getFontColor());
