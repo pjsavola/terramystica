@@ -39,4 +39,9 @@ public class SelectBonAction extends Action {
     public boolean needsConfirm() {
         return game.phase == Game.Phase.ACTIONS;
     }
+
+    @Override
+    public String toString() {
+        return "Pass BON" + game.getBon(bonIndex);
+    }
 }

@@ -19,4 +19,9 @@ public class PassAction extends Action {
     public boolean isPass() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "Pass";
+    }
 }

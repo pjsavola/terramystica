@@ -42,4 +42,11 @@ public class PlaceInitialDwellingAction extends Action {
     public boolean needsConfirm() {
         return false;
     }
+
+    @Override
+    public String toString() {
+        final Hex hex = game.getHex(row, col);
+        final String id = hex.getId();
+        return "Build " + id;
+    }
 }

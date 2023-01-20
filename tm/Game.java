@@ -203,6 +203,10 @@ public class Game extends JPanel {
         return index >= 0 && index < bons.size();
     }
 
+    public int getBon(int index) {
+        return bons.get(index);
+    }
+
     public int getRound() {
         return round;
     }
@@ -294,11 +298,11 @@ public class Game extends JPanel {
                 pendingPass = action.isPass();
                 if (action.needsConfirm()) {
                     phase = Phase.CONFIRM_ACTION;
-                    repaint();
                 } else {
                     endTurn();
                 }
             }
+            repaint();
         }
     }
 
@@ -306,6 +310,7 @@ public class Game extends JPanel {
         if (phase == Phase.CONFIRM_ACTION) {
             phase = Phase.ACTIONS;
             endTurn();
+            repaint();
         }
     }
 
@@ -323,7 +328,6 @@ public class Game extends JPanel {
         } else {
             turnOrder.add(player);
         }
-        repaint();
     }
 
     public void leechTriggered(Map<Hex.Type, Integer> leech) {

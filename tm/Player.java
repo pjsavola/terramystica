@@ -1,5 +1,6 @@
 package tm;
 
+import tm.action.ConvertAction;
 import tm.faction.*;
 
 import javax.swing.*;
@@ -274,7 +275,7 @@ public class Player extends JPanel {
         if (r.power > 0)
             throw new RuntimeException("Trying to convert power to power");
 
-        final int power = r.coins + r.workers * 3 + r.priests * 5;
+        final int power = ConvertAction.getPowerCost(r);
         if (!canAffordPower(power))
             throw new RuntimeException("Not enough power for conversion");
 
@@ -507,6 +508,10 @@ public class Player extends JPanel {
         return power[2] + getMaxBurn() >= powerCost;
     }
 
+    public int getNeededBurn(int powerCost) {
+        return Math.max(0, powerCost - power[2]);
+    }
+
     public boolean canAfford(Resources r) {
         return coins >= r.coins && workers >= r.workers && priests >= r.priests && canAffordPower(r.power);
     }
@@ -526,6 +531,7 @@ public class Player extends JPanel {
             burn(1);
         }
         this.power[2] -= power;
+        this.power[0] += power;
     }
 
     public void pass() {

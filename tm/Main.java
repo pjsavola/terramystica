@@ -1,5 +1,6 @@
 package tm;
 
+import tm.action.ConvertAction;
 import tm.action.PassAction;
 
 import javax.swing.*;
@@ -71,7 +72,7 @@ public class Main {
             public void keyReleased(KeyEvent e) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER -> game.confirmTurn();
-                    case KeyEvent.VK_C -> game.confirmTurn(); // convert
+                    case KeyEvent.VK_C -> game.resolveAction(new ConvertAction(Resources.c1));
                     case KeyEvent.VK_ESCAPE -> game.rewind();
                 }
             }

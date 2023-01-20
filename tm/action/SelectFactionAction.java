@@ -30,4 +30,9 @@ public class SelectFactionAction extends Action {
     public boolean needsConfirm() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "Select " + faction.getName();
+    }
 }

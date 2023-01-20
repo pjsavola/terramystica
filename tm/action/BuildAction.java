@@ -77,4 +77,17 @@ public class BuildAction extends Action {
         }
         game.leechTriggered(leech);
     }
+
+    @Override
+    public String toString() {
+        final Hex hex = game.getHex(row, col);
+        final String id = hex.getId();
+        return switch (structure) {
+            case DWELLING -> "Build " + id;
+            case TRADING_POST -> "Upgrade " + id + " to TP";
+            case TEMPLE -> "Upgrade " + id + " to TE";
+            case STRONGHOLD -> "Upgrade " + id + " to SH";
+            case SANCTUARY -> "Upgrade " + id + " to SA";
+        };
+    }
 }
