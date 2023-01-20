@@ -2,11 +2,13 @@ package tm;
 
 import tm.action.ConvertAction;
 import tm.action.PassAction;
+import tm.faction.Alchemists;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Main {
@@ -70,9 +72,49 @@ public class Main {
 
             @Override
             public void keyReleased(KeyEvent e) {
+                if (game.phase != Game.Phase.ACTIONS && game.phase != Game.Phase.CONFIRM_ACTION) return;
+
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER -> game.confirmTurn();
-                    case KeyEvent.VK_C -> game.resolveAction(new ConvertAction(Resources.c1));
+                    case KeyEvent.VK_C -> {
+                        final boolean alchemists = game.getCurrentPlayer().getFaction() instanceof Alchemists;
+                        final JTextField priestsToWorkers = new JTextField();
+                        final JTextField workersToCoins = new JTextField();
+                        final JTextField powerToPriests = new JTextField();
+                        final JTextField powerToWorkers = new JTextField();
+                        final JTextField powerToCoins = new JTextField();
+                        final JTextField pointsToCoins = new JTextField();
+                        Object[] message = {
+                                "P -> W:", priestsToWorkers,
+                                "W -> C:", workersToCoins,
+                                "5 PW -> P", powerToPriests,
+                                "3 PW -> W", powerToWorkers,
+                                "1 PW -> C", powerToCoins,
+                                "1 VP -> C", pointsToCoins
+                        };
+                        message = Arrays.stream(message).limit(alchemists ? 12 : 10).toArray();
+
+                        int option = JOptionPane.showConfirmDialog(null, message, "Convert", JOptionPane.OK_CANCEL_OPTION);
+                        if (option == JOptionPane.OK_OPTION) {
+                            try {
+                                final int p2w = priestsToWorkers.getText().isEmpty() ? 0 : Integer.parseInt(priestsToWorkers.getText());
+                                final int w2c = workersToCoins.getText().isEmpty() ? 0 : Integer.parseInt(workersToCoins.getText());
+                                final int vp2c = pointsToCoins.getText().isEmpty() ? 0 : Integer.parseInt(pointsToCoins.getText());
+                                final int pw2p = powerToPriests.getText().isEmpty() ? 0 : Integer.parseInt(powerToPriests.getText());
+                                final int pw2w = powerToWorkers.getText().isEmpty() ? 0 : Integer.parseInt(powerToWorkers.getText());
+                                final int pw2c = powerToCoins.getText().isEmpty() ? 0 : Integer.parseInt(powerToCoins.getText());
+                                Resources powerConversions = Resources.zero;
+                                if (pw2p > 0) powerConversions = powerConversions.combine(Resources.fromPriests(pw2p));
+                                if (pw2w > 0) powerConversions = powerConversions.combine(Resources.fromWorkers(pw2w));
+                                if (pw2c > 0) powerConversions = powerConversions.combine(Resources.fromCoins(pw2c));
+                                if (powerConversions != Resources.zero || p2w > 0 || w2c > 0 || vp2c > 0) {
+                                    game.resolveAction(new ConvertAction(powerConversions, p2w, w2c, vp2c));
+                                }
+                            } catch (NumberFormatException ex) {
+                                System.err.println("Invalid number: " + ex.getMessage());
+                            }
+                        }
+                    }
                     case KeyEvent.VK_ESCAPE -> game.rewind();
                 }
             }

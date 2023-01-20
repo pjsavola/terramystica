@@ -278,7 +278,11 @@ public class Game extends JPanel {
             if (options.size() == 1) {
                 resolveAction(new BuildAction(row, col, options.get(0)));
             } else if (!options.isEmpty()) {
-                // Which upgrade?
+                final String[] choices = options.stream().map(Hex.Structure::getName).toArray(String[]::new);
+                final int response = JOptionPane.showOptionDialog(this, "Upgrade Trading Post to...", "Choose upgrade", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                if (response >= 0 && response < options.size()) {
+                    resolveAction(new BuildAction(row, col, options.get(response)));
+                }
             }
         }
     }
@@ -347,5 +351,9 @@ public class Game extends JPanel {
 
     public boolean isMyTurn(Player player) {
         return turnOrder.get(0) == player;
+    }
+
+    public Player getCurrentPlayer() {
+        return turnOrder.get(0);
     }
 }

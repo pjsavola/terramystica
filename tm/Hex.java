@@ -61,6 +61,26 @@ public class Hex {
         public Structure getParent() {
             return parent;
         }
+
+        public String getName() {
+            return switch (this) {
+                case DWELLING -> "Dwelling";
+                case TRADING_POST -> "Trading Post";
+                case TEMPLE -> "Temple";
+                case STRONGHOLD -> "Stronghold";
+                case SANCTUARY -> "Sanctuary";
+            };
+        }
+
+        public String getAbbrevation() {
+            return switch (this) {
+                case DWELLING -> "D";
+                case TRADING_POST -> "TP";
+                case TEMPLE -> "TE";
+                case STRONGHOLD -> "SH";
+                case SANCTUARY -> "SA";
+            };
+        }
     };
 
     private final static Font font = new Font("Arial", Font.BOLD, 12);
@@ -151,19 +171,19 @@ public class Hex {
                 g.drawPolygon(shapex, shapey, 7);
             } else if (structure == Structure.TEMPLE) {
                 g.setColor(type.getBuildingColor());
-                g.fillOval(x - 10, y - 10, 20, 20);
+                g.fillOval(x - 14, y - 14, 28, 28);
                 g.setColor(type.getFontColor());
-                g.drawOval(x - 10, y - 10, 20, 20);
+                g.drawOval(x - 14, y - 14, 28, 28);
             } else if (structure == Structure.STRONGHOLD) {
                 g.setColor(type.getBuildingColor());
-                g.fillRect(x - 20, y - 20, 40, 40);
+                g.fillRect(x - 16, y - 16, 32, 32);
                 g.setColor(type.getFontColor());
-                g.drawRect(x - 20, y - 20, 40, 40);
+                g.drawRect(x - 16, y - 16, 32, 32);
             } else if (structure == Structure.SANCTUARY) {
                 g.setColor(type.getBuildingColor());
-                g.fillRoundRect(x - 20, y - 10, 40, 20, 10, 10);
+                g.fillRoundRect(x - 20, y - 14, 40, 28, 28, 28);
                 g.setColor(type.getFontColor());
-                g.drawRoundRect(x - 20, y - 10, 40, 20, 10, 10);
+                g.drawRoundRect(x - 20, y - 14, 40, 28, 28, 28);
             } else {
                 throw new RuntimeException("Invalid structure");
             }

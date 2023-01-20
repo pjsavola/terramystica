@@ -408,6 +408,22 @@ public class Player extends JPanel {
         }
     }
 
+    public boolean canConvert(int priests, int workers, int points) {
+        final int priestsToCoins = Math.min(priests, workers);
+        return this.priests >= priests && this.workers >= workers - priestsToCoins && (points == 0 || (faction instanceof Alchemists && this.points >= points));
+    }
+
+    public void convert(int priests, int workers, int points) {
+        this.priests -= priests;
+        this.workers -= workers;
+        this.workers += priests;
+        this.coins += workers;
+        if (faction instanceof Alchemists) {
+            this.points -= points;
+            this.coins += points;
+        }
+    }
+
     public void dig(int amount) {
         if (workers < amount * digging)
             throw new RuntimeException("Cannot afford to dig " + amount);
