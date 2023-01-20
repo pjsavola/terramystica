@@ -5,6 +5,7 @@ import tm.faction.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Player extends JPanel {
@@ -58,6 +59,35 @@ public class Player extends JPanel {
         add(pool);
     }
 
+    public void reset() {
+        coins = 0;
+        workers = 0;
+        priests = 0;
+        maxPriests = 7;
+        keys = 0;
+        favorIncome = Resources.zero;
+        bridgesLeft = 3;
+        Arrays.fill(ownedFavors, false);
+        passed = false;
+        round = null;
+        pendingSpades = 0;
+        pendingFavors = 0;
+        pendingWorkerToPriestConversions = 0;
+        pendingBridges = 0;
+        dwellings = 0;
+        tradingPosts = 0;
+        temples = 0;
+        strongholds = 0;
+        sanctuaries = 0;
+        shipping = 0;
+        range = 1;
+        jumpCost = Resources.zero;
+        bons.clear();
+        favs.clear();
+        towns.clear();
+        selectFaction(faction, 20);
+    }
+
     public int getCultSteps(int cult) {
         return cultSteps[cult];
     }
@@ -74,6 +104,8 @@ public class Player extends JPanel {
         this.faction = faction;
         this.points = points;
         power[0] = 12;
+        power[1] = 0;
+        power[2] = 0;
         if (faction instanceof Dwarves) {
             range = 2;
             jumpCost = Resources.w2;

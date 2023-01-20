@@ -69,13 +69,10 @@ public class Main {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                switch (e.getKeyChar()) {
-                    case 'c' -> game.confirmTurn();
-                    case 'n' -> game.confirmTurn();
-                    case 'q' -> {
-                        game.rewind(mapData, seed);
-                        frame.pack(); // do this so that it does not reset scroll bar etc :(
-                    }
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_ENTER -> game.confirmTurn();
+                    case KeyEvent.VK_C -> game.confirmTurn(); // convert
+                    case KeyEvent.VK_ESCAPE -> game.rewind();
                 }
             }
         });

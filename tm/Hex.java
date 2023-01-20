@@ -64,7 +64,7 @@ public class Hex {
     };
 
     private final static Font font = new Font("Arial", Font.BOLD, 12);
-    private final Type type;
+    private Type type;
     private final String id;
     private Structure structure;
     private List<Hex> neighbors;
@@ -96,6 +96,11 @@ public class Hex {
 
     public void setNeighbors(List<Hex> neighbors) {
         this.neighbors = neighbors;
+    }
+
+    public void reset(Type type) {
+        this.type = type;
+        this.structure = null;
     }
 
     public void draw(Graphics2D g, int x, int y, int radius) {

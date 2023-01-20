@@ -119,6 +119,16 @@ public class Grid extends JPanel {
         });
     }
 
+    public void reset(String[] mapData) {
+        for (int row = 0; row < mapData.length; ++row) {
+            String[] cols = mapData[row].split(",");
+            for (int col = 0; col < cols.length; ++col) {
+                final Hex.Type type = Main.getType(cols[col]);
+                map[row][col].reset(type);
+            }
+        }
+    }
+
     public Hex getHex(int row, int col) {
         if (row > map.length) return null;
         if (col > map[row].length) return null;

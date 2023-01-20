@@ -14,104 +14,38 @@ import java.util.stream.IntStream;
 public class Game extends JPanel {
     public enum Phase { PICK_FACTIONS, AUCTION_FACTIONS, INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, CONFIRM_ACTION, END };
 
-    private List<Player> players;
-    private List<Integer> bons;
-    private List<Round> rounds;
-    private int[] bonusCoins;
-    private List<Integer> favs;
-    private List<Integer> towns;
-    boolean[] usedPowerActions;
-    private Grid mapPanel;
-    private Cults cultPanel;
-    private PowerActions powerActionPanel;
-    private TurnOrder turnOrderPanel;
-    private Rounds roundPanel;
-    private Pool pool;
+    private final List<Player> players = new ArrayList<>();
+    private final List<Integer> bons = new ArrayList<>();
+    private final List<Round> rounds = new ArrayList<>();
+    private final int[] bonusCoins = new int[3];
+    private final List<Integer> favs = new ArrayList<>();
+    private final List<Integer> towns = new ArrayList<>();
+    final boolean[] usedPowerActions = new boolean[6];
+    private final Grid mapPanel;
+    private final Cults cultPanel;
+    private final PowerActions powerActionPanel;
+    private final TurnOrder turnOrderPanel;
+    private final Rounds roundPanel;
+    private final Pool pool;
     private int round;
 
-    private List<Player> turnOrder;
-    private List<Player> nextTurnOrder;
-    private List<Action> history;
-    private List<Action> newActions;
+    private final List<Player> turnOrder = new ArrayList<>();
+    private final List<Player> nextTurnOrder = new ArrayList<>();
+    private final List<Action> history = new ArrayList<>();
+    private final List<Action> newActions = new ArrayList<>();
     private boolean pendingPass;
 
     public Phase phase;
 
+
+    private final String[] mapData;
+    private final int playerCount;
+    private final int seed;
+
     public Game(int playerCount, String[] mapData, int seed) {
-        init(playerCount, mapData, seed);
-    }
-
-    private void init(int playerCount, String[] mapData, int seed) {
-        players = new ArrayList<>();
-        turnOrder = new ArrayList<>();
-        nextTurnOrder = new ArrayList<>();
-        history = new ArrayList<>();
-        newActions = new ArrayList<>();
-        usedPowerActions = new boolean[6];
-        phase = Phase.INITIAL_DWELLINGS;
-        round = 0;
-        pendingPass = false;
-
-        final Random random = new Random(seed);
-
-        final List<Integer> allBons = new ArrayList<>(IntStream.range(1, 11).boxed().toList());
-        Collections.shuffle(allBons, random);
-        bons = new ArrayList<>(allBons.stream().limit(playerCount + 3).sorted().toList());
-        bonusCoins = new int[3];
-
-        favs = new ArrayList<>(IntStream.range(1, 5).boxed().toList());
-        for (int i = 5; i < 13; ++i) {
-            favs.add(i);
-            favs.add(i);
-            favs.add(i);
-        }
-
-        towns = new ArrayList<>();
-        for (int i = 1; i < 9; ++i) {
-            towns.add(i);
-            if (i != 6 && i != 8) {
-                towns.add(i);
-            }
-        }
-
-        final List<Round> allRounds = new ArrayList<>(List.of(Round.fireW, Round.firePw, Round.waterP, Round.waterS, Round.earthC, Round.earthS, Round.airW, Round.airS, Round.priestC));
-        int spadeRound;
-        do {
-            Collections.shuffle(allRounds, random);
-            spadeRound = allRounds.indexOf(Round.earthC) + 1;
-        } while (spadeRound == 5 || spadeRound == 6);
-        rounds = allRounds.stream().limit(6).toList();
-
-        final List<Faction> allFactions = new ArrayList<>(List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches()));
-        Collections.shuffle(allFactions, random);
-
-        Player chaosMagiciansPlayer = null;
-        Player nomadsPlayer = null;
-        while (playerCount-- > 0) {
-            final Player player = new Player(this);
-            final Faction faction = allFactions.remove(allFactions.size() - 1);
-            player.selectFaction(faction, 20);
-            allFactions.removeIf(f -> f.getHomeType() == faction.getHomeType());
-            players.add(player);
-            nextTurnOrder.add(0, player);
-            if (faction instanceof ChaosMagicians) {
-                chaosMagiciansPlayer = player;
-            } else {
-                turnOrder.add(player);
-                if (faction instanceof Nomads) {
-                    nomadsPlayer = player;
-                }
-            }
-        }
-        for (int i = turnOrder.size() - 1; i >= 0; --i) {
-            turnOrder.add(turnOrder.get(i));
-        }
-        if (nomadsPlayer != null) {
-            turnOrder.add(nomadsPlayer);
-        }
-        if (chaosMagiciansPlayer != null) {
-            turnOrder.add(chaosMagiciansPlayer);
-        }
+        this.playerCount = playerCount;
+        this.mapData = mapData;
+        this.seed = seed;
 
         mapPanel = new Grid(this, mapData);
         cultPanel = new Cults(players);
@@ -119,8 +53,113 @@ public class Game extends JPanel {
         turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder);
         roundPanel = new Rounds(rounds);
         pool = new Pool(this, bons, bonusCoins, favs, towns);
-
+        reset();
         addComponents();
+    }
+
+    private void reset() {
+        phase = Phase.INITIAL_DWELLINGS;
+        round = 0;
+        pendingPass = false;
+        cultPanel.reset();
+        Arrays.fill(usedPowerActions, false);
+        history.clear();
+        newActions.clear();
+        roundPanel.round = 0;
+
+        final Random random = new Random(seed);
+
+        bons.clear();
+        final List<Integer> allBons = new ArrayList<>(IntStream.range(1, 11).boxed().toList());
+        Collections.shuffle(allBons, random);
+        allBons.stream().limit(playerCount + 3).sorted().forEach(bons::add);
+        Arrays.fill(bonusCoins, 0);
+
+        favs.clear();
+        IntStream.range(1, 5).boxed().forEach(favs::add);
+        for (int i = 5; i < 13; ++i) {
+            favs.add(i);
+            favs.add(i);
+            favs.add(i);
+        }
+
+        towns.clear();
+        for (int i = 1; i < 9; ++i) {
+            towns.add(i);
+            if (i != 6 && i != 8) {
+                towns.add(i);
+            }
+        }
+
+        rounds.clear();
+        final List<Round> allRounds = new ArrayList<>(List.of(Round.fireW, Round.firePw, Round.waterP, Round.waterS, Round.earthC, Round.earthS, Round.airW, Round.airS, Round.priestC));
+        int spadeRound;
+        do {
+            Collections.shuffle(allRounds, random);
+            spadeRound = allRounds.indexOf(Round.earthC) + 1;
+        } while (spadeRound == 5 || spadeRound == 6);
+        allRounds.stream().limit(6).forEach(rounds::add);
+
+        final List<Faction> allFactions = new ArrayList<>(List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches()));
+        Collections.shuffle(allFactions, random);
+
+        if (!players.isEmpty()) {
+            // Reuse existing players but sort them back to the original order.
+            turnOrder.clear();
+            nextTurnOrder.clear();
+            players.stream().sorted(Comparator.comparingInt(p -> -allFactions.indexOf(p.getFaction()))).forEach(nextTurnOrder::add);
+            players.clear();
+            Player chaosMagiciansPlayer = null;
+            Player nomadsPlayer = null;
+            for (Player player : nextTurnOrder) {
+                player.reset();
+                players.add(0, player);
+                final Faction faction = player.getFaction();
+                if (faction instanceof ChaosMagicians) {
+                    chaosMagiciansPlayer = player;
+                } else {
+                    turnOrder.add(0, player);
+                    turnOrder.add(player);
+                    if (faction instanceof Nomads) {
+                        nomadsPlayer = player;
+                    }
+                }
+            }
+            if (nomadsPlayer != null) {
+                turnOrder.add(nomadsPlayer);
+            }
+            if (chaosMagiciansPlayer != null) {
+                turnOrder.add(chaosMagiciansPlayer);
+            }
+        } else {
+            Player chaosMagiciansPlayer = null;
+            Player nomadsPlayer = null;
+            while (players.size() < playerCount) {
+                final Player player = new Player(this);
+                final Faction faction = allFactions.remove(allFactions.size() - 1);
+                player.selectFaction(faction, 20);
+                allFactions.removeIf(f -> f.getHomeType() == faction.getHomeType());
+                players.add(player);
+                nextTurnOrder.add(0, player);
+                if (faction instanceof ChaosMagicians) {
+                    chaosMagiciansPlayer = player;
+                } else {
+                    turnOrder.add(player);
+                    if (faction instanceof Nomads) {
+                        nomadsPlayer = player;
+                    }
+                }
+            }
+            for (int i = turnOrder.size() - 1; i >= 0; --i) {
+                turnOrder.add(turnOrder.get(i));
+            }
+            if (nomadsPlayer != null) {
+                turnOrder.add(nomadsPlayer);
+            }
+            if (chaosMagiciansPlayer != null) {
+                turnOrder.add(chaosMagiciansPlayer);
+            }
+        }
     }
 
     private void addComponents() {
@@ -148,10 +187,9 @@ public class Game extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
 
-    public void rewind(String[] mapData, int seed) {
-        final List<Action> history = this.history;
-        removeAll();
-        init(players.size(), mapData, seed);
+    public void rewind() {
+        final List<Action> history = new ArrayList<>(this.history);
+        reset();
         for (Action action : history) {
             resolveAction(action);
             if (phase == Phase.CONFIRM_ACTION) {

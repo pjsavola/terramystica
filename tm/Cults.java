@@ -10,12 +10,20 @@ import java.util.Map;
 public class Cults extends JPanel {
 
     private final List<Player> players;
-    private Player[][] cultPriests = new Player[4][4];
+    private final Player[][] cultPriests = new Player[4][4];
     private final static Font font = new Font("Arial", Font.PLAIN, 12);
     private final static Font cultFont = new Font("Arial", Font.PLAIN, 9);
 
     public Cults(List<Player> players) {
         this.players = new ArrayList<>(players);
+    }
+
+    public void reset() {
+        for (int i = 0; i < cultPriests.length; ++i) {
+            for (int j = 0; j < cultPriests[i].length; ++j) {
+                cultPriests[i][j] = null;
+            }
+        }
     }
 
     public static Color getCultColor(int cult) {
