@@ -28,6 +28,9 @@ public abstract class Action {
         return true;
     }
 
+    public void confirmed() {
+    }
+
     public boolean isFree() {
         return false;
     }

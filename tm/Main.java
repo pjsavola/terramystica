@@ -1,6 +1,7 @@
 package tm;
 
 import tm.action.ConvertAction;
+import tm.action.LeechAction;
 import tm.action.PassAction;
 import tm.faction.Alchemists;
 
@@ -39,7 +40,7 @@ public class Main {
                 "K,R,G,S,K,S,G,K,R,Y,U,R,Y",
         };
         final int seed = new Random().nextInt();
-        final int playerCount = 1;
+        final int playerCount = 2;
         final Game game = new Game(playerCount, mapData, seed);
 
         final Menu actionMenu = new Menu("Actions");
@@ -117,15 +118,24 @@ public class Main {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                if (game.phase != Game.Phase.ACTIONS && game.phase != Game.Phase.CONFIRM_ACTION) return;
-
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER -> game.confirmTurn();
-                    case KeyEvent.VK_C -> game.resolveAction(new ConvertAction(Resources.c1, 0, 0, 0));
-                    case KeyEvent.VK_W -> game.resolveAction(new ConvertAction(Resources.w1, 0, 0, 0));
-                    case KeyEvent.VK_P -> game.resolveAction(new ConvertAction(Resources.p1, 0, 0, 0));
-                    case KeyEvent.VK_A -> game.resolveAction(new ConvertAction(Resources.zero, 0, 0, 1));
-                    case KeyEvent.VK_ESCAPE -> game.rewind();
+                switch (game.phase) {
+                    case ACTIONS:
+                    case CONFIRM_ACTION:
+                        switch (e.getKeyCode()) {
+                            case KeyEvent.VK_ENTER -> game.confirmTurn();
+                            case KeyEvent.VK_C -> game.resolveAction(new ConvertAction(Resources.c1, 0, 0, 0));
+                            case KeyEvent.VK_W -> game.resolveAction(new ConvertAction(Resources.w1, 0, 0, 0));
+                            case KeyEvent.VK_P -> game.resolveAction(new ConvertAction(Resources.p1, 0, 0, 0));
+                            case KeyEvent.VK_A -> game.resolveAction(new ConvertAction(Resources.zero, 0, 0, 1));
+                            case KeyEvent.VK_ESCAPE -> game.rewind();
+                        }
+                        break;
+                    case LEECH:
+                        switch (e.getKeyCode()) {
+                            case KeyEvent.VK_ENTER -> game.resolveAction(new LeechAction(true));
+                            case KeyEvent.VK_ESCAPE -> game.resolveAction(new LeechAction(false));
+                        }
+                        break;
                 }
             }
         });

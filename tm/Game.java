@@ -9,10 +9,11 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Game extends JPanel {
-    public enum Phase { PICK_FACTIONS, AUCTION_FACTIONS, INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, CONFIRM_ACTION, END };
+    public enum Phase { PICK_FACTIONS, AUCTION_FACTIONS, INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, CONFIRM_ACTION, LEECH, END };
 
     private final List<Player> players = new ArrayList<>();
     private final List<Integer> bons = new ArrayList<>();
@@ -31,16 +32,20 @@ public class Game extends JPanel {
 
     private final List<Player> turnOrder = new ArrayList<>();
     private final List<Player> nextTurnOrder = new ArrayList<>();
+    private final List<Player> leechTurnOrder = new ArrayList<>();
     private final List<Action> history = new ArrayList<>();
     private final List<Action> newActions = new ArrayList<>();
     private boolean pendingPass;
 
     public Phase phase;
 
+    private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
 
     private final String[] mapData;
     private final int playerCount;
     private final int seed;
+
+    private boolean rewinding;
 
     public Game(int playerCount, String[] mapData, int seed) {
         this.playerCount = playerCount;
@@ -50,7 +55,7 @@ public class Game extends JPanel {
         mapPanel = new Grid(this, mapData);
         cultPanel = new Cults(players);
         powerActionPanel = new PowerActions(usedPowerActions);
-        turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder);
+        turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder, leechTurnOrder);
         roundPanel = new Rounds(rounds);
         pool = new Pool(this, bons, bonusCoins, favs, towns);
         reset();
@@ -65,6 +70,7 @@ public class Game extends JPanel {
         Arrays.fill(usedPowerActions, false);
         history.clear();
         newActions.clear();
+        leechTurnOrder.clear();
         roundPanel.round = 0;
 
         final Random random = new Random(seed);
@@ -100,15 +106,27 @@ public class Game extends JPanel {
         } while (spadeRound == 5 || spadeRound == 6);
         allRounds.stream().limit(6).forEach(rounds::add);
 
-        final List<Faction> allFactions = new ArrayList<>(List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches()));
+        final List<Faction> allFactions = new ArrayList<>(Game.allFactions);
         Collections.shuffle(allFactions, random);
 
         if (!players.isEmpty()) {
             // Reuse existing players but sort them back to the original order.
             turnOrder.clear();
             nextTurnOrder.clear();
-            players.stream().sorted(Comparator.comparingInt(p -> -allFactions.indexOf(p.getFaction()))).forEach(nextTurnOrder::add);
-            players.clear();
+            for (int i = allFactions.size() - 1; i >= 0; --i) {
+                final Faction faction = allFactions.get(i);
+                for (int j = 0; j < players.size(); ++j) {
+                    final Player player = players.get(j);
+                    if (player.getFaction() == faction) {
+                        nextTurnOrder.add(0, player);
+                        players.remove(j);
+                        break;
+                    }
+                }
+                if (players.isEmpty()) {
+                    break;
+                }
+            }
             Player chaosMagiciansPlayer = null;
             Player nomadsPlayer = null;
             for (Player player : nextTurnOrder) {
@@ -188,6 +206,7 @@ public class Game extends JPanel {
     }
 
     public void rewind() {
+        rewinding = true;
         final List<Action> history = new ArrayList<>(this.history);
         reset();
         for (Action action : history) {
@@ -196,15 +215,12 @@ public class Game extends JPanel {
                 confirmTurn();
             }
         }
+        rewinding = false;
         repaint();
     }
 
     public boolean isValidBonIndex(int index) {
         return index >= 0 && index < bons.size();
-    }
-
-    public int getBon(int index) {
-        return bons.get(index);
     }
 
     public int getRound() {
@@ -274,6 +290,9 @@ public class Game extends JPanel {
             resolveAction(new PlaceInitialDwellingAction(row, col));
         } else if (phase == Phase.ACTIONS) {
             final Hex hex = mapPanel.getHex(row, col);
+            if (hex.getStructure() != null && hex.getType() != getCurrentPlayer().getFaction().getHomeType()) {
+                return;
+            }
             final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
             if (options.size() == 1) {
                 resolveAction(new BuildAction(row, col, options.get(0)));
@@ -292,9 +311,10 @@ public class Game extends JPanel {
     }
 
     public void resolveAction(Action action) {
-        if (turnOrder.isEmpty()) return;
+        final Player player = getCurrentPlayer();
+        if (player == null) return;
 
-        action.setData(this, turnOrder.get(0));
+        action.setData(this, player);
         if (action.validatePhase() && action.canExecute()) {
             action.execute();
             newActions.add(action);
@@ -318,19 +338,36 @@ public class Game extends JPanel {
         }
     }
 
+    public void confirmLeech() {
+        if (phase == Phase.LEECH) {
+            leechTurnOrder.remove(0);
+            if (leechTurnOrder.isEmpty()) {
+                phase = Phase.ACTIONS;
+            }
+        }
+    }
+
     public void endTurn() {
         history.addAll(newActions);
+        for (Action action : newActions) {
+            if (!rewinding) {
+                System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
+            }
+            action.confirmed();
+        }
         newActions.clear();
-        final Player player = turnOrder.remove(0);
-        if (pendingPass) {
-            if (phase == Phase.ACTIONS) {
-                nextTurnOrder.add(player);
+        if (phase != Phase.LEECH) {
+            final Player player = turnOrder.remove(0);
+            if (pendingPass) {
+                if (phase == Phase.ACTIONS) {
+                    nextTurnOrder.add(player);
+                }
+                if (turnOrder.isEmpty()) {
+                    nextRound();
+                }
+            } else {
+                turnOrder.add(player);
             }
-            if (turnOrder.isEmpty()) {
-                nextRound();
-            }
-        } else {
-            turnOrder.add(player);
         }
     }
 
@@ -338,22 +375,26 @@ public class Game extends JPanel {
         final Player activePlayer = turnOrder.get(0);
         final int activePlayerIndex = players.indexOf(activePlayer);
         for (int i = 1; i < players.size(); ++i) {
-            final Player otherPlayer = players.get(activePlayerIndex % players.size());
+            final Player otherPlayer = players.get((activePlayerIndex + i) % players.size());
             if (otherPlayer.canLeech()) {
                 final int leechAmount = leech.getOrDefault(otherPlayer.getHomeType(), 0);
                 if (leechAmount > 0) {
-                    // TODO: Actually make a decision
-                    otherPlayer.leech(leechAmount);
+                    otherPlayer.addPendingLeech(leechAmount);
+                    leechTurnOrder.add(otherPlayer);
+                    phase = Phase.LEECH;
                 }
             }
         }
     }
 
     public boolean isMyTurn(Player player) {
-        return turnOrder.get(0) == player;
+        return getCurrentPlayer() == player;
     }
 
     public Player getCurrentPlayer() {
+        if (phase == Phase.LEECH) {
+            return leechTurnOrder.get(0);
+        }
         return turnOrder.get(0);
     }
 }

@@ -42,6 +42,6 @@ public class SelectBonAction extends Action {
 
     @Override
     public String toString() {
-        return "Pass BON" + game.getBon(bonIndex);
+        return "Pass BON" + player.getBon();
     }
 }

@@ -9,14 +9,16 @@ public class TurnOrder extends JPanel {
     private final Game game;
     private final List<Player> turnOrder;
     private final List<Player> nextTurnOrder;
+    private final List<Player> leechTurnOrder;
     private final static Font font = new Font("Arial", Font.BOLD, 16);
     private final static int circleRadius = 20;
     private final static int topMargin = 20;
 
-    public TurnOrder(Game game, List<Player> turnOrder, List<Player> nextTurnOrder) {
+    public TurnOrder(Game game, List<Player> turnOrder, List<Player> nextTurnOrder, List<Player> leechTurnOrder) {
         this.game = game;
         this.turnOrder = turnOrder;
         this.nextTurnOrder = nextTurnOrder;
+        this.leechTurnOrder = leechTurnOrder;
     }
 
     @Override
@@ -36,6 +38,7 @@ public class TurnOrder extends JPanel {
                 int x = drawPlayers(g, 0, topMargin, "Active", turnOrder) + 10;
                 drawPlayers(g, x, topMargin, "Passed", nextTurnOrder);
             }
+            case LEECH -> drawPlayers(g, 0, topMargin, "Leech", leechTurnOrder);
         };
         g.setColor(oldColor);
         g2d.setStroke(oldStroke);

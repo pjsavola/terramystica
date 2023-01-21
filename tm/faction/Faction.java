@@ -3,6 +3,8 @@ package tm.faction;
 import tm.Hex;
 import tm.Resources;
 
+import java.util.List;
+
 public abstract class Faction {
     private final String name;
     private final Hex.Type homeType;

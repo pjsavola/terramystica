@@ -34,6 +34,7 @@ public class Player extends JPanel {
     private int pendingFavors;
     private int pendingWorkerToPriestConversions;
     private int pendingBridges;
+    private int pendingLeech;
 
     private int dwellings;
     private int tradingPosts;
@@ -75,6 +76,7 @@ public class Player extends JPanel {
         pendingFavors = 0;
         pendingWorkerToPriestConversions = 0;
         pendingBridges = 0;
+        pendingLeech = 0;
         dwellings = 0;
         tradingPosts = 0;
         temples = 0;
@@ -338,11 +340,22 @@ public class Player extends JPanel {
         return power[0] > 0 || power[1] > 0;
     }
 
-    public void leech(int amount) {
-        final int unused = addPower(amount);
-        if (unused < amount) {
-            points -= amount - unused - 1;
+    public void acceptLeech() {
+        if (pendingLeech > 0) {
+            final int unused = addPower(pendingLeech);
+            if (unused < pendingLeech) {
+                points -= pendingLeech - unused - 1;
+            }
+            pendingLeech = 0;
         }
+    }
+
+    public void addPendingLeech(int amount) {
+        pendingLeech = Math.min(amount, points + 1);
+    }
+
+    public boolean hasPendingLeech() {
+        return pendingLeech > 0;
     }
 
     private int addPower(int amount) {
@@ -572,6 +585,10 @@ public class Player extends JPanel {
         final int oldBon = bons.set(0, newBon);
         this.coins += coins;
         return oldBon;
+    }
+
+    public int getBon() {
+        return bons.get(0);
     }
 
     class PlayerInfo extends JPanel {

@@ -37,6 +37,7 @@ public class BuildAction extends Action {
 
     @Override
     public boolean canExecute() {
+        // TODO: Reachability
         final Hex hex = game.getHex(row, col);
         if (hex.getType() != player.getFaction().getHomeType()) return false;
         if (structure.getParent() != hex.getStructure()) return false;
@@ -61,8 +62,12 @@ public class BuildAction extends Action {
             case STRONGHOLD -> player.buildStronghold();
             case SANCTUARY -> player.buildSanctuary();
         }
+    }
 
+    @Override
+    public void confirmed() {
         final Map<Hex.Type, Integer> leech = new HashMap<>();
+        final Hex hex = game.getHex(row, col);
         for (Hex n : hex.getNeighbors()) {
             if (n.getStructure() != null && n.getType() != player.getFaction().getHomeType()) {
                 final int power = switch (n.getStructure()) {
