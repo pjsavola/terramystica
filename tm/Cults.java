@@ -2,10 +2,8 @@ package tm;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class Cults extends JPanel {
 
@@ -15,14 +13,12 @@ public class Cults extends JPanel {
     private final static Font cultFont = new Font("Arial", Font.PLAIN, 9);
 
     public Cults(List<Player> players) {
-        this.players = new ArrayList<>(players);
+        this.players = players;
     }
 
     public void reset() {
-        for (int i = 0; i < cultPriests.length; ++i) {
-            for (int j = 0; j < cultPriests[i].length; ++j) {
-                cultPriests[i][j] = null;
-            }
+        for (Player[] cultPriest : cultPriests) {
+            Arrays.fill(cultPriest, null);
         }
     }
 
@@ -144,5 +140,14 @@ public class Cults extends JPanel {
             cultPriests[cult][0] = player;
         }
         player.sendPriestToCult(cult, amount);
+    }
+
+    public static int selectCult(JPanel panel, int steps) {
+        final String[] choices = { getCultName(3), getCultName(2), getCultName(1), getCultName(0) };
+        int response;
+        do {
+            response = JOptionPane.showOptionDialog(panel, "Gain +" + steps + " cult in...", "Choose cult", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+        } while (response < 0 || response >= choices.length);
+        return 3 - response;
     }
 }

@@ -14,12 +14,16 @@ public class Pool extends JPanel {
     private final int[] bonusCoins;
     private final List<Integer> favs;
     private final List<Integer> towns;
+    private final boolean[] bonUsed;
+    private final boolean[] fav6Used;
 
-    public Pool(Game game, List<Integer> bons, int[] bonusCoins, List<Integer> favs, List<Integer> towns) {
+    public Pool(Game game, List<Integer> bons, int[] bonusCoins, List<Integer> favs, List<Integer> towns, boolean[] bonUsed, boolean[] fav6Used) {
         this.bons = bons;
         this.bonusCoins = bonusCoins;
         this.favs = favs;
         this.towns = towns;
+        this.bonUsed = bonUsed;
+        this.fav6Used = fav6Used;
 
         if (bonusCoins != null) {
             addMouseListener(new MouseListener() {
@@ -65,7 +69,8 @@ public class Pool extends JPanel {
         }
         int items = 0;
         for (int i = 0; i < bons.size(); ++i) {
-            Bons.drawBon(g, x, y, bons.get(i), showCoins ? bonusCoins[i] : 0);
+            final boolean used = i < bonUsed.length && bonUsed[i];
+            Bons.drawBon(g, x, y, bons.get(i), showCoins ? bonusCoins[i] : 0, used);
             x += 105;
             if (++items == 10) {
                 items = 0;
@@ -80,7 +85,8 @@ public class Pool extends JPanel {
                 ++count;
                 ++i;
             }
-            Favs.drawFav(g, x, y, fav, count);
+            final boolean used = count == 1 && fav == 6 && fav6Used[0];
+            Favs.drawFav(g, x, y, fav, count, used);
             x += 105;
             if (++items == 10) {
                 items = 0;

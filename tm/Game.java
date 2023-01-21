@@ -19,6 +19,7 @@ public class Game extends JPanel {
     private final List<Integer> bons = new ArrayList<>();
     private final List<Round> rounds = new ArrayList<>();
     private final int[] bonusCoins = new int[3];
+    public final boolean[] bonUsed = new boolean[2];
     private final List<Integer> favs = new ArrayList<>();
     private final List<Integer> towns = new ArrayList<>();
     final boolean[] usedPowerActions = new boolean[6];
@@ -36,10 +37,13 @@ public class Game extends JPanel {
     private final List<Action> history = new ArrayList<>();
     private final List<Action> newActions = new ArrayList<>();
     private boolean pendingPass;
+    private boolean leechAccepted;
+    private Player leechTrigger;
 
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
+    private static final List<Faction> testFactions = List.of(new Alchemists(), new Cultists());
 
     private final String[] mapData;
     private final int playerCount;
@@ -57,7 +61,7 @@ public class Game extends JPanel {
         powerActionPanel = new PowerActions(usedPowerActions);
         turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder, leechTurnOrder);
         roundPanel = new Rounds(rounds);
-        pool = new Pool(this, bons, bonusCoins, favs, towns);
+        pool = new Pool(this, bons, bonusCoins, favs, towns, bonUsed, null);
         reset();
         addComponents();
     }
@@ -66,12 +70,15 @@ public class Game extends JPanel {
         phase = Phase.INITIAL_DWELLINGS;
         round = 0;
         pendingPass = false;
+        leechAccepted = false;
+        leechTrigger = null;
         cultPanel.reset();
         Arrays.fill(usedPowerActions, false);
         history.clear();
         newActions.clear();
         leechTurnOrder.clear();
         roundPanel.round = 0;
+        Arrays.fill(bonUsed, false);
 
         final Random random = new Random(seed);
 
@@ -106,7 +113,7 @@ public class Game extends JPanel {
         } while (spadeRound == 5 || spadeRound == 6);
         allRounds.stream().limit(6).forEach(rounds::add);
 
-        final List<Faction> allFactions = new ArrayList<>(Game.allFactions);
+        final List<Faction> allFactions = new ArrayList<>(Game.testFactions);
         Collections.shuffle(allFactions, random);
 
         if (!players.isEmpty()) {
@@ -206,11 +213,15 @@ public class Game extends JPanel {
     }
 
     public void rewind() {
+        if (newActions.isEmpty()) return;
+
+        System.err.println("Undoing following moves: " + newActions);
         rewinding = true;
         final List<Action> history = new ArrayList<>(this.history);
         reset();
         for (Action action : history) {
             resolveAction(action);
+            System.err.println(getCurrentPlayer().getFaction().getName() + " -> " + action);
             if (phase == Phase.CONFIRM_ACTION) {
                 confirmTurn();
             }
@@ -237,6 +248,9 @@ public class Game extends JPanel {
         final int oldBon = player.pickBon(newBon, coins);
         if (oldBon != 0) {
             bons.set(bonIndex, oldBon);
+            if (oldBon < bonUsed.length) {
+                bonUsed[oldBon] = false;
+            }
         } else {
             bons.remove(bonIndex);
         }
@@ -338,8 +352,9 @@ public class Game extends JPanel {
         }
     }
 
-    public void confirmLeech() {
+    public void confirmLeech(boolean accept) {
         if (phase == Phase.LEECH) {
+            leechAccepted |= accept;
             leechTurnOrder.remove(0);
             if (leechTurnOrder.isEmpty()) {
                 phase = Phase.ACTIONS;
@@ -356,9 +371,30 @@ public class Game extends JPanel {
             action.confirmed();
         }
         newActions.clear();
+
+        if (!leechTurnOrder.isEmpty()) {
+            phase = Phase.LEECH;
+        }
+
         if (phase != Phase.LEECH) {
+            if (leechTrigger != null) {
+                if (leechAccepted) {
+                    if (!rewinding) {
+                        turnOrder.add(0, leechTrigger);
+                        final int cult = Cults.selectCult(this, 1);
+                        resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+                    }
+                } else {
+                    leechTrigger.addIncome(Resources.pw1);
+                    leechTrigger = null;
+                }
+            }
+            leechAccepted = false;
+
             final Player player = turnOrder.remove(0);
-            if (pendingPass) {
+            if (leechTrigger != null && !rewinding) {
+                leechTrigger = null;
+            } else if (pendingPass) {
                 if (phase == Phase.ACTIONS) {
                     nextTurnOrder.add(player);
                 }
@@ -367,6 +403,11 @@ public class Game extends JPanel {
                 }
             } else {
                 turnOrder.add(player);
+            }
+
+            if (leechTrigger != null && rewinding) {
+                turnOrder.add(0, leechTrigger);
+                leechTrigger = null;
             }
         }
     }
@@ -381,7 +422,9 @@ public class Game extends JPanel {
                 if (leechAmount > 0) {
                     otherPlayer.addPendingLeech(leechAmount);
                     leechTurnOrder.add(otherPlayer);
-                    phase = Phase.LEECH;
+                    if (activePlayer.getFaction() instanceof Cultists) {
+                        leechTrigger = activePlayer;
+                    }
                 }
             }
         }

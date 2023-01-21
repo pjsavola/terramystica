@@ -16,7 +16,7 @@ public class LeechAction extends Action {
     }
 
     public boolean canExecute() {
-        return player.hasPendingLeech();
+        return player.getPendingLeech() > 0;
     }
 
     public void execute() {
@@ -31,7 +31,7 @@ public class LeechAction extends Action {
 
     @Override
     public void confirmed() {
-        game.confirmLeech();
+        game.confirmLeech(accept);
     }
 
     @Override

@@ -3,6 +3,7 @@ package tm;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PowerActions extends JPanel {
@@ -50,6 +51,21 @@ public class PowerActions extends JPanel {
         final FontMetrics metrics = g.getFontMetrics();
         final int w = metrics.stringWidth(text);
         g.drawString(text, xpoints[0] + 23 - w/2, y + 27);
+    }
+
+    public static boolean actionClicked(int x, int y) {
+        final int minX = Arrays.stream(xpoints).min().getAsInt();
+        final int minY = Arrays.stream(ypoints).min().getAsInt();
+        final int maxX = Arrays.stream(xpoints).max().getAsInt();
+        final int maxY = Arrays.stream(ypoints).max().getAsInt();
+        if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+            // Corners
+            if (y - minY < 15 || maxY - y < 15) {
+                return x - minX >= 15 && maxX - x >= 15;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

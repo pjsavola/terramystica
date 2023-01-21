@@ -19,7 +19,7 @@ public abstract class Bons {
         };
     }
 
-    public static void drawBon(Graphics g, int x, int y, int bon, int coins) {
+    public static void drawBon(Graphics g, int x, int y, int bon, int coins, boolean used) {
         g.setColor(new Color(0xEEDDBB));
         g.fillRect(x, y, 100, 100);
 
@@ -42,14 +42,14 @@ public abstract class Bons {
         if (bon == 1) {
             final Color oldColor = g.getColor();
             final Stroke oldStroke = g2d.getStroke();
-            PowerActions.drawPowerAction(g2d, x + dx, y + dy, "spd", false);
+            PowerActions.drawPowerAction(g2d, x + dx, y + dy, "spd", used);
             g.setColor(oldColor);
             g2d.setStroke(oldStroke);
             dx += 49;
         } else if (bon == 2) {
             final Color oldColor = g.getColor();
             final Stroke oldStroke = g2d.getStroke();
-            PowerActions.drawPowerAction(g2d, x + dx, y + dy, "cult", false);
+            PowerActions.drawPowerAction(g2d, x + dx, y + dy, "cult", used);
             g.setColor(oldColor);
             g2d.setStroke(oldStroke);
             dx += 49;

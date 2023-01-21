@@ -15,7 +15,7 @@ public abstract class Favs {
         };
     }
 
-    public static void drawFav(Graphics g, int x, int y, int fav, int count) {
+    public static void drawFav(Graphics g, int x, int y, int fav, int count, boolean used) {
         g.setColor(new Color(0xEEDDDD));
         g.fillRect(x, y, 100, 100);
 
@@ -52,7 +52,7 @@ public abstract class Favs {
         if (fav == 6) {
             final Color oldColor = g.getColor();
             final Stroke oldStroke = g2d.getStroke();
-            PowerActions.drawPowerAction(g2d, x + dx, y + dy, "cult", false);
+            PowerActions.drawPowerAction(g2d, x + dx, y + dy, "cult", used);
             g.setColor(oldColor);
             g2d.setStroke(oldStroke);
         }

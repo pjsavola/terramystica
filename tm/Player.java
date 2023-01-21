@@ -1,13 +1,17 @@
 package tm;
 
 import tm.action.ConvertAction;
+import tm.action.CultStepAction;
 import tm.faction.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Player extends JPanel {
 
@@ -36,6 +40,9 @@ public class Player extends JPanel {
     private int pendingBridges;
     private int pendingLeech;
 
+    public boolean usedFactionAction;
+    public boolean[] usedFav6 = new boolean[1];
+
     private int dwellings;
     private int tradingPosts;
     private int temples;
@@ -56,7 +63,7 @@ public class Player extends JPanel {
         super(new FlowLayout(FlowLayout.LEFT));
         this.game = game;
         data = new PlayerInfo();
-        pool = new Pool(game, bons, null, favs, towns);
+        pool = new Pool(game, bons, null, favs, towns, game.bonUsed, usedFav6);
         add(data);
         add(pool);
     }
@@ -85,6 +92,8 @@ public class Player extends JPanel {
         shipping = 0;
         range = 1;
         jumpCost = Resources.zero;
+        usedFactionAction = false;
+        usedFav6[0] = false;
         bons.clear();
         favs.clear();
         towns.clear();
@@ -354,8 +363,8 @@ public class Player extends JPanel {
         pendingLeech = Math.min(amount, points + 1);
     }
 
-    public boolean hasPendingLeech() {
-        return pendingLeech > 0;
+    public int getPendingLeech() {
+        return pendingLeech;
     }
 
     private int addPower(int amount) {
@@ -372,7 +381,7 @@ public class Player extends JPanel {
         return amount;
     }
 
-    private void addCultSteps(int[] cults) {
+    public void addCultSteps(int[] cults) {
         for (int i = 0; i < 4; ++i) {
             cultSteps[i] = addPowerFromCultSteps(cultSteps[i], cults[i], game.cultOccupied(i));
         }
@@ -411,7 +420,7 @@ public class Player extends JPanel {
         return oldValue;
     }
 
-    private void addIncome(Resources income) {
+    public void addIncome(Resources income) {
         coins += income.coins;
         workers += income.workers;
         priests = Math.min(priests + income.priests, maxPriests);
@@ -592,6 +601,37 @@ public class Player extends JPanel {
     }
 
     class PlayerInfo extends JPanel {
+
+        PlayerInfo() {
+            addMouseListener(new MouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (faction.getPowerAction(strongholds > 0) != null) {
+                        if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
+                            if (faction instanceof Auren) {
+                                game.resolveAction(new CultStepAction(0, 2, CultStepAction.Source.ATCA));
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                }
+            });
+        }
         @Override
         public void paint(Graphics g) {
             int dx = 5;
