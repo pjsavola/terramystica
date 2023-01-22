@@ -38,7 +38,7 @@ public class Game extends JPanel {
     private final List<Action> newActions = new ArrayList<>();
     private boolean pendingPass;
     private boolean leechAccepted;
-    private Player leechTrigger;
+    public Player leechTrigger;
 
     public Phase phase;
 
@@ -376,8 +376,6 @@ public class Game extends JPanel {
         for (Action action : newActions) {
             if (!rewinding) {
                 System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
-            } else {
-                System.err.println(getCurrentPlayer().getFaction().getName() + " -> " + action);
             }
             action.confirmed();
         }

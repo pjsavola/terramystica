@@ -54,7 +54,6 @@ public class PowerActions extends JPanel {
     }
 
     public static boolean actionClicked(int x, int y) {
-        System.err.println("Clicked: " + x + "," + y);
         final int minX = Arrays.stream(xpoints).min().getAsInt();
         final int minY = Arrays.stream(ypoints).min().getAsInt();
         final int maxX = Arrays.stream(xpoints).max().getAsInt();

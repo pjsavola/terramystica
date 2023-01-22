@@ -38,7 +38,14 @@ public class TurnOrder extends JPanel {
                 int x = drawPlayers(g, 0, topMargin, "Active", turnOrder) + 10;
                 drawPlayers(g, x, topMargin, "Passed", nextTurnOrder);
             }
-            case LEECH -> drawPlayers(g, 0, topMargin, "Leech " + game.getCurrentPlayer().getPendingLeech() + "?", leechTurnOrder);
+            case LEECH -> {
+                String txt = "Leech " + game.getCurrentPlayer().getPendingLeech();
+                if (game.leechTrigger != null) {
+                    txt += " from Cultists";
+                }
+                drawPlayers(g, 0, topMargin, txt + "?", leechTurnOrder);
+            }
+            case CONFIRM_ACTION -> drawPlayers(g, 0, topMargin, "Confirm turn", List.of(game.getCurrentPlayer()));
         };
         g.setColor(oldColor);
         g2d.setStroke(oldStroke);
