@@ -142,12 +142,12 @@ public class Cults extends JPanel {
         player.sendPriestToCult(cult, amount);
     }
 
-    public static int selectCult(JPanel panel, int steps) {
+    public static int selectCult(JPanel panel, int steps, boolean force) {
         final String[] choices = { getCultName(3), getCultName(2), getCultName(1), getCultName(0) };
         int response;
         do {
             response = JOptionPane.showOptionDialog(panel, "Gain +" + steps + " cult in...", "Choose cult", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
-        } while (response < 0 || response >= choices.length);
+        } while (force && (response < 0 || response >= choices.length));
         return 3 - response;
     }
 }

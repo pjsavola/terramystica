@@ -2,11 +2,10 @@ package tm.action;
 
 import tm.Cults;
 import tm.Game;
-import tm.Player;
 
 public class CultStepAction extends Action {
 
-    public enum Source { BON2, FAV6, ATCA, LEECH };
+    public enum Source { BON2, FAV6, ACTA, LEECH };
 
     private final int cult;
     private final int amount;
@@ -31,9 +30,9 @@ public class CultStepAction extends Action {
         steps[cult] = amount;
         player.addCultSteps(steps);
         switch (source) {
-            case BON2 -> game.bonUsed[0] = true;
+            case BON2 -> game.bonUsed[1] = true;
             case FAV6 -> player.usedFav6[0] = true;
-            case ATCA -> player.usedFactionAction = true;
+            case ACTA -> player.usedFactionAction = true;
         }
     }
 

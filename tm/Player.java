@@ -11,7 +11,6 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Player extends JPanel {
 
@@ -63,7 +62,7 @@ public class Player extends JPanel {
         super(new FlowLayout(FlowLayout.LEFT));
         this.game = game;
         data = new PlayerInfo();
-        pool = new Pool(game, bons, null, favs, towns, game.bonUsed, usedFav6);
+        pool = new Pool(game, this, bons, null, favs, towns, game.bonUsed, usedFav6);
         add(data);
         add(pool);
     }
@@ -617,7 +616,10 @@ public class Player extends JPanel {
                     if (faction.getPowerAction(strongholds > 0) != null) {
                         if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
                             if (faction instanceof Auren) {
-                                game.resolveAction(new CultStepAction(0, 2, CultStepAction.Source.ATCA));
+                                final int cult = Cults.selectCult(game, 1, false);
+                                if (cult >= 0 && cult < 4) {
+                                    game.resolveAction(new CultStepAction(cult, 2, CultStepAction.Source.ACTA));
+                                }
                             }
                         }
                     }

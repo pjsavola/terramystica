@@ -61,7 +61,7 @@ public class Game extends JPanel {
         powerActionPanel = new PowerActions(usedPowerActions);
         turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder, leechTurnOrder);
         roundPanel = new Rounds(rounds);
-        pool = new Pool(this, bons, bonusCoins, favs, towns, bonUsed, null);
+        pool = new Pool(this, null, bons, bonusCoins, favs, towns, bonUsed, null);
         reset();
         addComponents();
     }
@@ -237,7 +237,7 @@ public class Game extends JPanel {
         }
         rewinding = false;
         if (leechTrigger != null && leechTurnOrder.isEmpty()) {
-            final int cult = Cults.selectCult(this, 1);
+            final int cult = Cults.selectCult(this, 1, true);
             resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
         }
         repaint();
@@ -405,7 +405,7 @@ public class Game extends JPanel {
                     if (leechAccepted) {
                         turnOrder.add(0, leechTrigger);
                         if (!rewinding) {
-                            final int cult = Cults.selectCult(this, 1);
+                            final int cult = Cults.selectCult(this, 1, true);
                             resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
                         }
                     } else {

@@ -54,14 +54,17 @@ public class PowerActions extends JPanel {
     }
 
     public static boolean actionClicked(int x, int y) {
+        System.err.println("Clicked: " + x + "," + y);
         final int minX = Arrays.stream(xpoints).min().getAsInt();
         final int minY = Arrays.stream(ypoints).min().getAsInt();
         final int maxX = Arrays.stream(xpoints).max().getAsInt();
         final int maxY = Arrays.stream(ypoints).max().getAsInt();
         if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
             // Corners
-            if (y - minY < 15 || maxY - y < 15) {
-                return x - minX >= 15 && maxX - x >= 15;
+            final int dy = Math.min(y - minY, maxY - y);
+            final int dx = Math.min(x - minX, maxX - x);
+            if (dy < 15 && dx < 15) {
+                return dx + dy >= 15;
             }
             return true;
         }
