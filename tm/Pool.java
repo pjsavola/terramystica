@@ -3,6 +3,7 @@ package tm;
 import tm.Bons;
 import tm.action.CultStepAction;
 import tm.action.SelectBonAction;
+import tm.action.SelectFavAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,8 +40,6 @@ public class Pool extends JPanel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (game.phase != Game.Phase.ACTIONS && game.phase != Game.Phase.INITIAL_BONS) return;
-
                 final int px = e.getX();
                 final int py = e.getY();
                 final int col = px / 105;
@@ -49,31 +48,42 @@ public class Pool extends JPanel {
                 if (px % 105 >= 5 && py % 105 >= 5) {
                     if (idx < bons.size()) {
                         if (player != null && game.isMyTurn(player)) {
-                            switch (bons.get(idx)) {
-                                case 1 -> {
-                                    // TODO
-                                }
-                                case 2 -> {
-                                    if (PowerActions.actionClicked(px % 105 - 5 - 3, py % 105 - 5 - 30)) {
-                                        final int cult = Cults.selectCult(game, 1, false);
-                                        if (cult >= 0 && cult < 4) {
-                                            game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.BON2));
+                            if (game.phase == Game.Phase.ACTIONS) {
+                                switch (bons.get(idx)) {
+                                    case 1 -> {
+                                        // TODO
+                                    }
+                                    case 2 -> {
+                                        if (PowerActions.actionClicked(px % 105 - 5 - 3, py % 105 - 5 - 30)) {
+                                            final int cult = Cults.selectCult(game, 1, false);
+                                            if (cult >= 0 && cult < 4) {
+                                                game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.BON2));
+                                            }
                                         }
                                     }
                                 }
                             }
                         } else if (player == null) {
-                            game.resolveAction(new SelectBonAction(idx));
+                            if (game.phase == Game.Phase.INITIAL_BONS || game.phase == Game.Phase.ACTIONS) {
+                                game.resolveAction(new SelectBonAction(idx));
+                            }
                         }
                     } else if (idx - bons.size() < favs.size()) {
                         if (player != null && game.isMyTurn(player)) {
-                            if (favs.get(idx - bons.size()) == 6) {
-                                if (PowerActions.actionClicked(px % 105 - 5 + 3, py % 105 - 5 + 30)) {
-                                    final int cult = Cults.selectCult(game, 1, false);
-                                    if (cult >= 0 && cult < 4) {
-                                        game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.FAV6));
+                            if (game.phase == Game.Phase.ACTIONS) {
+                                if (favs.get(idx - bons.size()) == 6) {
+                                    if (PowerActions.actionClicked(px % 105 - 5 - 3, py % 105 - 5 - 44)) {
+                                        final int cult = Cults.selectCult(game, 1, false);
+                                        if (cult >= 0 && cult < 4) {
+                                            game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.FAV6));
+                                        }
                                     }
                                 }
+                            }
+                        } else if (player == null) {
+                            if (game.phase == Game.Phase.CONFIRM_ACTION) {
+                                final int fav = favs.stream().distinct().toList().get(idx - bons.size());
+                                game.resolveAction(new SelectFavAction(fav));
                             }
                         }
                     }
@@ -148,6 +158,8 @@ public class Pool extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         final int itemCount = (int) (bons.size() + favs.stream().distinct().count() + towns.stream().distinct().count());
-        return new Dimension(5 + 105 * bons.size(), 20 + 105 * ((itemCount - 1) / 10 + 1));
+        final int cols = Math.min(itemCount, 10);
+        final int rows = (itemCount - 1) / 10 + 1;
+        return new Dimension(5 + 105 * cols, 20 + 105 * rows);
     }
 }

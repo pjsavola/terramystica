@@ -269,6 +269,16 @@ public class Game extends JPanel {
         }
     }
 
+    public boolean canSelectFav(int fav) {
+        return favs.contains(fav) && getCurrentPlayer().canAddFavor(fav);
+    }
+
+    public void selectFav(Player player, int fav) {
+        if (favs.remove((Integer) fav)) {
+            player.addFavor(fav);
+        }
+    }
+
     public void nextRound() {
         if (phase == Phase.INITIAL_DWELLINGS) {
             turnOrder.addAll(nextTurnOrder);
@@ -359,6 +369,8 @@ public class Game extends JPanel {
 
     public void confirmTurn() {
         if (phase == Phase.CONFIRM_ACTION) {
+            if (getCurrentPlayer().hasPendingFavor()) return;
+
             phase = Phase.ACTIONS;
             endTurn();
             repaint();

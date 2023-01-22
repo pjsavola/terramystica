@@ -143,6 +143,15 @@ public class Player extends JPanel {
         ownedFavors[number - 1] = true;
         --pendingFavors;
         favs.add(number);
+        pool.setSize(pool.getPreferredSize());
+    }
+
+    public boolean canAddFavor(int number) {
+        return pendingFavors > 0 && !ownedFavors[number - 1];
+    }
+
+    public boolean hasPendingFavor() {
+        return pendingFavors > 0;
     }
 
     public void placeInitialDwelling() {
@@ -642,7 +651,7 @@ public class Player extends JPanel {
             Color factionColor = faction.getHomeType().getBuildingColor();
             final boolean myTurn = game.isMyTurn(Player.this);
             final boolean passed = Player.this.passed && game.phase != Game.Phase.END;
-            if (passed && !myTurn) {
+            if (passed) {
                 factionColor = new Color(factionColor.getRed(), factionColor.getGreen(), factionColor.getBlue(), 50);
             }
             g.setColor(factionColor);
@@ -651,7 +660,11 @@ public class Player extends JPanel {
             String factionName = faction.getName();
             if (myTurn) {
                 if (game.phase == Game.Phase.CONFIRM_ACTION) {
-                    factionName += " - CONFIRM TURN";
+                    String txt = "CONFIRM TURN";
+                    if (game.getCurrentPlayer().hasPendingFavor()) {
+                        txt = "SELECT FAVOR";
+                    }
+                    factionName += " - " + txt;
                 } else {
                     factionName = "> " + factionName;
                 }
@@ -717,7 +730,7 @@ public class Player extends JPanel {
 
         @Override
         public Dimension getPreferredSize() {
-            return new Dimension(300, 128);
+            return new Dimension(400, 128);
         }
     }
 }

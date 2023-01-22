@@ -45,7 +45,13 @@ public class TurnOrder extends JPanel {
                 }
                 drawPlayers(g, 0, topMargin, txt + "?", leechTurnOrder);
             }
-            case CONFIRM_ACTION -> drawPlayers(g, 0, topMargin, "Confirm turn", List.of(game.getCurrentPlayer()));
+            case CONFIRM_ACTION -> {
+                String txt = "Confirm turn";
+                if (game.getCurrentPlayer().hasPendingFavor()) {
+                    txt = "Select Fav";
+                }
+                drawPlayers(g, 0, topMargin, txt, List.of(game.getCurrentPlayer()));
+            }
         };
         g.setColor(oldColor);
         g2d.setStroke(oldStroke);
