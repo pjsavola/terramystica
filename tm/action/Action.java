@@ -8,8 +8,18 @@ public abstract class Action {
     protected Player player;
 
     public void setData(Game game, Player player) {
+        if (this.game != null && this.game != game) {
+            throw new RuntimeException("Game mismatch when rewinding");
+        }
+        if (this.player != null && this.player != player) {
+            throw new RuntimeException("Player mismatch when rewinding");
+        }
         this.game = game;
         this.player = player;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public boolean validatePhase() {

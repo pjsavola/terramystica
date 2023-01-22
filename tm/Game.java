@@ -219,14 +219,27 @@ public class Game extends JPanel {
         rewinding = true;
         final List<Action> history = new ArrayList<>(this.history);
         reset();
-        for (Action action : history) {
+        for (int i = 0; i < history.size(); ++i) {
+            final Action action = history.get(i);
             resolveAction(action);
-            System.err.println(getCurrentPlayer().getFaction().getName() + " -> " + action);
             if (phase == Phase.CONFIRM_ACTION) {
+                for (int j = i + 1; j < history.size(); ++j) {
+                    final Action futureAction = history.get(j);
+                    if (futureAction.isFree() && futureAction.getPlayer() == action.getPlayer()) {
+                        resolveAction(futureAction);
+                        ++i;
+                    } else {
+                        break;
+                    }
+                }
                 confirmTurn();
             }
         }
         rewinding = false;
+        if (leechTrigger != null && leechTurnOrder.isEmpty()) {
+            final int cult = Cults.selectCult(this, 1);
+            resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+        }
         repaint();
     }
 
@@ -355,10 +368,6 @@ public class Game extends JPanel {
     public void confirmLeech(boolean accept) {
         if (phase == Phase.LEECH) {
             leechAccepted |= accept;
-            leechTurnOrder.remove(0);
-            if (leechTurnOrder.isEmpty()) {
-                phase = Phase.ACTIONS;
-            }
         }
     }
 
@@ -367,32 +376,16 @@ public class Game extends JPanel {
         for (Action action : newActions) {
             if (!rewinding) {
                 System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
+            } else {
+                System.err.println(getCurrentPlayer().getFaction().getName() + " -> " + action);
             }
             action.confirmed();
         }
         newActions.clear();
 
-        if (!leechTurnOrder.isEmpty()) {
-            phase = Phase.LEECH;
-        }
-
         if (phase != Phase.LEECH) {
-            if (leechTrigger != null) {
-                if (leechAccepted) {
-                    if (!rewinding) {
-                        turnOrder.add(0, leechTrigger);
-                        final int cult = Cults.selectCult(this, 1);
-                        resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
-                    }
-                } else {
-                    leechTrigger.addIncome(Resources.pw1);
-                    leechTrigger = null;
-                }
-            }
-            leechAccepted = false;
-
             final Player player = turnOrder.remove(0);
-            if (leechTrigger != null && !rewinding) {
+            if (leechTrigger != null && leechTurnOrder.isEmpty()) {
                 leechTrigger = null;
             } else if (pendingPass) {
                 if (phase == Phase.ACTIONS) {
@@ -404,11 +397,28 @@ public class Game extends JPanel {
             } else {
                 turnOrder.add(player);
             }
-
-            if (leechTrigger != null && rewinding) {
-                turnOrder.add(0, leechTrigger);
-                leechTrigger = null;
+        } else {
+            leechTurnOrder.remove(0);
+            if (leechTurnOrder.isEmpty()) {
+                phase = Phase.ACTIONS;
+                if (leechTrigger != null) {
+                    if (leechAccepted) {
+                        turnOrder.add(0, leechTrigger);
+                        if (!rewinding) {
+                            final int cult = Cults.selectCult(this, 1);
+                            resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+                        }
+                    } else {
+                        leechTrigger.addIncome(Resources.pw1);
+                        leechTrigger = null;
+                    }
+                }
+                leechAccepted = false;
             }
+        }
+
+        if (!leechTurnOrder.isEmpty()) {
+            phase = Phase.LEECH;
         }
     }
 
