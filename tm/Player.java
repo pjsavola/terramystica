@@ -535,6 +535,7 @@ public class Player extends JPanel {
     public void startRound(Round round) {
         this.round = round;
         addRoundIncome(round);
+        usedFav6[0] = false;
         passed = false;
     }
 
