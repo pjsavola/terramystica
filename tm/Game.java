@@ -22,7 +22,7 @@ public class Game extends JPanel {
     public final boolean[] bonUsed = new boolean[2];
     private final List<Integer> favs = new ArrayList<>();
     private final List<Integer> towns = new ArrayList<>();
-    final boolean[] usedPowerActions = new boolean[6];
+    public final boolean[] usedPowerActions = new boolean[6];
     private final Grid mapPanel;
     public final Cults cultPanel;
     private final PowerActions powerActionPanel;
@@ -58,7 +58,7 @@ public class Game extends JPanel {
 
         mapPanel = new Grid(this, mapData);
         cultPanel = new Cults(this, players);
-        powerActionPanel = new PowerActions(usedPowerActions);
+        powerActionPanel = new PowerActions(this, usedPowerActions);
         turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder, leechTurnOrder);
         roundPanel = new Rounds(rounds);
         pool = new Pool(this, null, bons, bonusCoins, favs, towns, bonUsed, null);

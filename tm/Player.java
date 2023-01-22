@@ -473,6 +473,10 @@ public class Player extends JPanel {
         workers -= amount * digging;
     }
 
+    public void addSpades(int amount) {
+        pendingSpades += amount;
+    }
+
     public void useSpades(int amount) {
         if (pendingSpades < amount)
             throw new RuntimeException("Trying to use too many spades");

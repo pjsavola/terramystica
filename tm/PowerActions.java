@@ -1,7 +1,11 @@
 package tm;
 
+import tm.action.SelectPowerActionAction;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,8 +15,39 @@ public class PowerActions extends JPanel {
     private final boolean[] usedPowerActions;
     private final static Font font = new Font("Arial", Font.BOLD, 12);
 
-    public PowerActions(boolean[] usedPowerActions) {
+    public PowerActions(Game game, boolean[] usedPowerActions) {
         this.usedPowerActions = usedPowerActions;
+
+        addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (game.phase != Game.Phase.ACTIONS) return;
+
+                final int px = e.getX();
+                final int py = e.getY();
+                for (int i = 0; i < usedPowerActions.length; ++i) {
+                    if (!usedPowerActions[i] && actionClicked(px - i * 55, py)) {
+                        game.resolveAction(new SelectPowerActionAction(i + 1));
+                    }
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
     }
 
     @Override
@@ -73,5 +108,17 @@ public class PowerActions extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(354, 49);
+    }
+
+    public static int getRequiredPower(int act) {
+        return switch (act) {
+            case 1 -> 3;
+            case 2 -> 3;
+            case 3 -> 4;
+            case 4 -> 4;
+            case 5 -> 4;
+            case 6 -> 6;
+            default -> throw new RuntimeException("Unknown act: " + act);
+        };
     }
 }

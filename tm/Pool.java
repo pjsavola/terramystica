@@ -4,6 +4,7 @@ import tm.Bons;
 import tm.action.CultStepAction;
 import tm.action.SelectBonAction;
 import tm.action.SelectFavAction;
+import tm.action.SpadeAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,12 +50,12 @@ public class Pool extends JPanel {
                     if (idx < bons.size()) {
                         if (player != null && game.isMyTurn(player)) {
                             if (game.phase == Game.Phase.ACTIONS) {
-                                switch (bons.get(idx)) {
-                                    case 1 -> {
-                                        // TODO
-                                    }
-                                    case 2 -> {
-                                        if (PowerActions.actionClicked(px % 105 - 5 - 3, py % 105 - 5 - 30)) {
+                                if (PowerActions.actionClicked(px % 105 - 5 - 3, py % 105 - 5 - 30)) {
+                                    switch (bons.get(idx)) {
+                                        case 1 -> {
+                                            game.resolveAction(new SpadeAction(1, SpadeAction.Source.BON1));
+                                        }
+                                        case 2 -> {
                                             final int cult = Cults.selectCult(game, 1, false);
                                             if (cult >= 0 && cult < 4) {
                                                 game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.BON2));
