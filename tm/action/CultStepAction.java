@@ -17,10 +17,6 @@ public class CultStepAction extends Action {
         this.source = source;
     }
 
-    public boolean validatePhase() {
-        return game.phase == Game.Phase.ACTIONS;
-    }
-
     public boolean canExecute() {
         return cult >= 0 && cult < 4;
     }

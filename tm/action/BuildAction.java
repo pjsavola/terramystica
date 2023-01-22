@@ -3,8 +3,10 @@ package tm.action;
 import tm.Game;
 import tm.Hex;
 import tm.Player;
+import tm.faction.ChaosMagicians;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BuildAction extends Action {
@@ -87,6 +89,17 @@ public class BuildAction extends Action {
     public String toString() {
         final Hex hex = game.getHex(row, col);
         final String id = hex.getId();
-        return structure == Hex.Structure.DWELLING ? ("Build " + id) : ("Upgrade " + id + " to " + structure.getAbbrevation());
+
+        // Auto pick favs in rare cases
+        final StringBuilder autoPicks = new StringBuilder();
+        if (structure == Hex.Structure.TEMPLE || structure == Hex.Structure.SANCTUARY) {
+            final List<Integer> favOptions = game.getSelectableFavs(player);
+            final int newFavs = Math.max(favOptions.size(), player.getFaction() instanceof ChaosMagicians ? 2 : 1);
+            if (newFavs == favOptions.size()) {
+                favOptions.forEach(fav -> autoPicks.append(". +FAV").append(fav));
+            }
+        }
+
+        return structure == Hex.Structure.DWELLING ? ("Build " + id) : ("Upgrade " + id + " to " + structure.getAbbrevation() + autoPicks);
     }
 }

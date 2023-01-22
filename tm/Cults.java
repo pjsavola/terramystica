@@ -1,7 +1,11 @@
 package tm;
 
+import tm.action.PriestToCultAction;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
 
@@ -12,8 +16,62 @@ public class Cults extends JPanel {
     private final static Font font = new Font("Arial", Font.PLAIN, 12);
     private final static Font cultFont = new Font("Arial", Font.PLAIN, 9);
 
-    public Cults(List<Player> players) {
+    public Cults(Game game, List<Player> players) {
         this.players = players;
+        addMouseListener(new MouseListener() {
+
+            private List<Integer> getSpotOptions(int cult) {
+                final List<Integer> result = new ArrayList<>();
+                if (isCultSpotFree(cult, 3)) result.add(3);
+                if (isCultSpotFree(cult, 2)) result.add(2);
+                result.add(1);
+                return result;
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (game.phase != Game.Phase.ACTIONS) return;
+
+                final int px = e.getX();
+                final int py = e.getY();
+                if (py >= 540) {
+                    for (int cult = 0; cult < 4; ++cult) {
+                        if (px < (cult + 1) * 50) {
+                            game.resolveAction(new PriestToCultAction(cult, getSpotOptions(cult).get(0)));
+                            break;
+                        }
+                    }
+                } else if (py <= 20) {
+                    for (int cult = 0; cult < 4; ++cult) {
+                        if (px < (cult + 1) * 50) {
+                            final List<Integer> options = getSpotOptions(cult);
+                            final String[] choices = options.stream().map(Object::toString).toArray(String[]::new);
+                            final int response = JOptionPane.showOptionDialog(game, "Send P to " + getCultName(cult) + " for...", "Send Priest", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                            if (response >= 0 && response < options.size()) {
+                                game.resolveAction(new PriestToCultAction(cult, options.get(response)));
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
     }
 
     public void reset() {
@@ -118,6 +176,15 @@ public class Cults extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(200, 560);
+    }
+
+    public boolean isCultSpotFree(int cult, int amount) {
+        if (amount == 3) {
+            return cultPriests[cult][0] == null;
+        } else if (amount == 2) {
+            return cultPriests[cult][1] == null || cultPriests[cult][2] == null || cultPriests[cult][3] == null;
+        }
+        return true;
     }
 
     public void sendPriestToCult(Player player, int cult, int amount) {

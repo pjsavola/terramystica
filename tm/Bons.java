@@ -64,6 +64,9 @@ public abstract class Bons {
         } else if (bon == 9) {
             g.drawString("pass-vp:D*2", x + dx, y + dy + 8);
             dy += 14;
+        } else if (bon == 10) {
+            g.drawString("pass-vp:ship*3", x + dx, y + dy + 8);
+            dy += 14;
         }
         Resources r = getBonIncome(bon);
         if (r.coins > 0) {

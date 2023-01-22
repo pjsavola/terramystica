@@ -203,9 +203,12 @@ public class Player extends JPanel {
         --tradingPosts;
         points += round.te;
         pay(faction.getTempleCost());
-        ++pendingFavors;
-        if (faction instanceof ChaosMagicians) {
-            ++pendingFavors;
+        final List<Integer> favOptions = game.getSelectableFavs(this);
+        final int newFavs = Math.max(favOptions.size(), faction instanceof ChaosMagicians ? 2 : 1);
+        pendingFavors += newFavs;
+        if (newFavs == favOptions.size()) {
+            // Automatically add the new favors because there are no other choices.
+            favOptions.forEach(this::addFavor);
         }
     }
 
@@ -395,7 +398,12 @@ public class Player extends JPanel {
         }
     }
 
+    public boolean canSendPriestToCult() {
+        return priests > 0;
+    }
+
     public void sendPriestToCult(int cult, int amount) {
+        --priests;
         cultSteps[cult] = addPowerFromCultSteps(cultSteps[cult], amount, game.cultOccupied(cult));
         if (amount > 1) {
             --maxPriests;

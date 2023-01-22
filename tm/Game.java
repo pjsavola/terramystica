@@ -24,7 +24,7 @@ public class Game extends JPanel {
     private final List<Integer> towns = new ArrayList<>();
     final boolean[] usedPowerActions = new boolean[6];
     private final Grid mapPanel;
-    private final Cults cultPanel;
+    public final Cults cultPanel;
     private final PowerActions powerActionPanel;
     private final TurnOrder turnOrderPanel;
     private final Rounds roundPanel;
@@ -57,7 +57,7 @@ public class Game extends JPanel {
         this.seed = seed;
 
         mapPanel = new Grid(this, mapData);
-        cultPanel = new Cults(players);
+        cultPanel = new Cults(this, players);
         powerActionPanel = new PowerActions(usedPowerActions);
         turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder, leechTurnOrder);
         roundPanel = new Rounds(rounds);
@@ -277,6 +277,10 @@ public class Game extends JPanel {
         if (favs.remove((Integer) fav)) {
             player.addFavor(fav);
         }
+    }
+
+    public List<Integer> getSelectableFavs(Player player) {
+        return favs.stream().distinct().filter(player::canAddFavor).toList();
     }
 
     public void nextRound() {
