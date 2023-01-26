@@ -269,6 +269,16 @@ public class Game extends JPanel {
         }
     }
 
+    public boolean canSelectTown(int town) {
+        return towns.contains(town);
+    }
+
+    public void selectTown(Player player, int town) {
+        if (towns.remove((Integer) town)) {
+            player.foundTown(town);
+        }
+    }
+
     public boolean canSelectFav(int fav) {
         return favs.contains(fav) && getCurrentPlayer().canAddFavor(fav);
     }
@@ -335,14 +345,34 @@ public class Game extends JPanel {
                 return;
             }
             final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
+            Hex.Structure choice = null;
             if (options.size() == 1) {
-                resolveAction(new BuildAction(row, col, options.get(0)));
+                choice = options.get(0);
             } else if (!options.isEmpty()) {
                 final String[] choices = options.stream().map(Hex.Structure::getName).toArray(String[]::new);
                 final int response = JOptionPane.showOptionDialog(this, "Upgrade Trading Post to...", "Choose upgrade", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
                 if (response >= 0 && response < options.size()) {
-                    resolveAction(new BuildAction(row, col, options.get(response)));
+                    choice = options.get(response);
                 }
+            }
+            if (choice != null) {
+                /*
+                final Player player = getCurrentPlayer();
+                if (choice == Hex.Structure.STRONGHOLD && player.getFaction() instanceof Darklings) {
+                    final int leftoverWorkers = player.getWorkers() - player.getFaction().getStrongholdCost().workers;
+                    final List<Integer> conversionOptions = new ArrayList<>();
+                    for (int i = 0; i < leftoverWorkers; ++i) {
+                        conversionOptions.add(i + 1);
+                    }
+                    if (conversionOptions.size() > 1) {
+                        final String[] choices = options.stream().map(Object::toString).toArray(String[]::new);
+                        final int response = JOptionPane.showOptionDialog(this, "Convert workers to priests...", "Convert Workers", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                        if (response >= 0 && response < options.size()) {
+
+                        }
+                    }
+                }*/
+                resolveAction(new BuildAction(row, col, choice));
             }
         }
     }

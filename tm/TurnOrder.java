@@ -2,7 +2,9 @@ package tm;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TurnOrder extends JPanel {
 
@@ -47,8 +49,15 @@ public class TurnOrder extends JPanel {
             }
             case CONFIRM_ACTION -> {
                 String txt = "Confirm turn";
+                final List<String> pendingItems = new ArrayList<>();
                 if (game.getCurrentPlayer().hasPendingFavor()) {
-                    txt = "Select Fav";
+                    pendingItems.add("Fav");
+                }
+                if (game.getCurrentPlayer().hasPendingTown()) {
+                    pendingItems.add("Town");
+                }
+                if (!pendingItems.isEmpty()) {
+                    txt = "Select " + String.join(" / ", pendingItems);
                 }
                 drawPlayers(g, 0, topMargin, txt, List.of(game.getCurrentPlayer()));
             }

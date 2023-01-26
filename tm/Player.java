@@ -37,6 +37,7 @@ public class Player extends JPanel {
     private int pendingFavors;
     private int pendingWorkerToPriestConversions;
     private int pendingBridges;
+    private int pendingTowns;
     private int pendingLeech;
 
     public boolean usedFactionAction;
@@ -97,6 +98,10 @@ public class Player extends JPanel {
         favs.clear();
         towns.clear();
         selectFaction(faction, 20);
+    }
+
+    public int getWorkers() {
+        return workers;
     }
 
     public int getCultSteps(int cult) {
@@ -232,7 +237,7 @@ public class Player extends JPanel {
         } else if (faction instanceof Cultists) {
             points += 7;
         } else if (faction instanceof Darklings) {
-            pendingWorkerToPriestConversions = Math.min(workers, 3);
+            pendingWorkerToPriestConversions = 3;
         } else if (faction instanceof Dwarves) {
             jumpCost = Resources.w1;
         } else if (faction instanceof Fakirs) {
@@ -262,6 +267,14 @@ public class Player extends JPanel {
         if (faction instanceof ChaosMagicians) {
             ++pendingFavors;
         }
+    }
+
+    public boolean hasPendingPriestToWorkerConversions() {
+        return pendingWorkerToPriestConversions > 0;
+    }
+
+    public boolean hasPendingTown() {
+        return pendingTowns > 0;
     }
 
     public void foundTown(int number) {
@@ -674,8 +687,15 @@ public class Player extends JPanel {
             if (myTurn) {
                 if (game.phase == Game.Phase.CONFIRM_ACTION) {
                     String txt = "CONFIRM TURN";
+                    final List<String> pendingItems = new ArrayList<>();
                     if (game.getCurrentPlayer().hasPendingFavor()) {
-                        txt = "SELECT FAVOR";
+                        pendingItems.add("FAV");
+                    }
+                    if (game.getCurrentPlayer().hasPendingTown()) {
+                        pendingItems.add("TOWN");
+                    }
+                    if (!pendingItems.isEmpty()) {
+                        txt = "SELECT " + String.join(" / ", pendingItems);
                     }
                     factionName += " - " + txt;
                 } else {

@@ -1,10 +1,7 @@
 package tm;
 
 import tm.Bons;
-import tm.action.CultStepAction;
-import tm.action.SelectBonAction;
-import tm.action.SelectFavAction;
-import tm.action.SpadeAction;
+import tm.action.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,7 +44,10 @@ public class Pool extends JPanel {
                 final int row = py / 105;
                 final int idx = 10 * row + col;
                 if (px % 105 >= 5 && py % 105 >= 5) {
-                    if (idx < bons.size()) {
+                    final int bonCount = bons.size();
+                    final int favCount = (int) favs.stream().distinct().count();
+                    final int townCount = (int) towns.stream().distinct().count();
+                    if (idx < bonCount) {
                         if (player != null && game.isMyTurn(player)) {
                             if (game.phase == Game.Phase.ACTIONS) {
                                 if (PowerActions.actionClicked(px % 105 - 5 - 3, py % 105 - 5 - 30)) {
@@ -69,7 +69,7 @@ public class Pool extends JPanel {
                                 game.resolveAction(new SelectBonAction(idx));
                             }
                         }
-                    } else if (idx - bons.size() < favs.size()) {
+                    } else if (idx - bonCount < favCount) {
                         if (player != null && game.isMyTurn(player)) {
                             if (game.phase == Game.Phase.ACTIONS) {
                                 if (favs.get(idx - bons.size()) == 6) {
@@ -83,8 +83,15 @@ public class Pool extends JPanel {
                             }
                         } else if (player == null) {
                             if (game.phase == Game.Phase.CONFIRM_ACTION) {
-                                final int fav = favs.stream().distinct().toList().get(idx - bons.size());
+                                final int fav = favs.stream().distinct().toList().get(idx - bonCount);
                                 game.resolveAction(new SelectFavAction(fav));
+                            }
+                        }
+                    } else if (idx - bonCount - favCount < townCount) {
+                        if (player == null) {
+                            if (game.phase == Game.Phase.CONFIRM_ACTION) {
+                                final int town = towns.stream().distinct().toList().get(idx - bonCount - favCount);
+                                game.resolveAction(new SelectTownAction(town));
                             }
                         }
                     }
