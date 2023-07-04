@@ -2,17 +2,38 @@ package tm;
 
 import tm.action.ConvertAction;
 import tm.action.CultStepAction;
+import tm.action.DarklingsConvertAction;
+import tm.action.PendingAction;
 import tm.faction.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Player extends JPanel {
+
+    public enum PendingType {
+        SELECT_FAV("Select Fav"),
+        SELECT_TOWN("Select Town"),
+        CONVERT_W2P("Convert W -> P"),
+        PLACE_BRIDGE("Place Bridge"),
+        USE_SPADES("Use Spades");
+
+        private final String description;
+
+        private PendingType(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    };
 
     private final Game game;
 
@@ -155,10 +176,6 @@ public class Player extends JPanel {
         return pendingFavors > 0 && !ownedFavors[number - 1];
     }
 
-    public boolean hasPendingFavor() {
-        return pendingFavors > 0;
-    }
-
     public void placeInitialDwelling() {
         ++dwellings;
     }
@@ -238,6 +255,12 @@ public class Player extends JPanel {
             points += 7;
         } else if (faction instanceof Darklings) {
             pendingWorkerToPriestConversions = 3;
+            final int workers = game.getCurrentPlayer().getWorkers();
+            final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().sorted((a, b) -> b - a).map(Object::toString).toArray(String[]::new);
+            final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+            if (response >= 0 && response < choices.length) {
+                game.resolveAction(new DarklingsConvertAction(response));
+            }
         } else if (faction instanceof Dwarves) {
             jumpCost = Resources.w1;
         } else if (faction instanceof Fakirs) {
@@ -267,14 +290,6 @@ public class Player extends JPanel {
         if (faction instanceof ChaosMagicians) {
             ++pendingFavors;
         }
-    }
-
-    public boolean hasPendingPriestToWorkerConversions() {
-        return pendingWorkerToPriestConversions > 0;
-    }
-
-    public boolean hasPendingTown() {
-        return pendingTowns > 0;
     }
 
     public void foundTown(int number) {
@@ -686,17 +701,8 @@ public class Player extends JPanel {
             String factionName = faction.getName();
             if (myTurn) {
                 if (game.phase == Game.Phase.CONFIRM_ACTION) {
-                    String txt = "CONFIRM TURN";
-                    final List<String> pendingItems = new ArrayList<>();
-                    if (game.getCurrentPlayer().hasPendingFavor()) {
-                        pendingItems.add("FAV");
-                    }
-                    if (game.getCurrentPlayer().hasPendingTown()) {
-                        pendingItems.add("TOWN");
-                    }
-                    if (!pendingItems.isEmpty()) {
-                        txt = "SELECT " + String.join(" / ", pendingItems);
-                    }
+                    final String pending = game.getCurrentPlayer().getPendingActions().stream().map(PendingType::getDescription).collect(Collectors.joining(" / ")).toUpperCase();
+                    final String txt = pending.isEmpty() ? "CONFIRM TURN" : pending;
                     factionName += " - " + txt;
                 } else {
                     factionName = "> " + factionName;
@@ -765,5 +771,21 @@ public class Player extends JPanel {
         public Dimension getPreferredSize() {
             return new Dimension(400, 128);
         }
+    }
+
+    public void convertWorkersToPriests(int amount) {
+        pendingWorkerToPriestConversions = 0;
+        addIncome(Resources.fromPriests(amount));
+        pay(Resources.fromWorkers(amount));
+    }
+
+    public Set<PendingType> getPendingActions() {
+        final Set<PendingType> result = new HashSet<>();
+        if (pendingTowns > 0) result.add(PendingType.SELECT_TOWN);
+        if (pendingFavors > 0) result.add(PendingType.SELECT_FAV);
+        if (pendingSpades > 0) result.add(PendingType.USE_SPADES);
+        if (pendingBridges > 0) result.add(PendingType.PLACE_BRIDGE);
+        if (pendingWorkerToPriestConversions > 0) result.add(PendingType.CONVERT_W2P);
+        return result;
     }
 }

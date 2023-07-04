@@ -1,6 +1,7 @@
 package tm.action;
 
 import tm.Game;
+import tm.Player;
 
 public class SelectFavAction extends PendingAction {
 
@@ -12,7 +13,7 @@ public class SelectFavAction extends PendingAction {
 
     @Override
     public boolean canExecute() {
-        return game.canSelectFav(fav);
+        return game.canSelectFav(fav) && player.canAddFavor(fav) && player.getPendingActions().contains(Player.PendingType.SELECT_FAV);
     }
 
     @Override

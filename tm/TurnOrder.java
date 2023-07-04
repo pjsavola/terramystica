@@ -48,17 +48,8 @@ public class TurnOrder extends JPanel {
                 drawPlayers(g, 0, topMargin, txt + "?", leechTurnOrder);
             }
             case CONFIRM_ACTION -> {
-                String txt = "Confirm turn";
-                final List<String> pendingItems = new ArrayList<>();
-                if (game.getCurrentPlayer().hasPendingFavor()) {
-                    pendingItems.add("Fav");
-                }
-                if (game.getCurrentPlayer().hasPendingTown()) {
-                    pendingItems.add("Town");
-                }
-                if (!pendingItems.isEmpty()) {
-                    txt = "Select " + String.join(" / ", pendingItems);
-                }
+                final String pending = game.getCurrentPlayer().getPendingActions().stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / "));
+                final String txt = pending.isEmpty() ? "Confirm turn" : pending;
                 drawPlayers(g, 0, topMargin, txt, List.of(game.getCurrentPlayer()));
             }
         };

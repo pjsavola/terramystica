@@ -1,6 +1,7 @@
 package tm.action;
 
 import tm.Game;
+import tm.Player;
 
 public class SelectTownAction extends PendingAction {
 
@@ -12,7 +13,7 @@ public class SelectTownAction extends PendingAction {
 
     @Override
     public boolean canExecute() {
-        return game.canSelectTown(town);
+        return game.canSelectTown(town) && player.getPendingActions().contains(Player.PendingType.SELECT_TOWN);
     }
 
     @Override

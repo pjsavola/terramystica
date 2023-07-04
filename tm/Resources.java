@@ -45,7 +45,7 @@ public class Resources {
     public static final Resources c1w1 = c1.combine(w1);
     public static final Resources c2w1 = c2.combine(w1);
     public static final Resources c4w1 = c4.combine(w1);
-    public static final Resources c3w2 = c3.combine(w1);
+    public static final Resources c3w2 = c3.combine(w2);
     public static final Resources c5w2 = c5.combine(w2);
     public static final Resources c6w2 = c6.combine(w2);
     public static final Resources c4w3 = c4.combine(w3);

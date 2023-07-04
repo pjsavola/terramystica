@@ -1,8 +1,6 @@
 package tm;
 
-import tm.action.ConvertAction;
-import tm.action.LeechAction;
-import tm.action.PassAction;
+import tm.action.*;
 import tm.faction.Alchemists;
 
 import javax.swing.*;
@@ -11,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public class Main {
     public static Hex.Type getType(String type) {
@@ -92,6 +91,17 @@ public class Main {
         final MenuItem passAction = new MenuItem("Pass");
         passAction.addActionListener(l -> game.resolveAction(new PassAction()));
         actionMenu.add(passAction);
+
+        final MenuItem darklingConvertAction = new MenuItem("Darklings SH Conversion");
+        darklingConvertAction.addActionListener(l -> {
+            final int workers = game.getCurrentPlayer().getWorkers();
+            final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().map(Object::toString).toArray(String[]::new);
+            final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+            if (response >= 0 && response < choices.length) {
+                game.resolveAction(new DarklingsConvertAction(response));
+            }
+        });
+        actionMenu.add(darklingConvertAction);
 
         final MenuBar menuBar = new MenuBar();
         menuBar.add(actionMenu);

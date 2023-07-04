@@ -43,7 +43,7 @@ public class Game extends JPanel {
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new Alchemists(), new Cultists());
+    private static final List<Faction> testFactions = List.of(new Darklings(), new Giants());
 
     private final String[] mapData;
     private final int playerCount;
@@ -280,7 +280,7 @@ public class Game extends JPanel {
     }
 
     public boolean canSelectFav(int fav) {
-        return favs.contains(fav) && getCurrentPlayer().canAddFavor(fav);
+        return favs.contains(fav);
     }
 
     public void selectFav(Player player, int fav) {
@@ -403,7 +403,7 @@ public class Game extends JPanel {
 
     public void confirmTurn() {
         if (phase == Phase.CONFIRM_ACTION) {
-            if (getCurrentPlayer().hasPendingFavor()) return;
+            if (!getCurrentPlayer().getPendingActions().isEmpty()) return;
 
             phase = Phase.ACTIONS;
             endTurn();
