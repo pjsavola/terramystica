@@ -40,9 +40,9 @@ public class Main {
         };
         final int seed = new Random().nextInt();
         final int playerCount = 2;
-        final Game game = new Game(playerCount, mapData, seed);
 
         final Menu actionMenu = new Menu("Actions");
+        final Game game = new Game(playerCount, mapData, seed, actionMenu);
 
         final MenuItem convertAction = new MenuItem("Convert");
         convertAction.addActionListener(l -> {
@@ -88,11 +88,21 @@ public class Main {
         });
         actionMenu.add(convertAction);
 
-        final MenuItem passAction = new MenuItem("Pass");
+        final MenuItem passAction = new ActionMenuItem("Final Pass") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.getRound() == 6 && game.getCurrentPlayer().getPendingActions().isEmpty();
+            }
+        };
         passAction.addActionListener(l -> game.resolveAction(new PassAction()));
         actionMenu.add(passAction);
 
-        final MenuItem darklingConvertAction = new MenuItem("Darklings SH Conversion");
+        final MenuItem darklingConvertAction = new ActionMenuItem("Darklings SH Conversion") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.getCurrentPlayer().getPendingActions().contains(Player.PendingType.CONVERT_W2P);
+            }
+        };
         darklingConvertAction.addActionListener(l -> {
             final int workers = game.getCurrentPlayer().getWorkers();
             final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().map(Object::toString).toArray(String[]::new);
@@ -149,6 +159,7 @@ public class Main {
                 }
             }
         });
+        game.refresh();
         frame.setVisible(true);
     }
 }

@@ -24,7 +24,7 @@ public class PlaceInitialDwellingAction extends Action {
     @Override
     public boolean canExecute() {
         final Hex hex = game.getHex(row, col);
-        return hex != null && hex.getType() == player.getFaction().getHomeType();
+        return hex != null && hex.getType() == player.getFaction().getHomeType() && hex.getStructure() == null;
     }
 
     @Override

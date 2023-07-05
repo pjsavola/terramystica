@@ -51,10 +51,13 @@ public class Game extends JPanel {
 
     private boolean rewinding;
 
-    public Game(int playerCount, String[] mapData, int seed) {
+    private final Menu actionMenu;
+
+    public Game(int playerCount, String[] mapData, int seed, Menu actionMenu) {
         this.playerCount = playerCount;
         this.mapData = mapData;
         this.seed = seed;
+        this.actionMenu = actionMenu;
 
         mapPanel = new Grid(this, mapData);
         cultPanel = new Cults(this, players);
@@ -240,7 +243,7 @@ public class Game extends JPanel {
             final int cult = Cults.selectCult(this, 1, true);
             resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
         }
-        repaint();
+        refresh();
     }
 
     public boolean isValidBonIndex(int index) {
@@ -397,7 +400,7 @@ public class Game extends JPanel {
                     endTurn();
                 }
             }
-            repaint();
+            refresh();
         }
     }
 
@@ -407,7 +410,7 @@ public class Game extends JPanel {
 
             phase = Phase.ACTIONS;
             endTurn();
-            repaint();
+            refresh();
         }
     }
 
@@ -493,5 +496,20 @@ public class Game extends JPanel {
             return leechTurnOrder.get(0);
         }
         return turnOrder.get(0);
+    }
+
+    public void refresh() {
+        final int count = actionMenu.getItemCount();
+        for (int i = 0; i < count; ++i) {
+            final MenuItem item = actionMenu.getItem(i);
+            final boolean enable;
+            if (item instanceof ActionMenuItem && getCurrentPlayer() != null) {
+                enable = !((ActionMenuItem) item).canExecute(this);
+            } else {
+                enable = false;
+            }
+            item.setEnabled(enable);
+        }
+        repaint();
     }
 }

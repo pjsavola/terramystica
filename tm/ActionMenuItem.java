@@ -3,5 +3,10 @@ package tm;
 import java.awt.*;
 
 public abstract class ActionMenuItem extends MenuItem {
-    public abstract Game.Phase getPhase();
+
+    protected ActionMenuItem(String name) {
+        super(name);
+    }
+
+    public abstract boolean canExecute(Game game);
 }
