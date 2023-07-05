@@ -12,7 +12,7 @@ public abstract class Action {
             throw new RuntimeException("Game mismatch when rewinding");
         }
         if (this.player != null && this.player != player) {
-            throw new RuntimeException("Player mismatch when rewinding");
+            throw new RuntimeException("Player mismatch when rewinding. Action: " + this.player.getFaction().getName() + ", Rewind: " + player.getFaction().getName());
         }
         this.game = game;
         this.player = player;

@@ -788,4 +788,9 @@ public class Player extends JPanel {
         if (pendingWorkerToPriestConversions > 0) result.add(PendingType.CONVERT_W2P);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return faction == null ? super.toString() : faction.getName();
+    }
 }

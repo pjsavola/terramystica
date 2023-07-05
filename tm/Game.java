@@ -82,6 +82,7 @@ public class Game extends JPanel {
         leechTurnOrder.clear();
         roundPanel.round = 0;
         Arrays.fill(bonUsed, false);
+        mapPanel.reset(mapData);
 
         final Random random = new Random(seed);
 
@@ -125,7 +126,7 @@ public class Game extends JPanel {
             nextTurnOrder.clear();
             for (int i = allFactions.size() - 1; i >= 0; --i) {
                 final Faction faction = allFactions.get(i);
-                for (int j = 0; j < players.size(); ++j) {
+                for (int j = players.size() - 1; j >= 0; --j) {
                     final Player player = players.get(j);
                     if (player.getFaction() == faction) {
                         nextTurnOrder.add(0, player);
