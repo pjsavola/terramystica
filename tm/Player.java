@@ -492,14 +492,35 @@ public class Player extends JPanel {
     }
 
     public void dig(int amount) {
-        if (workers < amount * digging)
-            throw new RuntimeException("Cannot afford to dig " + amount);
+        if (faction instanceof Darklings) {
+            if (priests < amount) {
+                throw new RuntimeException("Cannot afford to dig " + amount);
+            }
+            points += 2 * amount;
+            pendingSpades += amount;
+            priests -= amount;
+        } else {
+            if (workers < amount * digging)
+                throw new RuntimeException("Cannot afford to dig " + amount);
 
-        if (amount % 2 != 0 && faction instanceof Giants)
-            throw new RuntimeException("Giants can only dig even amounts");
+            if (amount % 2 != 0 && faction instanceof Giants)
+                throw new RuntimeException("Giants can only dig even amounts");
 
-        pendingSpades += amount;
-        workers -= amount * digging;
+            pendingSpades += amount;
+            workers -= amount * digging;
+            if (faction instanceof Alchemists && strongholds > 0) {
+                addPower(2 * amount);
+            }
+        }
+    }
+
+    public boolean canDig(int amount) {
+        if (faction instanceof Darklings) {
+            return priests >= amount;
+        } else {
+            if (amount % 2 != 0 && faction instanceof Giants) return false;
+            return workers >= digging * amount;
+        }
     }
 
     public void addSpades(int amount) {

@@ -50,9 +50,9 @@ public class CultStepAction extends Action {
     @Override
     public String toString() {
         String act = switch (source) {
-            case BON2 -> "BON2 ";
-            case FAV6 -> "FAV6 ";
-            case ACTA -> "ACTA ";
+            case BON2 -> "Action BON2 ";
+            case FAV6 -> "Action FAV6 ";
+            case ACTA -> "Action ACTA ";
             default -> "";
         };
         return act + "+" + Cults.getCultName(cult);

@@ -4,7 +4,7 @@ import tm.PowerActions;
 
 public class SpadeAction extends Action {
 
-    public enum Source { BON1 };
+    public enum Source { BON1, DIGGING };
 
     private final int amount;
     private final Source source;
@@ -16,7 +16,10 @@ public class SpadeAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return amount >= 1 && amount <= 3;
+        return switch (source) {
+            case BON1 -> !game.bonUsed[0] && amount == 1;
+            case DIGGING -> player.canDig(amount) && amount > 0 && amount <= 3;
+        };
     }
 
     @Override
@@ -29,6 +32,9 @@ public class SpadeAction extends Action {
 
     @Override
     public String toString() {
-        return "Action BON1";
+        return switch (source) {
+            case BON1 -> "Action BON1";
+            case DIGGING -> "Dig " + amount;
+        };
     }
 }
