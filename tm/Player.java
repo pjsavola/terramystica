@@ -789,6 +789,15 @@ public class Player extends JPanel {
         return result;
     }
 
+    public int getBridgesLeft() {
+        return bridgesLeft;
+    }
+
+    public void placeBridge(Hex hex1, Hex hex2) {
+        --pendingBridges;
+        game.bridgePlaced(new Bridge(this, hex1, hex2));
+    }
+
     @Override
     public String toString() {
         return faction == null ? super.toString() : faction.getName();

@@ -15,6 +15,7 @@ public class Grid extends JPanel {
     private final int radius = 40;
     private final Dimension size;
     private final Game game;
+    private final List<Bridge> bridges = new ArrayList<>();
 
     public Grid(Game game, String[] mapData) {
         this.game = game;
@@ -127,6 +128,7 @@ public class Grid extends JPanel {
                 map[row][col].reset(type);
             }
         }
+        bridges.clear();
     }
 
     public Hex getHex(int row, int col) {
@@ -143,11 +145,32 @@ public class Grid extends JPanel {
     @Override
     public void paint(Graphics g) {
         final Graphics2D g2d = (Graphics2D) g;
+
+        for (Bridge bridge : bridges) {
+            Point p1 = null;
+            Point p2 = null;
+            for (int row = 0; row < map.length; ++row) {
+                for (int col = 0; col < map[row].length; ++col) {
+                    if (bridge.getHex1() == map[row][col]) {
+                        p1 = points[row][col];
+                    }
+                    if (bridge.getHex2() == map[row][col]) {
+                        p2 = points[row][col];
+                    }
+                }
+            }
+            bridge.draw(g2d, p1.x, p1.y, p2.x, p2.y);
+        }
+
         for (int row = 0; row < map.length; ++row) {
             for (int col = 0; col < map[row].length; ++col) {
                 final Point p = points[row][col];
                 map[row][col].draw(g2d, p.x, p.y, radius);
             }
         }
+    }
+
+    public void addBridge(Bridge bridge) {
+        bridges.add(bridge);
     }
 }

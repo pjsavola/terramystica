@@ -192,4 +192,9 @@ public class Hex {
         g.setColor(oldColor);
         g.setStroke(oldStroke);
     }
+
+    @Override
+    public String toString() {
+        return getId();
+    }
 }

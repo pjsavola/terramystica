@@ -413,8 +413,7 @@ public class Game extends JPanel {
                                 }
                             }
                             if (requiredCommonWaterNeighbors <= 0) {
-                                System.err.println("Bridge OK");
-                                bridgeEnd = null;
+                                resolveAction(new PlaceBridgeAction(hex, bridgeEnd));
                                 return;
                             }
                         }
@@ -557,5 +556,10 @@ public class Game extends JPanel {
             item.setEnabled(enable);
         }
         repaint();
+    }
+
+    public void bridgePlaced(Bridge bridge) {
+        mapPanel.addBridge(bridge);
+        bridgeEnd = null;
     }
 }
