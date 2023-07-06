@@ -267,7 +267,7 @@ public class Player extends JPanel {
         } else if (faction instanceof Fakirs) {
             ++range;
         } else if (faction instanceof Halflings) {
-            pendingSpades += 3;
+            addSpades(3);
         } else if (faction instanceof Mermaids) {
             if (canAdvanceShipping()) {
                 advanceShipping();
@@ -355,8 +355,8 @@ public class Player extends JPanel {
             case 2 -> addIncome(Resources.p1);
             case 3 -> addIncome(Resources.w2);
             case 4 -> addIncome(Resources.c7);
-            case 5 -> ++pendingSpades;
-            case 6 -> pendingSpades += 2;
+            case 5 -> addSpades(1);
+            case 6 -> addSpades(2);
         }
         game.usedPowerActions[act - 1] = true;
     }
@@ -471,7 +471,7 @@ public class Player extends JPanel {
         priests = Math.min(priests + income.priests, maxPriests);
         addPower(income.power);
         if (income == Resources.spade) {
-            ++pendingSpades;
+            addSpades(1);
         }
     }
 
@@ -497,7 +497,6 @@ public class Player extends JPanel {
                 throw new RuntimeException("Cannot afford to dig " + amount);
             }
             points += 2 * amount;
-            pendingSpades += amount;
             priests -= amount;
         } else {
             if (workers < amount * digging)
@@ -506,12 +505,9 @@ public class Player extends JPanel {
             if (amount % 2 != 0 && faction instanceof Giants)
                 throw new RuntimeException("Giants can only dig even amounts");
 
-            pendingSpades += amount;
             workers -= amount * digging;
-            if (faction instanceof Alchemists && strongholds > 0) {
-                addPower(2 * amount);
-            }
         }
+        addSpades(amount);
     }
 
     public boolean canDig(int amount) {
@@ -524,6 +520,11 @@ public class Player extends JPanel {
     }
 
     public void addSpades(int amount) {
+        if (faction instanceof Halflings) {
+            points += amount;
+        } else if (faction instanceof Alchemists && strongholds > 0) {
+            addPower(2 * amount);
+        }
         pendingSpades += amount;
     }
 
@@ -687,17 +688,18 @@ public class Player extends JPanel {
                 public void mouseReleased(MouseEvent e) {
                     if (faction.getPowerAction(strongholds > 0) != null) {
                         if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
-                            if (CultStepAction.isSourceValid(CultStepAction.Source.ACTA, game, Player.this)) {
-                                final int cult = Cults.selectCult(game, 1, false);
-                                if (cult >= 0 && cult < 4) {
-                                    game.resolveAction(new CultStepAction(cult, 2, CultStepAction.Source.ACTA));
+                            if (faction instanceof Auren) {
+                                if (CultStepAction.isSourceValid(CultStepAction.Source.ACTA, game, Player.this)) {
+                                    final int cult = Cults.selectCult(game, 1, false);
+                                    if (cult >= 0 && cult < 4) {
+                                        game.resolveAction(new CultStepAction(cult, 2, CultStepAction.Source.ACTA));
+                                    }
                                 }
+                            } else if (faction instanceof Engineers) {
+                                game.resolveAction(new EngineersBridgeAction());
+                            } else if (faction instanceof Mermaids) {
+                                // TODO: Form towns?
                             }
-                        }
-                    }
-                    if (faction instanceof Engineers) {
-                        if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
-                            game.resolveAction(new EngineersBridgeAction());
                         }
                     }
                 }

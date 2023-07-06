@@ -44,4 +44,9 @@ public class Mermaids extends Faction {
             default -> throw new RuntimeException("Invalid shipping level " + level);
         };
     }
+
+    @Override
+    public String getPowerAction(boolean stronghold) {
+        return "town";
+    }
 }
