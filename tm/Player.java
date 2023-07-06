@@ -557,6 +557,10 @@ public class Player extends JPanel {
         points += 4;
     }
 
+    public boolean canUseRange() {
+        return canAfford(jumpCost);
+    }
+
     private Resources getIncome() {
         Resources income = faction.getBaseIncome().combine(favorIncome);
         for (int i = 0; i < dwellings; ++i) {

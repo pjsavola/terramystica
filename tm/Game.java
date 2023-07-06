@@ -44,7 +44,7 @@ public class Game extends JPanel {
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new Engineers());
+    private static final List<Faction> testFactions = List.of(new Dwarves());
 
     private final String[] mapData;
     private final int playerCount;
@@ -565,5 +565,9 @@ public class Game extends JPanel {
 
     public boolean isReachable(Hex hex, Player player) {
         return mapPanel.getReachableTiles(player).contains(hex);
+    }
+
+    public boolean isJumpable(Hex hex, Player player) {
+        return player.canUseRange() && mapPanel.getJumpableTiles(player).contains(hex);
     }
 }

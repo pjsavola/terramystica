@@ -216,4 +216,49 @@ public class Grid extends JPanel {
         }
         return distances.keySet().stream().filter(hex -> hex.getType() != Hex.Type.WATER).collect(Collectors.toSet());
     }
+
+    public Set<Hex> getJumpableTiles(Player player) {
+        final int range = player.getRange();
+        if (range < 2) return Collections.emptySet();
+
+        final Map<Hex, Integer> distances = new HashMap<>();
+        final Deque<Hex> work = new ArrayDeque<>();
+        for (Hex[] hexes : map) {
+            for (Hex hex : hexes) {
+                if (hex.getStructure() != null && hex.getType() == player.getHomeType()) {
+                    work.add(hex);
+                    distances.put(hex, 0);
+                }
+            }
+        }
+
+        final Set<Hex> jumpables = new HashSet<>();
+        while (!work.isEmpty()) {
+            final Hex hex = work.removeFirst();
+            for (Hex neighbor : hex.getNeighbors()) {
+                if (!distances.containsKey(neighbor)) {
+                    final int distance = distances.get(hex) + 1;
+                    distances.put(neighbor, distance);
+                    if (range > distance) {
+                        work.add(neighbor);
+                    }
+                    if (distance > 1 && neighbor.getType() != Hex.Type.WATER) {
+                        jumpables.add(neighbor);
+                    }
+                }
+            }
+        }
+
+        for (Bridge bridge : bridges) {
+            final Integer d1 = distances.get(bridge.getHex1());
+            final Integer d2 = distances.get(bridge.getHex2());
+            if (d1 != null && d1 == 0) {
+                jumpables.remove(bridge.getHex2());
+            }
+            if (d2 != null && d2 == 0) {
+                jumpables.remove(bridge.getHex1());
+            }
+        }
+        return jumpables;
+    }
 }

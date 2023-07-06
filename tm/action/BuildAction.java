@@ -47,7 +47,7 @@ public class BuildAction extends Action {
         if (structure.getParent() != hex.getStructure()) return false;
 
         return switch (structure) {
-            case DWELLING -> player.canBuildDwelling() && game.isReachable(hex, player);
+            case DWELLING -> player.canBuildDwelling() && (game.isReachable(hex, player) || game.isJumpable(hex, player));
             case TRADING_POST -> player.canBuildTradingPost(expensive);
             case TEMPLE -> player.canBuildTemple();
             case STRONGHOLD -> player.canBuildStronghold();
@@ -58,6 +58,9 @@ public class BuildAction extends Action {
     @Override
     public void execute() {
         final Hex hex = game.getHex(row, col);
+        if (structure == Hex.Structure.DWELLING && !game.isReachable(hex, player)) {
+            player.useRange();
+        }
         hex.setStructure(structure);
         switch (structure) {
             case DWELLING -> player.buildDwelling();
