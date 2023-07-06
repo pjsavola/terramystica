@@ -39,7 +39,7 @@ public class Main {
                 "K,R,G,S,K,S,G,K,R,Y,U,R,Y",
         };
         final int seed = new Random().nextInt();
-        final int playerCount = 2;
+        final int playerCount = 1;
 
         final Menu actionMenu = new Menu("Actions");
         final Game game = new Game(playerCount, mapData, seed, actionMenu);

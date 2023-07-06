@@ -39,6 +39,7 @@ public class Game extends JPanel {
     private boolean pendingPass;
     private boolean leechAccepted;
     public Player leechTrigger;
+    private Hex bridgeEnd;
 
     public Phase phase;
 
@@ -83,6 +84,7 @@ public class Game extends JPanel {
         roundPanel.round = 0;
         Arrays.fill(bonUsed, false);
         mapPanel.reset(mapData);
+        bridgeEnd = null;
 
         final Random random = new Random(seed);
 
@@ -341,25 +343,28 @@ public class Game extends JPanel {
     }
 
     public void hexClicked(int row, int col) {
-        if (phase == Phase.INITIAL_DWELLINGS) {
-            resolveAction(new PlaceInitialDwellingAction(row, col));
-        } else if (phase == Phase.ACTIONS) {
-            final Hex hex = mapPanel.getHex(row, col);
-            if (hex.getStructure() != null && hex.getType() != getCurrentPlayer().getFaction().getHomeType()) {
-                return;
-            }
-            final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
-            Hex.Structure choice = null;
-            if (options.size() == 1) {
-                choice = options.get(0);
-            } else if (!options.isEmpty()) {
-                final String[] choices = options.stream().map(Hex.Structure::getName).toArray(String[]::new);
-                final int response = JOptionPane.showOptionDialog(this, "Upgrade Trading Post to...", "Choose upgrade", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
-                if (response >= 0 && response < options.size()) {
-                    choice = options.get(response);
+        switch (phase) {
+            case INITIAL_DWELLINGS:
+                resolveAction(new PlaceInitialDwellingAction(row, col));
+                break;
+            case ACTIONS: {
+                final Hex hex = mapPanel.getHex(row, col);
+                final Hex.Type homeType = getCurrentPlayer().getFaction().getHomeType();
+                if (hex.getStructure() != null && hex.getType() != homeType) {
+                    return;
                 }
-            }
-            if (choice != null) {
+                final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
+                Hex.Structure choice = null;
+                if (options.size() == 1) {
+                    choice = options.get(0);
+                } else if (!options.isEmpty()) {
+                    final String[] choices = options.stream().map(Hex.Structure::getName).toArray(String[]::new);
+                    final int response = JOptionPane.showOptionDialog(this, "Upgrade Trading Post to...", "Choose upgrade", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                    if (response >= 0 && response < options.size()) {
+                        choice = options.get(response);
+                    }
+                }
+                if (choice != null) {
                 /*
                 final Player player = getCurrentPlayer();
                 if (choice == Hex.Structure.STRONGHOLD && player.getFaction() instanceof Darklings) {
@@ -376,7 +381,47 @@ public class Game extends JPanel {
                         }
                     }
                 }*/
-                resolveAction(new BuildAction(row, col, choice));
+                    resolveAction(new BuildAction(row, col, choice));
+                }
+                break;
+            }
+            case CONFIRM_ACTION: {
+                if (!getCurrentPlayer().getPendingActions().contains(Player.PendingType.PLACE_BRIDGE)) {
+                    return;
+                }
+                final Hex hex = mapPanel.getHex(row, col);
+                final Hex.Type homeType = getCurrentPlayer().getFaction().getHomeType();
+                if (bridgeEnd == null) {
+                    bridgeEnd = hex;
+                } else if (bridgeEnd != hex) {
+                    if (hex.getType() == homeType || bridgeEnd.getType() == homeType) {
+                        boolean structureInBridgeEnd = false;
+                        if (hex.getType() == homeType && hex.getStructure() != null) {
+                            structureInBridgeEnd = true;
+                        }
+                        if (bridgeEnd.getType() == homeType && bridgeEnd.getStructure() != null) {
+                            structureInBridgeEnd = true;
+                        }
+                        if (structureInBridgeEnd) {
+                            int requiredCommonWaterNeighbors = 2;
+                            if (hex.getNeighbors().size() <= 3 && bridgeEnd.getNeighbors().size() <= 3) {
+                                --requiredCommonWaterNeighbors;
+                            }
+                            for (Hex neighbor : bridgeEnd.getNeighbors()) {
+                                if (hex.getNeighbors().contains(neighbor) && neighbor.getType() == Hex.Type.WATER) {
+                                    --requiredCommonWaterNeighbors;
+                                }
+                            }
+                            if (requiredCommonWaterNeighbors <= 0) {
+                                System.err.println("Bridge OK");
+                                bridgeEnd = null;
+                                return;
+                            }
+                        }
+                    }
+                    bridgeEnd = hex;
+                }
+                break;
             }
         }
     }
