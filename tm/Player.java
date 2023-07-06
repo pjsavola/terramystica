@@ -134,6 +134,14 @@ public class Player extends JPanel {
         return faction.getHomeType();
     }
 
+    public int getShipping() {
+        return shipping;
+    }
+
+    public int getRange() {
+        return range;
+    }
+
     public void selectFaction(Faction faction, int points) {
         this.faction = faction;
         this.points = points;

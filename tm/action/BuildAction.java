@@ -32,7 +32,7 @@ public class BuildAction extends Action {
         if (structure == Hex.Structure.TRADING_POST) {
             expensive = true;
             for (Hex n : hex.getNeighbors()) {
-                if (n.getStructure() != null && n.getType() != player.getFaction().getHomeType()) {
+                if (n.getStructure() != null && n.getType() != player.getHomeType()) {
                     expensive = false;
                     break;
                 }
@@ -42,13 +42,12 @@ public class BuildAction extends Action {
 
     @Override
     public boolean canExecute() {
-        // TODO: Reachability
         final Hex hex = game.getHex(row, col);
-        if (hex.getType() != player.getFaction().getHomeType()) return false;
+        if (hex.getType() != player.getHomeType()) return false;
         if (structure.getParent() != hex.getStructure()) return false;
 
         return switch (structure) {
-            case DWELLING -> player.canBuildDwelling();
+            case DWELLING -> player.canBuildDwelling() && game.isReachable(hex, player);
             case TRADING_POST -> player.canBuildTradingPost(expensive);
             case TEMPLE -> player.canBuildTemple();
             case STRONGHOLD -> player.canBuildStronghold();
@@ -74,7 +73,7 @@ public class BuildAction extends Action {
         final Map<Hex.Type, Integer> leech = new HashMap<>();
         final Hex hex = game.getHex(row, col);
         for (Hex n : hex.getNeighbors()) {
-            if (n.getStructure() != null && n.getType() != player.getFaction().getHomeType()) {
+            if (n.getStructure() != null && n.getType() != player.getHomeType()) {
                 final int power = switch (n.getStructure()) {
                     case DWELLING -> 1;
                     case TRADING_POST -> 2;

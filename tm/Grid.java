@@ -4,9 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Grid extends JPanel {
 
@@ -172,5 +172,48 @@ public class Grid extends JPanel {
 
     public void addBridge(Bridge bridge) {
         bridges.add(bridge);
+    }
+
+    public Set<Hex> getReachableTiles(Player player) {
+        final Map<Hex, Integer> distances = new HashMap<>();
+        final Deque<Hex> work = new ArrayDeque<>();
+        final int shipping = player.getShipping();
+        for (Hex[] hexes : map) {
+            for (Hex hex : hexes) {
+                if (hex.getStructure() != null && hex.getType() == player.getHomeType()) {
+                    work.add(hex);
+                    distances.put(hex, 0);
+                }
+            }
+        }
+        while (!work.isEmpty()) {
+            final Hex hex = work.removeFirst();
+            for (Hex neighbor : hex.getNeighbors()) {
+                if (!distances.containsKey(neighbor)) {
+                    final int distance = distances.get(hex) + 1;
+                    distances.put(neighbor, distance);
+                    if (neighbor.getType() == Hex.Type.WATER) {
+                        if (shipping >= distance) {
+                            work.add(neighbor);
+                        }
+                    }
+                }
+            }
+            for (Bridge bridge : bridges) {
+                Hex neighbor = null;
+                if (bridge.getHex1() == hex) {
+                    neighbor = bridge.getHex2();
+                } else if (bridge.getHex2() == hex) {
+                    neighbor = bridge.getHex1();
+                }
+                if (neighbor != null) {
+                    if (!distances.containsKey(neighbor)) {
+                        final int distance = distances.get(hex) + 1;
+                        distances.put(neighbor, distance);
+                    }
+                }
+            }
+        }
+        return distances.keySet().stream().filter(hex -> hex.getType() != Hex.Type.WATER).collect(Collectors.toSet());
     }
 }

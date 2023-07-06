@@ -18,7 +18,7 @@ public class PlaceBridgeAction extends PendingAction {
         if (hex1 == null || hex2 == null || hex1 == hex2) return false;
         if (player.getBridgesLeft() <= 0 || !player.getPendingActions().contains(Player.PendingType.PLACE_BRIDGE)) return false;
 
-        final Hex.Type homeType = player.getFaction().getHomeType();
+        final Hex.Type homeType = player.getHomeType();
         if (hex1.getType() != homeType && hex2.getType() != homeType) return false;
         if ((hex1.getType() != homeType || hex1.getStructure() == null) && (hex2.getType() != homeType || hex2.getStructure() == null)) return false;
 

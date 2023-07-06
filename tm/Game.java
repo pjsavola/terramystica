@@ -349,7 +349,7 @@ public class Game extends JPanel {
                 break;
             case ACTIONS: {
                 final Hex hex = mapPanel.getHex(row, col);
-                final Hex.Type homeType = getCurrentPlayer().getFaction().getHomeType();
+                final Hex.Type homeType = getCurrentPlayer().getHomeType();
                 if (hex.getStructure() != null && hex.getType() != homeType) {
                     return;
                 }
@@ -390,7 +390,7 @@ public class Game extends JPanel {
                     return;
                 }
                 final Hex hex = mapPanel.getHex(row, col);
-                final Hex.Type homeType = getCurrentPlayer().getFaction().getHomeType();
+                final Hex.Type homeType = getCurrentPlayer().getHomeType();
                 if (bridgeEnd == null) {
                     bridgeEnd = hex;
                 } else if (bridgeEnd != hex) {
@@ -561,5 +561,9 @@ public class Game extends JPanel {
     public void bridgePlaced(Bridge bridge) {
         mapPanel.addBridge(bridge);
         bridgeEnd = null;
+    }
+
+    public boolean isReachable(Hex hex, Player player) {
+        return mapPanel.getReachableTiles(player).contains(hex);
     }
 }
