@@ -44,7 +44,7 @@ public class Game extends JPanel {
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new Darklings(), new Giants());
+    private static final List<Faction> testFactions = List.of(new Engineers());
 
     private final String[] mapData;
     private final int playerCount;

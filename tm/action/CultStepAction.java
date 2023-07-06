@@ -2,6 +2,8 @@ package tm.action;
 
 import tm.Cults;
 import tm.Game;
+import tm.Player;
+import tm.faction.Auren;
 
 public class CultStepAction extends Action {
 
@@ -17,8 +19,21 @@ public class CultStepAction extends Action {
         this.source = source;
     }
 
+    public static boolean isSourceValid(Source source, Game game, Player player) {
+        return switch (source) {
+            case BON2 -> player.getBon() == 2 && !game.bonUsed[1];
+            case FAV6 -> player.hasFavor(6) && !player.usedFav6[0];
+            case ACTA -> player.getFaction() instanceof Auren && !player.usedFactionAction;
+            default -> true;
+        };
+    }
+
+    private boolean isAmountValid() {
+        return amount == (source == Source.ACTA ? 2 : 1);
+    }
+
     public boolean canExecute() {
-        return cult >= 0 && cult < 4;
+        return isSourceValid(source, game, player) && isAmountValid() && cult >= 0 && cult < 4;
     }
 
     public void execute() {
@@ -34,6 +49,12 @@ public class CultStepAction extends Action {
 
     @Override
     public String toString() {
-        return "+" + Cults.getCultName(cult);
+        String act = switch (source) {
+            case BON2 -> "BON2 ";
+            case FAV6 -> "FAV6 ";
+            case ACTA -> "ACTA ";
+            default -> "";
+        };
+        return act + "+" + Cults.getCultName(cult);
     }
 }

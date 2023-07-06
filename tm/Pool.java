@@ -56,9 +56,11 @@ public class Pool extends JPanel {
                                             game.resolveAction(new SpadeAction(1, SpadeAction.Source.BON1));
                                         }
                                         case 2 -> {
-                                            final int cult = Cults.selectCult(game, 1, false);
-                                            if (cult >= 0 && cult < 4) {
-                                                game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.BON2));
+                                            if (CultStepAction.isSourceValid(CultStepAction.Source.BON2, game, player)) {
+                                                final int cult = Cults.selectCult(game, 1, false);
+                                                if (cult >= 0 && cult < 4) {
+                                                    game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.BON2));
+                                                }
                                             }
                                         }
                                     }
@@ -74,9 +76,11 @@ public class Pool extends JPanel {
                             if (game.phase == Game.Phase.ACTIONS) {
                                 if (favs.get(idx - bons.size()) == 6) {
                                     if (PowerActions.actionClicked(px % 105 - 5 - 3, py % 105 - 5 - 44)) {
-                                        final int cult = Cults.selectCult(game, 1, false);
-                                        if (cult >= 0 && cult < 4) {
-                                            game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.FAV6));
+                                        if (CultStepAction.isSourceValid(CultStepAction.Source.FAV6, game, player)) {
+                                            final int cult = Cults.selectCult(game, 1, false);
+                                            if (cult >= 0 && cult < 4) {
+                                                game.resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.FAV6));
+                                            }
                                         }
                                     }
                                 }

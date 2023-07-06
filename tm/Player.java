@@ -1,9 +1,6 @@
 package tm;
 
-import tm.action.ConvertAction;
-import tm.action.CultStepAction;
-import tm.action.DarklingsConvertAction;
-import tm.action.PendingAction;
+import tm.action.*;
 import tm.faction.*;
 
 import javax.swing.*;
@@ -174,6 +171,10 @@ public class Player extends JPanel {
 
     public boolean canAddFavor(int number) {
         return pendingFavors > 0 && !ownedFavors[number - 1];
+    }
+
+    public boolean hasFavor(int number) {
+        return ownedFavors[number - 1];
     }
 
     public void placeInitialDwelling() {
@@ -665,12 +666,17 @@ public class Player extends JPanel {
                 public void mouseReleased(MouseEvent e) {
                     if (faction.getPowerAction(strongholds > 0) != null) {
                         if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
-                            if (faction instanceof Auren) {
+                            if (CultStepAction.isSourceValid(CultStepAction.Source.ACTA, game, Player.this)) {
                                 final int cult = Cults.selectCult(game, 1, false);
                                 if (cult >= 0 && cult < 4) {
                                     game.resolveAction(new CultStepAction(cult, 2, CultStepAction.Source.ACTA));
                                 }
                             }
+                        }
+                    }
+                    if (faction instanceof Engineers) {
+                        if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
+                            game.resolveAction(new EngineersBridgeAction());
                         }
                     }
                 }
@@ -796,6 +802,11 @@ public class Player extends JPanel {
     public void placeBridge(Hex hex1, Hex hex2) {
         --pendingBridges;
         game.bridgePlaced(new Bridge(this, hex1, hex2));
+    }
+
+    public void getEngineerBridge() {
+        workers -= 2;
+        ++pendingBridges;
     }
 
     @Override

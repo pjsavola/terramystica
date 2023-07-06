@@ -1,28 +1,22 @@
 package tm.action;
 
-import tm.Game;
 import tm.PowerActions;
+import tm.faction.Engineers;
 
-public class SelectPowerActionAction extends Action {
-
-    private final int act;
-
-    public SelectPowerActionAction(int act) {
-        this.act = act;
-    }
+public class EngineersBridgeAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return act >= 1 && act <= 6 && !game.usedPowerActions[act - 1] && player.canAffordPower(PowerActions.getRequiredPower(act));
+        return player.getFaction() instanceof Engineers && player.getWorkers() >= 2 && player.getBridgesLeft() > 0 && player.getPendingActions().isEmpty();
     }
 
     @Override
     public void execute() {
-        player.usePowerAction(act);
+        player.getEngineerBridge();
     }
 
     @Override
     public String toString() {
-        return "Action ACT" + act;
+        return "Action ACTE";
     }
 }
