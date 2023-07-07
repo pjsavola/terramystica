@@ -83,7 +83,7 @@ public class Hex {
         }
     };
 
-    private final static Font font = new Font("Arial", Font.BOLD, 12);
+    final static Font font = new Font("Arial", Font.BOLD, 12);
     private Type type;
     private final String id;
     private Structure structure;

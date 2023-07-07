@@ -54,7 +54,10 @@ public class Game extends JPanel {
 
     private final Menu actionMenu;
 
-    public Game(int playerCount, String[] mapData, int seed, Menu actionMenu) {
+    private final JFrame frame;
+
+    public Game(JFrame frame, int playerCount, String[] mapData, int seed, Menu actionMenu) {
+        this.frame = frame;
         this.playerCount = playerCount;
         this.mapData = mapData;
         this.seed = seed;
@@ -344,13 +347,33 @@ public class Game extends JPanel {
 
     public void hexClicked(int row, int col) {
         switch (phase) {
-            case INITIAL_DWELLINGS:
-                resolveAction(new PlaceInitialDwellingAction(row, col));
-                break;
-            case ACTIONS: {
+            case INITIAL_DWELLINGS -> resolveAction(new PlaceInitialDwellingAction(row, col));
+            case ACTIONS -> {
                 final Hex hex = mapPanel.getHex(row, col);
                 final Hex.Type homeType = getCurrentPlayer().getHomeType();
-                if (hex.getStructure() != null && hex.getType() != homeType) {
+                if (hex.getType() != homeType) {
+                    if (hex.getStructure() != null) {
+                        return;
+                    }
+                    final JDialog popup = new JDialog(frame, true);
+                    final JPanel terraformPanel = new JPanel();
+                    final int ordinal = hex.getType().ordinal();
+                    final Hex.Type[] result = new Hex.Type[1];
+                    for (int i = ordinal + 4; i < ordinal + 11; ++i) {
+                        final Hex.Type type = Hex.Type.values()[i % 7];
+                        if (type == hex.getType()) continue;
+
+                        terraformPanel.add(new TerrainButton(popup, hex.getId(), type, Math.abs(type.ordinal() - ordinal), result));
+                    }
+                    popup.setTitle("Select target terrain");
+                    popup.setContentPane(terraformPanel);
+                    popup.setLocationRelativeTo(frame);
+                    popup.pack();
+                    popup.setVisible(true);
+                    if (result[0] == null) {
+                        return;
+                    }
+                    System.err.println(result[0]);
                     return;
                 }
                 final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
@@ -365,27 +388,10 @@ public class Game extends JPanel {
                     }
                 }
                 if (choice != null) {
-                /*
-                final Player player = getCurrentPlayer();
-                if (choice == Hex.Structure.STRONGHOLD && player.getFaction() instanceof Darklings) {
-                    final int leftoverWorkers = player.getWorkers() - player.getFaction().getStrongholdCost().workers;
-                    final List<Integer> conversionOptions = new ArrayList<>();
-                    for (int i = 0; i < leftoverWorkers; ++i) {
-                        conversionOptions.add(i + 1);
-                    }
-                    if (conversionOptions.size() > 1) {
-                        final String[] choices = options.stream().map(Object::toString).toArray(String[]::new);
-                        final int response = JOptionPane.showOptionDialog(this, "Convert workers to priests...", "Convert Workers", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
-                        if (response >= 0 && response < options.size()) {
-
-                        }
-                    }
-                }*/
                     resolveAction(new BuildAction(row, col, choice));
                 }
-                break;
             }
-            case CONFIRM_ACTION: {
+            case CONFIRM_ACTION -> {
                 if (!getCurrentPlayer().getPendingActions().contains(Player.PendingType.PLACE_BRIDGE)) {
                     return;
                 }
@@ -420,7 +426,6 @@ public class Game extends JPanel {
                     }
                     bridgeEnd = hex;
                 }
-                break;
             }
         }
     }

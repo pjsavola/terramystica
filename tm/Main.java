@@ -42,7 +42,9 @@ public class Main {
         final int playerCount = 1;
 
         final Menu actionMenu = new Menu("Actions");
-        final Game game = new Game(playerCount, mapData, seed, actionMenu);
+
+        final JFrame frame = new JFrame();
+        final Game game = new Game(frame, playerCount, mapData, seed, actionMenu);
 
         final MenuItem convertAction = new MenuItem("Convert");
         convertAction.addActionListener(l -> {
@@ -120,7 +122,6 @@ public class Main {
         final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
         final JScrollPane jsp = new JScrollPane(game, v, h);
 
-        final JFrame frame = new JFrame();
         frame.setTitle("Terra Mystica");
         frame.setContentPane(jsp);
         frame.setMenuBar(menuBar);
