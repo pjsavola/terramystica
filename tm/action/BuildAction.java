@@ -29,6 +29,8 @@ public class BuildAction extends Action {
     public void setData(Game game, Player player) {
         super.setData(game, player);
         final Hex hex = game.getHex(row, col);
+        if (hex == null) throw new RuntimeException("Invalid hex");
+
         if (structure == Hex.Structure.TRADING_POST) {
             expensive = true;
             for (Hex n : hex.getNeighbors()) {

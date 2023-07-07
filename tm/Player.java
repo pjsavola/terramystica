@@ -558,6 +558,10 @@ public class Player extends JPanel {
         pendingSpades += amount;
     }
 
+    public int getPendingSpades() {
+        return pendingSpades;
+    }
+
     public void useSpades(int amount) {
         if (pendingSpades < amount)
             throw new RuntimeException("Trying to use too many spades");

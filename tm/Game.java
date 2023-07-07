@@ -347,44 +347,15 @@ public class Game extends JPanel {
     }
 
     public void hexClicked(int row, int col, int button) {
+        final Hex hex = getHex(row, col);
+        if (hex == null) return;
+
         switch (phase) {
             case INITIAL_DWELLINGS -> resolveAction(new PlaceInitialDwellingAction(row, col));
             case ACTIONS -> {
-                final Hex hex = mapPanel.getHex(row, col);
                 final Hex.Type homeType = getCurrentPlayer().getHomeType();
                 if (hex.getType() != homeType || button == MouseEvent.BUTTON3) {
-                    if (hex.getStructure() != null) {
-                        return;
-                    }
-                    boolean jump = false;
-                    if (!isReachable(hex, getCurrentPlayer())) {
-                        if (!isJumpable(hex, getCurrentPlayer())) {
-                            return;
-                        }
-                        jump = true;
-                    }
-                    final JDialog popup = new JDialog(frame, true);
-                    final JPanel terraformPanel = new JPanel();
-                    final int ordinal = hex.getType().ordinal();
-                    final Hex.Type[] result = new Hex.Type[1];
-                    for (int i = ordinal + 4; i < ordinal + 11; ++i) {
-                        final Hex.Type type = Hex.Type.values()[i % 7];
-                        if (type == hex.getType()) continue;
-
-                        final int cost = getCurrentPlayer().getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
-                        if (!getCurrentPlayer().canDig(cost, jump)) continue;
-
-                        terraformPanel.add(new TerrainButton(popup, hex.getId(), type, cost, result));
-                    }
-                    popup.setTitle("Select target terrain");
-                    popup.setContentPane(terraformPanel);
-                    popup.setLocationRelativeTo(frame);
-                    popup.pack();
-                    popup.setVisible(true);
-                    if (result[0] == null) {
-                        return;
-                    }
-                    resolveAction(new DigAction(hex, result[0], jump));
+                    handleDigging(hex);
                     return;
                 }
                 final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
@@ -405,15 +376,12 @@ public class Game extends JPanel {
             case CONFIRM_ACTION -> {
                 final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
                 if (pendingActions.contains(Player.PendingType.BUILD)) {
-                    final Hex hex = mapPanel.getHex(row, col);
                     if (getCurrentPlayer().hasPendingBuild(hex)) {
                         resolveAction(new BuildAction(row, col, Hex.Structure.DWELLING));
                     }
                 } else if (pendingActions.contains(Player.PendingType.USE_SPADES)) {
-                    final Hex hex = mapPanel.getHex(row, col);
-                    // TODO: Implement
+                    handleDigging(hex);
                 } else if (pendingActions.contains(Player.PendingType.PLACE_BRIDGE)) {
-                    final Hex hex = mapPanel.getHex(row, col);
                     final Hex.Type homeType = getCurrentPlayer().getHomeType();
                     if (bridgeEnd == null) {
                         bridgeEnd = hex;
@@ -447,6 +415,42 @@ public class Game extends JPanel {
                 }
             }
         }
+    }
+
+    private void handleDigging(Hex hex) {
+        if (hex.getStructure() != null) {
+            return;
+        }
+        final Player player = getCurrentPlayer();
+        boolean jump = false;
+        if (!isReachable(hex, player)) {
+            if (!isJumpable(hex, player)) {
+                return;
+            }
+            jump = true;
+        }
+        final JDialog popup = new JDialog(frame, true);
+        final JPanel terraformPanel = new JPanel();
+        final int ordinal = hex.getType().ordinal();
+        final Hex.Type[] result = new Hex.Type[1];
+        for (int i = ordinal + 4; i < ordinal + 11; ++i) {
+            final Hex.Type type = Hex.Type.values()[i % 7];
+            if (type == hex.getType()) continue;
+
+            final int cost = Math.max(0, (player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type)) - player.getPendingSpades());
+            if (!player.canDig(cost, jump)) continue;
+
+            terraformPanel.add(new TerrainButton(popup, hex.getId(), type, cost, result));
+        }
+        popup.setTitle("Select target terrain");
+        popup.setContentPane(terraformPanel);
+        popup.setLocationRelativeTo(frame);
+        popup.pack();
+        popup.setVisible(true);
+        if (result[0] == null) {
+            return;
+        }
+        resolveAction(new DigAction(hex, result[0], jump));
     }
 
     public Hex getHex(int row, int col) {
