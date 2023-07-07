@@ -53,7 +53,7 @@ public class Pool extends JPanel {
                                 if (PowerActions.actionClicked(px % 105 - 5 - 3, py % 105 - 5 - 30)) {
                                     switch (bons.get(idx)) {
                                         case 1 -> {
-                                            game.resolveAction(new SpadeAction(1, SpadeAction.Source.BON1));
+                                            game.resolveAction(new SpadeAction());
                                         }
                                         case 2 -> {
                                             if (CultStepAction.isSourceValid(CultStepAction.Source.BON2, game, player)) {
