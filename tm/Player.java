@@ -19,7 +19,8 @@ public class Player extends JPanel {
         SELECT_TOWN("Select Town"),
         CONVERT_W2P("Convert W -> P"),
         PLACE_BRIDGE("Place Bridge"),
-        USE_SPADES("Use Spades");
+        USE_SPADES("Use Spades"),
+        BUILD("Build?");
 
         private final String description;
 
@@ -57,6 +58,7 @@ public class Player extends JPanel {
     private int pendingBridges;
     private int pendingTowns;
     private int pendingLeech;
+    private List<Hex> pendingBuilds = new ArrayList<>();
 
     public boolean usedFactionAction;
     public boolean[] usedFav6 = new boolean[1];
@@ -102,6 +104,7 @@ public class Player extends JPanel {
         pendingWorkerToPriestConversions = 0;
         pendingBridges = 0;
         pendingLeech = 0;
+        pendingBuilds.clear();
         dwellings = 0;
         tradingPosts = 0;
         temples = 0;
@@ -189,12 +192,15 @@ public class Player extends JPanel {
         ++dwellings;
     }
 
-    public boolean canBuildDwelling() {
-        return dwellings < 8 && canAfford(faction.getDwellingCost());
+    public boolean canBuildDwelling(boolean useJump) {
+        if (useJump && jumpCost == Resources.zero) {
+            throw new RuntimeException("Cannot jump to build");
+        }
+        return dwellings < 8 && canAfford(useJump ? jumpCost.combine(faction.getDwellingCost()) : faction.getDwellingCost());
     }
 
     public void buildDwelling() {
-        if (!canBuildDwelling())
+        if (!canBuildDwelling(false))
             throw new RuntimeException("Unable to build more dwellings");
 
         ++dwellings;
@@ -411,6 +417,20 @@ public class Player extends JPanel {
         pendingLeech = Math.min(amount, points + 1);
     }
 
+    public void addPendingBuild(Hex hex) {
+        if (dwellings < 8) {
+            pendingBuilds.add(hex);
+        }
+    }
+
+    public boolean hasPendingBuild(Hex hex) {
+        return pendingBuilds.contains(hex);
+    }
+
+    public void clearPendingBuilds() {
+        pendingBuilds.clear();
+    }
+
     public int getPendingLeech() {
         return pendingLeech;
     }
@@ -535,11 +555,6 @@ public class Player extends JPanel {
     }
 
     public void addSpades(int amount) {
-        if (faction instanceof Halflings) {
-            points += amount;
-        } else if (faction instanceof Alchemists && strongholds > 0) {
-            addPower(2 * amount);
-        }
         pendingSpades += amount;
     }
 
@@ -834,6 +849,7 @@ public class Player extends JPanel {
         if (pendingSpades > 0) result.add(PendingType.USE_SPADES);
         if (pendingBridges > 0) result.add(PendingType.PLACE_BRIDGE);
         if (pendingWorkerToPriestConversions > 0) result.add(PendingType.CONVERT_W2P);
+        if (!pendingBuilds.isEmpty()) result.add(PendingType.BUILD);
         return result;
     }
 

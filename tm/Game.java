@@ -370,8 +370,7 @@ public class Game extends JPanel {
                         final Hex.Type type = Hex.Type.values()[i % 7];
                         if (type == hex.getType()) continue;
 
-                        final int delta = Math.abs((type.ordinal() - ordinal));
-                        final int cost = getCurrentPlayer().getFaction() instanceof Giants ? 2 : Math.min(7 - delta, delta);
+                        final int cost = getCurrentPlayer().getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
                         if (!getCurrentPlayer().canDig(cost, jump)) continue;
 
                         terraformPanel.add(new TerrainButton(popup, hex.getId(), type, cost, result));
@@ -384,7 +383,7 @@ public class Game extends JPanel {
                     if (result[0] == null) {
                         return;
                     }
-                    System.err.println(result[0]);
+                    resolveAction(new DigAction(hex, result[0], jump));
                     return;
                 }
                 final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();

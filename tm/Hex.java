@@ -102,6 +102,10 @@ public class Hex {
         return type;
     }
 
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public Structure getStructure() {
         return structure;
     }

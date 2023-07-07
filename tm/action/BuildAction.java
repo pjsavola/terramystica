@@ -41,25 +41,50 @@ public class BuildAction extends Action {
     }
 
     @Override
+    public final boolean validatePhase() {
+        if (game.phase == Game.Phase.CONFIRM_ACTION) {
+            return player.getPendingActions().contains(Player.PendingType.BUILD);
+        }
+        return super.validatePhase();
+    }
+
+    @Override
     public boolean canExecute() {
         final Hex hex = game.getHex(row, col);
         if (hex.getType() != player.getHomeType()) return false;
         if (structure.getParent() != hex.getStructure()) return false;
+        if (structure == Hex.Structure.DWELLING) {
+            if (player.getPendingActions().contains(Player.PendingType.BUILD)) {
+                return player.hasPendingBuild(hex) && player.canBuildDwelling(false);
+            }
+            boolean jump = false;
+            if (!game.isReachable(hex, player)) {
+                if (!game.isJumpable(hex, player)) {
+                    return false;
+                }
+                jump = true;
+            }
+            return player.canBuildDwelling(jump);
+        }
 
         return switch (structure) {
-            case DWELLING -> player.canBuildDwelling() && (game.isReachable(hex, player) || game.isJumpable(hex, player));
             case TRADING_POST -> player.canBuildTradingPost(expensive);
             case TEMPLE -> player.canBuildTemple();
             case STRONGHOLD -> player.canBuildStronghold();
             case SANCTUARY -> player.canBuildSanctuary();
+            default -> throw new IllegalStateException("Unexpected value: " + structure);
         };
     }
 
     @Override
     public void execute() {
         final Hex hex = game.getHex(row, col);
-        if (structure == Hex.Structure.DWELLING && !game.isReachable(hex, player)) {
-            player.useRange();
+        if (structure == Hex.Structure.DWELLING) {
+            if (player.getPendingActions().contains(Player.PendingType.BUILD)) {
+                player.clearPendingBuilds();
+            } else if (!game.isReachable(hex, player)) {
+                player.useRange();
+            }
         }
         hex.setStructure(structure);
         switch (structure) {
