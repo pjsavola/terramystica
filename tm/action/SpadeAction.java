@@ -18,7 +18,7 @@ public class SpadeAction extends Action {
     public boolean canExecute() {
         return switch (source) {
             case BON1 -> !game.bonUsed[0] && amount == 1;
-            case DIGGING -> player.canDig(amount) && amount > 0 && amount <= 3;
+            case DIGGING -> player.canDig(amount, false) && amount > 0 && amount <= 3;
         };
     }
 

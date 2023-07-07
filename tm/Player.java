@@ -518,11 +518,18 @@ public class Player extends JPanel {
         addSpades(amount);
     }
 
-    public boolean canDig(int amount) {
+    public boolean canDig(int amount, boolean useJump) {
+        if (useJump && jumpCost == Resources.zero) {
+            throw new RuntimeException("Cannot jump to dig");
+        }
         if (faction instanceof Darklings) {
             return priests >= amount;
         } else {
             if (amount % 2 != 0 && faction instanceof Giants) return false;
+            if (useJump) {
+                final Resources totalCost = jumpCost.combine(Resources.fromWorkers(digging * amount));
+                return canAfford(totalCost);
+            }
             return workers >= digging * amount;
         }
     }

@@ -355,6 +355,13 @@ public class Game extends JPanel {
                     if (hex.getStructure() != null) {
                         return;
                     }
+                    boolean jump = false;
+                    if (!isReachable(hex, getCurrentPlayer())) {
+                        if (!isJumpable(hex, getCurrentPlayer())) {
+                            return;
+                        }
+                        jump = true;
+                    }
                     final JDialog popup = new JDialog(frame, true);
                     final JPanel terraformPanel = new JPanel();
                     final int ordinal = hex.getType().ordinal();
@@ -363,7 +370,11 @@ public class Game extends JPanel {
                         final Hex.Type type = Hex.Type.values()[i % 7];
                         if (type == hex.getType()) continue;
 
-                        terraformPanel.add(new TerrainButton(popup, hex.getId(), type, Math.abs(type.ordinal() - ordinal), result));
+                        final int delta = Math.abs((type.ordinal() - ordinal));
+                        final int cost = getCurrentPlayer().getFaction() instanceof Giants ? 2 : Math.min(7 - delta, delta);
+                        if (!getCurrentPlayer().canDig(cost, jump)) continue;
+
+                        terraformPanel.add(new TerrainButton(popup, hex.getId(), type, cost, result));
                     }
                     popup.setTitle("Select target terrain");
                     popup.setContentPane(terraformPanel);
