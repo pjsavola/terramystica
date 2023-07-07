@@ -7,6 +7,7 @@ import tm.faction.*;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -345,13 +346,13 @@ public class Game extends JPanel {
         return false;
     }
 
-    public void hexClicked(int row, int col) {
+    public void hexClicked(int row, int col, int button) {
         switch (phase) {
             case INITIAL_DWELLINGS -> resolveAction(new PlaceInitialDwellingAction(row, col));
             case ACTIONS -> {
                 final Hex hex = mapPanel.getHex(row, col);
                 final Hex.Type homeType = getCurrentPlayer().getHomeType();
-                if (hex.getType() != homeType) {
+                if (hex.getType() != homeType || button == MouseEvent.BUTTON3) {
                     if (hex.getStructure() != null) {
                         return;
                     }
@@ -402,46 +403,47 @@ public class Game extends JPanel {
                 }
             }
             case CONFIRM_ACTION -> {
-                if (getCurrentPlayer().getPendingActions().contains(Player.PendingType.BUILD)) {
+                final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
+                if (pendingActions.contains(Player.PendingType.BUILD)) {
                     final Hex hex = mapPanel.getHex(row, col);
                     if (getCurrentPlayer().hasPendingBuild(hex)) {
                         resolveAction(new BuildAction(row, col, Hex.Structure.DWELLING));
                     }
-                    return;
-                }
-                if (!getCurrentPlayer().getPendingActions().contains(Player.PendingType.PLACE_BRIDGE)) {
-                    return;
-                }
-                final Hex hex = mapPanel.getHex(row, col);
-                final Hex.Type homeType = getCurrentPlayer().getHomeType();
-                if (bridgeEnd == null) {
-                    bridgeEnd = hex;
-                } else if (bridgeEnd != hex) {
-                    if (hex.getType() == homeType || bridgeEnd.getType() == homeType) {
-                        boolean structureInBridgeEnd = false;
-                        if (hex.getType() == homeType && hex.getStructure() != null) {
-                            structureInBridgeEnd = true;
-                        }
-                        if (bridgeEnd.getType() == homeType && bridgeEnd.getStructure() != null) {
-                            structureInBridgeEnd = true;
-                        }
-                        if (structureInBridgeEnd) {
-                            int requiredCommonWaterNeighbors = 2;
-                            if (hex.getNeighbors().size() <= 3 && bridgeEnd.getNeighbors().size() <= 3) {
-                                --requiredCommonWaterNeighbors;
+                } else if (pendingActions.contains(Player.PendingType.USE_SPADES)) {
+                    final Hex hex = mapPanel.getHex(row, col);
+                    // TODO: Implement
+                } else if (pendingActions.contains(Player.PendingType.PLACE_BRIDGE)) {
+                    final Hex hex = mapPanel.getHex(row, col);
+                    final Hex.Type homeType = getCurrentPlayer().getHomeType();
+                    if (bridgeEnd == null) {
+                        bridgeEnd = hex;
+                    } else if (bridgeEnd != hex) {
+                        if (hex.getType() == homeType || bridgeEnd.getType() == homeType) {
+                            boolean structureInBridgeEnd = false;
+                            if (hex.getType() == homeType && hex.getStructure() != null) {
+                                structureInBridgeEnd = true;
                             }
-                            for (Hex neighbor : bridgeEnd.getNeighbors()) {
-                                if (hex.getNeighbors().contains(neighbor) && neighbor.getType() == Hex.Type.WATER) {
+                            if (bridgeEnd.getType() == homeType && bridgeEnd.getStructure() != null) {
+                                structureInBridgeEnd = true;
+                            }
+                            if (structureInBridgeEnd) {
+                                int requiredCommonWaterNeighbors = 2;
+                                if (hex.getNeighbors().size() <= 3 && bridgeEnd.getNeighbors().size() <= 3) {
                                     --requiredCommonWaterNeighbors;
                                 }
-                            }
-                            if (requiredCommonWaterNeighbors <= 0) {
-                                resolveAction(new PlaceBridgeAction(hex, bridgeEnd));
-                                return;
+                                for (Hex neighbor : bridgeEnd.getNeighbors()) {
+                                    if (hex.getNeighbors().contains(neighbor) && neighbor.getType() == Hex.Type.WATER) {
+                                        --requiredCommonWaterNeighbors;
+                                    }
+                                }
+                                if (requiredCommonWaterNeighbors <= 0) {
+                                    resolveAction(new PlaceBridgeAction(hex, bridgeEnd));
+                                    return;
+                                }
                             }
                         }
+                        bridgeEnd = hex;
                     }
-                    bridgeEnd = hex;
                 }
             }
         }

@@ -106,7 +106,7 @@ public class Grid extends JPanel {
                     }
                 }
                 if (minDistSq < radius * radius) {
-                    game.hexClicked(selectedRow, selectedCol);
+                    game.hexClicked(selectedRow, selectedCol, e.getButton());
                 }
             }
 
