@@ -402,6 +402,13 @@ public class Game extends JPanel {
                 }
             }
             case CONFIRM_ACTION -> {
+                if (getCurrentPlayer().getPendingActions().contains(Player.PendingType.BUILD)) {
+                    final Hex hex = mapPanel.getHex(row, col);
+                    if (getCurrentPlayer().hasPendingBuild(hex)) {
+                        resolveAction(new BuildAction(row, col, Hex.Structure.DWELLING));
+                    }
+                    return;
+                }
                 if (!getCurrentPlayer().getPendingActions().contains(Player.PendingType.PLACE_BRIDGE)) {
                     return;
                 }
@@ -466,7 +473,8 @@ public class Game extends JPanel {
 
     public void confirmTurn() {
         if (phase == Phase.CONFIRM_ACTION) {
-            if (!getCurrentPlayer().getPendingActions().isEmpty()) return;
+            final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
+            if (!pendingActions.isEmpty() && !pendingActions.contains(Player.PendingType.BUILD)) return;
 
             phase = Phase.ACTIONS;
             endTurn();

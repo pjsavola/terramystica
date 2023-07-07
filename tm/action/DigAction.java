@@ -8,11 +8,13 @@ public class DigAction extends Action {
     private final Hex target;
     private final Hex.Type type;
     private final boolean jump;
+    private final int spadeCost;
 
     public DigAction(Hex target, Hex.Type type, boolean jump) {
         this.target = target;
         this.type = type;
         this.jump = jump;
+        spadeCost = getSpadeCost(target, type);
     }
 
     public static int getSpadeCost(Hex hex, Hex.Type type) {
@@ -31,13 +33,13 @@ public class DigAction extends Action {
             return false;
         }
 
-        final int spadeCount = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
+        final int spadeCount = player.getFaction() instanceof Giants ? 2 : spadeCost;
         return target != null && target.getStructure() == null && spadeCount != 0 && player.canDig(spadeCount, jump);
     }
 
     @Override
     public void execute() {
-        final int spadeCount = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
+        final int spadeCount = player.getFaction() instanceof Giants ? 2 : spadeCost;
         if (jump) {
             player.useRange();
         }
@@ -51,7 +53,7 @@ public class DigAction extends Action {
 
     @Override
     public String toString() {
-        final int spadeCount = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
+        final int spadeCount = player.getFaction() instanceof Giants ? 2 : spadeCost;
         return "Dig " + spadeCount + ". Transform " + target.getId() + " to " + type;
     }
 }
