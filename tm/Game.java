@@ -577,10 +577,10 @@ public class Game extends JPanel {
         for (int i = 0; i < count; ++i) {
             final MenuItem item = actionMenu.getItem(i);
             final boolean enable;
-            if (item instanceof ActionMenuItem && getCurrentPlayer() != null) {
-                enable = !((ActionMenuItem) item).canExecute(this);
+            if (item instanceof ActionMenuItem) {
+                enable = getCurrentPlayer() != null && ((ActionMenuItem) item).canExecute(this);
             } else {
-                enable = false;
+                enable = true;
             }
             item.setEnabled(enable);
         }

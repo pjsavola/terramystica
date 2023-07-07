@@ -46,7 +46,12 @@ public class Main {
         final JFrame frame = new JFrame();
         final Game game = new Game(frame, playerCount, mapData, seed, actionMenu);
 
-        final MenuItem convertAction = new MenuItem("Convert");
+        final MenuItem convertAction = new ActionMenuItem("Convert") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION;
+            }
+        };
         convertAction.addActionListener(l -> {
             if (game.phase != Game.Phase.ACTIONS && game.phase != Game.Phase.CONFIRM_ACTION) return;
 
