@@ -58,7 +58,7 @@ public class DigAction extends Action {
     @Override
     public void execute() {
         if (jump) {
-            player.useRange();
+            player.useRange(true);
         }
         if (requiredDigging > 0) {
             player.dig(requiredDigging);

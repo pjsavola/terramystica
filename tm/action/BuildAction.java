@@ -85,7 +85,7 @@ public class BuildAction extends Action {
             if (player.getPendingActions().contains(Player.PendingType.BUILD)) {
                 player.clearPendingBuilds();
             } else if (!game.isReachable(hex, player)) {
-                player.useRange();
+                player.useRange(false);
             }
         }
         hex.setStructure(structure);

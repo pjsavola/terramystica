@@ -58,7 +58,8 @@ public class Player extends JPanel {
     private int pendingBridges;
     private int pendingTowns;
     private int pendingLeech;
-    private List<Hex> pendingBuilds = new ArrayList<>();
+    private final List<Hex> pendingBuilds = new ArrayList<>();
+    private boolean rangeUsedForDigging;
 
     public boolean usedFactionAction;
     public boolean[] usedFav6 = new boolean[1];
@@ -105,6 +106,7 @@ public class Player extends JPanel {
         pendingBridges = 0;
         pendingLeech = 0;
         pendingBuilds.clear();
+        rangeUsedForDigging = false;
         dwellings = 0;
         tradingPosts = 0;
         temples = 0;
@@ -192,11 +194,11 @@ public class Player extends JPanel {
         ++dwellings;
     }
 
-    public boolean canBuildDwelling(boolean useJump) {
-        if (useJump && jumpCost == Resources.zero) {
+    public boolean canBuildDwelling(boolean useRange) {
+        if (useRange && jumpCost == Resources.zero) {
             throw new RuntimeException("Cannot jump to build");
         }
-        return dwellings < 8 && canAfford(useJump ? jumpCost.combine(faction.getDwellingCost()) : faction.getDwellingCost());
+        return dwellings < 8 && canAfford(useRange ? jumpCost.combine(faction.getDwellingCost()) : faction.getDwellingCost());
     }
 
     public void buildDwelling() {
@@ -538,15 +540,18 @@ public class Player extends JPanel {
         addSpades(amount);
     }
 
-    public boolean canDig(int amount, boolean useJump) {
-        if (useJump && jumpCost == Resources.zero) {
-            throw new RuntimeException("Cannot jump to dig");
+    public boolean canDig(int amount, boolean useRange) {
+        if (useRange && jumpCost == Resources.zero) {
+            throw new RuntimeException("Cannot use range to dig");
         }
         if (faction instanceof Darklings) {
             return priests >= amount;
         } else {
             if (amount % 2 != 0 && faction instanceof Giants) return false;
-            if (useJump) {
+            if (useRange) {
+                if (rangeUsedForDigging) {
+                    return false;
+                }
                 final Resources totalCost = jumpCost.combine(Resources.fromWorkers(digging * amount));
                 return canAfford(totalCost);
             }
@@ -573,12 +578,18 @@ public class Player extends JPanel {
         } else if (faction instanceof Alchemists && strongholds > 0) {
             addPower(2 * amount);
         }
+        if (pendingSpades == 0) {
+            rangeUsedForDigging = false;
+        }
     }
 
-    public void useRange() {
+    public void useRange(boolean dig) {
         if (!canAfford(jumpCost))
             throw new RuntimeException("Unable to afford range usage");
 
+        if (dig) {
+            rangeUsedForDigging = true;
+        }
         pay(jumpCost);
         points += 4;
     }

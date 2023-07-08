@@ -480,8 +480,11 @@ public class Game extends JPanel {
     public void confirmTurn() {
         if (phase == Phase.CONFIRM_ACTION) {
             final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
-            if (!pendingActions.isEmpty() && !pendingActions.contains(Player.PendingType.BUILD)) return;
-
+            if (pendingActions.contains(Player.PendingType.BUILD)) {
+                getCurrentPlayer().clearPendingBuilds();
+            } else if (!pendingActions.isEmpty()) {
+                return;
+            }
             phase = Phase.ACTIONS;
             endTurn();
             refresh();
