@@ -749,7 +749,7 @@ public class Player extends JPanel {
                             } else if (faction instanceof Engineers) {
                                 game.resolveAction(new EngineersBridgeAction());
                             } else if (faction instanceof Mermaids) {
-                                // TODO: Form towns?
+                                game.highlightMermaidTownSpots();
                             }
                         }
                     }
@@ -860,7 +860,7 @@ public class Player extends JPanel {
     }
 
     void addPendingTowns(int amount) {
-        pendingTowns += amount;
+        pendingTowns += Math.min(towns.size(), amount);
     }
 
     public Set<PendingType> getPendingActions() {

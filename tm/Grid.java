@@ -1,5 +1,7 @@
 package tm;
 
+import tm.faction.Mermaids;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -142,6 +144,14 @@ public class Grid extends JPanel {
         return size;
     }
 
+    public List<Hex> getAllHexes() {
+        final List<Hex> result = new ArrayList<>();
+        for (Hex[] hexes : map) {
+            Collections.addAll(result, hexes);
+        }
+        return result;
+    }
+
     @Override
     public void paint(Graphics g) {
         final Graphics2D g2d = (Graphics2D) g;
@@ -178,14 +188,11 @@ public class Grid extends JPanel {
         final Map<Hex, Integer> distances = new HashMap<>();
         final Deque<Hex> work = new ArrayDeque<>();
         final int shipping = player.getShipping();
-        for (Hex[] hexes : map) {
-            for (Hex hex : hexes) {
-                if (hex.getStructure() != null && hex.getType() == player.getHomeType()) {
-                    work.add(hex);
-                    distances.put(hex, 0);
-                }
-            }
-        }
+        getAllHexes().stream().filter(h -> h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
+            work.add(h);
+            distances.put(h, 0);
+        });
+
         while (!work.isEmpty()) {
             final Hex hex = work.removeFirst();
             for (Hex neighbor : hex.getNeighbors()) {
@@ -218,14 +225,10 @@ public class Grid extends JPanel {
 
         final Map<Hex, Integer> distances = new HashMap<>();
         final Deque<Hex> work = new ArrayDeque<>();
-        for (Hex[] hexes : map) {
-            for (Hex hex : hexes) {
-                if (hex.getStructure() != null && hex.getType() == player.getHomeType()) {
-                    work.add(hex);
-                    distances.put(hex, 0);
-                }
-            }
-        }
+        getAllHexes().stream().filter(h -> h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
+            work.add(h);
+            distances.put(h, 0);
+        });
 
         final Set<Hex> jumpables = new HashSet<>();
         while (!work.isEmpty()) {
@@ -260,13 +263,9 @@ public class Grid extends JPanel {
     int updateTowns(Player player) {
         final int requiredSize = player.hasFavor(5) ? 6 : 7;
         final Map<Hex, Integer> sizes = new HashMap<>();
-        for (Hex[] hexes : map) {
-            for (Hex hex : hexes) {
-                if (!hex.town && hex.getStructure() != null && hex.getType() == player.getHomeType()) {
-                    sizes.put(hex, hex.getStructureSize(player));
-                }
-            }
-        }
+        getAllHexes().stream().filter(h -> !h.town && h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
+            sizes.put(h, h.getStructureSize(player));
+        });
         int newTowns = 0;
         while (!sizes.isEmpty()) {
             final Hex hex = sizes.keySet().iterator().next();
@@ -279,7 +278,7 @@ public class Grid extends JPanel {
                 final Hex n = work.removeFirst();
                 town.add(n);
                 for (Hex neighbor : n.getNeighbors()) {
-                    if (neighbor.town && neighbor.getStructure() != null && neighbor.getType() == player.getHomeType()) {
+                    if (hasTown(neighbor, player)) {
                         nearTown = true;
                     }
                     final Integer sz = sizes.remove(neighbor);
@@ -289,9 +288,9 @@ public class Grid extends JPanel {
                     }
                 }
                 for (Bridge bridge : bridges) {
-                    final Hex neighbor = bridge.getOtherEnd(hex);
+                    final Hex neighbor = bridge.getOtherEnd(n);
                     if (neighbor != null) {
-                        if (neighbor.town && neighbor.getStructure() != null && neighbor.getType() == player.getHomeType()) {
+                        if (hasTown(neighbor, player)) {
                             nearTown = true;
                         }
                         final Integer sz = sizes.remove(neighbor);
@@ -312,5 +311,93 @@ public class Grid extends JPanel {
             }
         }
         return newTowns;
+    }
+
+    public boolean canPlaceMermaidTown(Hex waterHex, Player player) {
+        if (waterHex.getType() != Hex.Type.WATER) return false;
+
+        final int requiredSize = player.hasFavor(5) ? 6 : 7;
+        final Map<Hex, Integer> sizes = new HashMap<>();
+        getAllHexes().stream().filter(h -> !h.town && h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
+            sizes.put(h, h.getStructureSize(player));
+        });
+        int size = 0;
+        final Deque<Hex> work = new ArrayDeque<>();
+        work.add(waterHex);
+        while (!work.isEmpty()) {
+            final Hex n = work.removeFirst();
+            for (Hex neighbor : n.getNeighbors()) {
+                if (hasTown(neighbor, player)) {
+                    return false;
+                }
+                final Integer sz = sizes.remove(neighbor);
+                if (sz != null) {
+                    size += sz;
+                    work.add(neighbor);
+                }
+            }
+            for (Bridge bridge : bridges) {
+                final Hex neighbor = bridge.getOtherEnd(n);
+                if (neighbor != null) {
+                    if (hasTown(neighbor, player)) {
+                        return false;
+                    }
+                    final Integer sz = sizes.remove(neighbor);
+                    if (sz != null) {
+                        size += sz;
+                        work.add(neighbor);
+                    }
+                }
+            }
+        }
+        return size >= requiredSize;
+    }
+
+    public void updateMermaidTown(Hex waterHex, Player player) {
+        if (waterHex.getType() != Hex.Type.WATER) throw new RuntimeException("Invalid terrain for Mermaid town");
+
+        final int requiredSize = player.hasFavor(5) ? 6 : 7;
+        final Map<Hex, Integer> sizes = new HashMap<>();
+        getAllHexes().stream().filter(h -> !h.town && h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
+            sizes.put(h, h.getStructureSize(player));
+        });
+        int size = 0;
+        final Deque<Hex> work = new ArrayDeque<>();
+        work.add(waterHex);
+        while (!work.isEmpty()) {
+            final Hex n = work.removeFirst();
+            n.town = true;
+            for (Hex neighbor : n.getNeighbors()) {
+                if (hasTown(neighbor, player)) {
+                    throw new RuntimeException("Cannot place mermaid town next to existing towns");
+                }
+                final Integer sz = sizes.remove(neighbor);
+                if (sz != null) {
+                    size += sz;
+                    work.add(neighbor);
+                }
+            }
+            for (Bridge bridge : bridges) {
+                final Hex neighbor = bridge.getOtherEnd(n);
+                if (neighbor != null) {
+                    if (hasTown(neighbor, player)) {
+                        throw new RuntimeException("Cannot place mermaid town next to existing towns");
+                    }
+                    final Integer sz = sizes.remove(neighbor);
+                    if (sz != null) {
+                        size += sz;
+                        work.add(neighbor);
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean hasTown(Hex hex, Player player) {
+        if (hex.town) {
+            if (hex.getStructure() != null && hex.getType() == player.getHomeType()) return true;
+            return hex.getType() == Hex.Type.WATER && player.getFaction() instanceof Mermaids;
+        }
+        return false;
     }
 }

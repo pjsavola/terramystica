@@ -89,6 +89,7 @@ public class Hex {
     private Structure structure;
     private List<Hex> neighbors;
     boolean town;
+    boolean highlight;
 
     public Hex(String id, Type type) {
         this.id = id;
@@ -137,6 +138,7 @@ public class Hex {
         this.type = type;
         structure = null;
         town = false;
+        highlight = false;
     }
 
     public void draw(Graphics2D g, int x, int y, int radius) {
@@ -145,10 +147,14 @@ public class Hex {
 
         final int[] xpoints = new int[6];
         final int[] ypoints = new int[6];
+        final int[] xpointsSmall = new int[6];
+        final int[] ypointsSmall = new int[6];
         for (int i = 0; i < 6; ++i) {
             final double angle = i * Math.PI / 3 + Math.toRadians(270);
             xpoints[i] = (int) (x + Math.cos(angle) * radius + 0.5);
             ypoints[i] = (int) (y + Math.sin(angle) * radius + 0.5);
+            xpointsSmall[i] = (int) (x + Math.cos(angle) * (radius - 2) + 0.5);
+            ypointsSmall[i] = (int) (y + Math.sin(angle) * (radius - 2) + 0.5);
         }
 
         final Stroke oldStroke = g.getStroke();
@@ -203,6 +209,11 @@ public class Hex {
             } else {
                 throw new RuntimeException("Invalid structure");
             }
+        }
+
+        if (highlight) {
+            g.setColor(Color.WHITE);
+            g.drawPolygon(xpointsSmall, ypointsSmall, 6);
         }
 
         g.setColor(oldColor);

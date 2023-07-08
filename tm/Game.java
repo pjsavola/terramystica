@@ -40,6 +40,7 @@ public class Game extends JPanel {
     private boolean leechAccepted;
     public Player leechTrigger;
     private Hex bridgeEnd;
+    public boolean pendingTownPlacement;
 
     public Phase phase;
 
@@ -88,6 +89,7 @@ public class Game extends JPanel {
         Arrays.fill(bonUsed, false);
         mapPanel.reset(mapData);
         bridgeEnd = null;
+        pendingTownPlacement = false;
 
         final Random random = new Random(seed);
 
@@ -352,6 +354,11 @@ public class Game extends JPanel {
         final Hex hex = getHex(row, col);
         if (hex == null) return;
 
+        if (pendingTownPlacement) {
+            resolveAction(new MermaidsTownAction(hex));
+            return;
+        }
+
         switch (phase) {
             case INITIAL_DWELLINGS -> resolveAction(new PlaceInitialDwellingAction(row, col));
             case ACTIONS -> {
@@ -608,5 +615,31 @@ public class Game extends JPanel {
     public void checkTowns(Player player) {
         final int newTowns = mapPanel.updateTowns(player);
         player.addPendingTowns(newTowns);
+    }
+
+    public boolean canPlaceMermaidTown(Hex hex, Player player) {
+        return !towns.isEmpty() && mapPanel.canPlaceMermaidTown(hex, player);
+    }
+
+    public void placeMermaidTown(Hex hex, Player player) {
+        mapPanel.updateMermaidTown(hex, player);
+        player.addPendingTowns(1);
+    }
+
+    public void highlightMermaidTownSpots() {
+        if (pendingTownPlacement) {
+            pendingTownPlacement = false;
+            clearHighlights();
+        } else {
+            final List<Hex> options = mapPanel.getAllHexes().stream().filter(h -> canPlaceMermaidTown(h, getCurrentPlayer())).toList();
+            if (!options.isEmpty()) {
+                pendingTownPlacement = true;
+                options.forEach(h -> h.highlight = true);
+            }
+        }
+    }
+
+    public void clearHighlights() {
+        mapPanel.getAllHexes().forEach(h -> h.highlight = false);
     }
 }
