@@ -88,6 +88,7 @@ public class Hex {
     private final String id;
     private Structure structure;
     private List<Hex> neighbors;
+    boolean town;
 
     public Hex(String id, Type type) {
         this.id = id;
@@ -122,9 +123,20 @@ public class Hex {
         this.neighbors = neighbors;
     }
 
+    public int getStructureSize(Player player) {
+        return switch (getStructure()) {
+            case DWELLING -> 1;
+            case TRADING_POST -> 2;
+            case TEMPLE -> 2;
+            case STRONGHOLD -> 3;
+            case SANCTUARY -> 3;
+        };
+    }
+
     public void reset(Type type) {
         this.type = type;
-        this.structure = null;
+        structure = null;
+        town = false;
     }
 
     public void draw(Graphics2D g, int x, int y, int radius) {

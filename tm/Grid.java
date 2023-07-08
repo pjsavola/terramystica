@@ -200,12 +200,7 @@ public class Grid extends JPanel {
                 }
             }
             for (Bridge bridge : bridges) {
-                Hex neighbor = null;
-                if (bridge.getHex1() == hex) {
-                    neighbor = bridge.getHex2();
-                } else if (bridge.getHex2() == hex) {
-                    neighbor = bridge.getHex1();
-                }
+                final Hex neighbor = bridge.getOtherEnd(hex);
                 if (neighbor != null) {
                     if (!distances.containsKey(neighbor)) {
                         final int distance = distances.get(hex) + 1;
@@ -260,5 +255,62 @@ public class Grid extends JPanel {
             }
         }
         return jumpables;
+    }
+
+    int updateTowns(Player player) {
+        final int requiredSize = player.hasFavor(5) ? 6 : 7;
+        final Map<Hex, Integer> sizes = new HashMap<>();
+        for (Hex[] hexes : map) {
+            for (Hex hex : hexes) {
+                if (!hex.town && hex.getStructure() != null && hex.getType() == player.getHomeType()) {
+                    sizes.put(hex, hex.getStructureSize(player));
+                }
+            }
+        }
+        int newTowns = 0;
+        while (!sizes.isEmpty()) {
+            final Hex hex = sizes.keySet().iterator().next();
+            int size = sizes.remove(hex);
+            boolean nearTown = false;
+            final Deque<Hex> work = new ArrayDeque<>();
+            final Set<Hex> town = new HashSet<>();
+            work.add(hex);
+            while (!work.isEmpty()) {
+                final Hex n = work.removeFirst();
+                town.add(n);
+                for (Hex neighbor : n.getNeighbors()) {
+                    if (neighbor.town && neighbor.getStructure() != null && neighbor.getType() == player.getHomeType()) {
+                        nearTown = true;
+                    }
+                    final Integer sz = sizes.remove(neighbor);
+                    if (sz != null) {
+                        size += sz;
+                        work.add(neighbor);
+                    }
+                }
+                for (Bridge bridge : bridges) {
+                    final Hex neighbor = bridge.getOtherEnd(hex);
+                    if (neighbor != null) {
+                        if (neighbor.town && neighbor.getStructure() != null && neighbor.getType() == player.getHomeType()) {
+                            nearTown = true;
+                        }
+                        final Integer sz = sizes.remove(neighbor);
+                        if (sz != null) {
+                            size += sz;
+                            work.add(neighbor);
+                        }
+                    }
+                }
+            }
+            if (nearTown || size >= requiredSize) {
+                for (Hex n : town) {
+                    n.town = true;
+                }
+                if (!nearTown) {
+                    ++newTowns;
+                }
+            }
+        }
+        return newTowns;
     }
 }

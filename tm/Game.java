@@ -10,7 +10,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Game extends JPanel {
@@ -296,6 +295,9 @@ public class Game extends JPanel {
     public void selectFav(Player player, int fav) {
         if (favs.remove((Integer) fav)) {
             player.addFavor(fav);
+            if (fav == 5) {
+                checkTowns(player);
+            }
         }
     }
 
@@ -601,5 +603,10 @@ public class Game extends JPanel {
 
     public boolean isJumpable(Hex hex, Player player) {
         return player.canUseRange() && mapPanel.getJumpableTiles(player).contains(hex);
+    }
+
+    public void checkTowns(Player player) {
+        final int newTowns = mapPanel.updateTowns(player);
+        player.addPendingTowns(newTowns);
     }
 }

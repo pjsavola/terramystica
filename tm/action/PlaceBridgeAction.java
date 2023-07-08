@@ -37,6 +37,7 @@ public class PlaceBridgeAction extends PendingAction {
     @Override
     public void execute() {
         game.getCurrentPlayer().placeBridge(hex1, hex2);
+        game.checkTowns(player);
     }
 
     @Override

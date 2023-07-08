@@ -96,6 +96,7 @@ public class BuildAction extends Action {
             case STRONGHOLD -> player.buildStronghold();
             case SANCTUARY -> player.buildSanctuary();
         }
+        game.checkTowns(player);
     }
 
     @Override
@@ -104,13 +105,7 @@ public class BuildAction extends Action {
         final Hex hex = game.getHex(row, col);
         for (Hex n : hex.getNeighbors()) {
             if (n.getStructure() != null && n.getType() != player.getHomeType()) {
-                final int power = switch (n.getStructure()) {
-                    case DWELLING -> 1;
-                    case TRADING_POST -> 2;
-                    case TEMPLE -> 2;
-                    case STRONGHOLD -> 3;
-                    case SANCTUARY -> 3;
-                };
+                final int power = n.getStructureSize(null); // TODO: Custom structure sizes
                 leech.put(n.getType(), leech.getOrDefault(n.getType(), 0) + power);
             }
         }

@@ -27,6 +27,12 @@ public class Bridge {
         return hex2;
     }
 
+    public Hex getOtherEnd(Hex hex) {
+        if (hex1 == hex) return hex2;
+        if (hex2 == hex) return hex1;
+        return null;
+    }
+
     public void draw(Graphics2D g, int x1, int y1, int x2, int y2) {
         final Stroke oldStroke = g.getStroke();
         final Color oldColor = g.getColor();

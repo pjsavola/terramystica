@@ -859,6 +859,10 @@ public class Player extends JPanel {
         pay(Resources.fromWorkers(amount));
     }
 
+    void addPendingTowns(int amount) {
+        pendingTowns += amount;
+    }
+
     public Set<PendingType> getPendingActions() {
         final Set<PendingType> result = new HashSet<>();
         if (pendingTowns > 0) result.add(PendingType.SELECT_TOWN);
