@@ -105,6 +105,7 @@ public class Player extends JPanel {
         pendingWorkerToPriestConversions = 0;
         pendingBridges = 0;
         pendingLeech = 0;
+        pendingTowns = 0;
         pendingBuilds = null;
         rangeUsedForDigging = false;
         dwellings = 0;
@@ -336,6 +337,7 @@ public class Player extends JPanel {
         }
         points += round.town;
         towns.add(number);
+        --pendingTowns;
     }
 
     public void convert(Resources r) {
@@ -865,7 +867,7 @@ public class Player extends JPanel {
     }
 
     void addPendingTowns(int amount) {
-        pendingTowns += Math.min(towns.size(), amount);
+        pendingTowns += amount;
     }
 
     public Set<PendingType> getPendingActions() {

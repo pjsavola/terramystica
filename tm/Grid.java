@@ -363,10 +363,11 @@ public class Grid extends JPanel {
         });
         int size = 0;
         final Deque<Hex> work = new ArrayDeque<>();
+        final Set<Hex> town = new HashSet<>();
         work.add(waterHex);
         while (!work.isEmpty()) {
             final Hex n = work.removeFirst();
-            n.town = true;
+            town.add(n);
             for (Hex neighbor : n.getNeighbors()) {
                 if (hasTown(neighbor, player)) {
                     throw new RuntimeException("Cannot place mermaid town next to existing towns");
@@ -390,6 +391,9 @@ public class Grid extends JPanel {
                     }
                 }
             }
+        }
+        for (Hex hex : town) {
+            hex.town = true;
         }
     }
 

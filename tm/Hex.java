@@ -143,8 +143,34 @@ public class Hex {
     }
 
     public void draw(Graphics2D g, int x, int y, int radius) {
-        if (type == Type.WATER && !town)
+        final Stroke oldStroke = g.getStroke();
+        final Color oldColor = g.getColor();
+
+        if (type == Type.WATER) {
+            final int[] xpoints = new int[6];
+            final int[] ypoints = new int[6];
+            for (int i = 0; i < 6; ++i) {
+                final double angle = i * Math.PI / 3 + Math.toRadians(270);
+                xpoints[i] = (int) (x + Math.cos(angle) * (radius * 3 / 4) + 0.5);
+                ypoints[i] = (int) (y + Math.sin(angle) * (radius * 3 / 4) + 0.5);
+            }
+
+            if (town) {
+                g.setColor(Type.BLUE.getHexColor().brighter());
+                g.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+                g.fillPolygon(xpoints, ypoints, 6);
+                g.setColor(Type.BLUE.getHexColor());
+                g.drawPolygon(xpoints, ypoints, 6);
+            } else if (highlight) {
+                g.setColor(Type.BLUE.getHexColor());
+                g.drawPolygon(xpoints, ypoints, 6);
+            } else {
+                return;
+            }
+            g.setColor(oldColor);
+            g.setStroke(oldStroke);
             return;
+        }
 
         final int[] xpoints = new int[6];
         final int[] ypoints = new int[6];
@@ -156,20 +182,6 @@ public class Hex {
             ypoints[i] = (int) (y + Math.sin(angle) * radius + 0.5);
             xpointsSmall[i] = (int) (x + Math.cos(angle) * (radius - 2) + 0.5);
             ypointsSmall[i] = (int) (y + Math.sin(angle) * (radius - 2) + 0.5);
-        }
-
-        final Stroke oldStroke = g.getStroke();
-        final Color oldColor = g.getColor();
-
-        if (type == Type.WATER) {
-            g.setColor(Type.BLUE.getHexColor());
-            g.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
-            g.fillPolygon(xpointsSmall, ypointsSmall, 6);
-            g.setColor(Color.BLACK);
-            g.drawPolygon(xpointsSmall, ypointsSmall, 6);
-            g.setColor(oldColor);
-            g.setStroke(oldStroke);
-            return;
         }
 
         g.setColor(type.color);

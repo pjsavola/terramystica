@@ -620,7 +620,7 @@ public class Game extends JPanel {
 
     public void checkTowns(Player player) {
         final int newTowns = mapPanel.updateTowns(player);
-        player.addPendingTowns(newTowns);
+        player.addPendingTowns(Math.min(towns.size(), newTowns));
     }
 
     public boolean canPlaceMermaidTown(Hex hex, Player player) {
@@ -629,7 +629,7 @@ public class Game extends JPanel {
 
     public void placeMermaidTown(Hex hex, Player player) {
         mapPanel.updateMermaidTown(hex, player);
-        player.addPendingTowns(1);
+        player.addPendingTowns(Math.min(towns.size(), 1));
     }
 
     public void highlightMermaidTownSpots() {
@@ -643,6 +643,7 @@ public class Game extends JPanel {
                 options.forEach(h -> h.highlight = true);
             }
         }
+        repaint();
     }
 
     public void clearHighlights() {

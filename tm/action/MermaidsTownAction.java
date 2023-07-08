@@ -20,7 +20,7 @@ public class MermaidsTownAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return game.pendingTownPlacement && player.getFaction() instanceof Mermaids && game.canPlaceMermaidTown(hex, player);
+        return player.getFaction() instanceof Mermaids && game.canPlaceMermaidTown(hex, player);
     }
 
     @Override
@@ -31,6 +31,6 @@ public class MermaidsTownAction extends Action {
 
     @Override
     public String toString() {
-        return "Action ACTM " + hex.getId();
+        return "Action ACTM";
     }
 }
