@@ -83,7 +83,8 @@ public class Hex {
         }
     };
 
-    final static Font font = new Font("Arial", Font.BOLD, 12);
+    final static Font font = new Font("Arial", Font.PLAIN, 13);
+    final static Font townFont = new Font("Arial", Font.BOLD, 13);
     private Type type;
     private final String id;
     private Structure structure;
@@ -142,7 +143,7 @@ public class Hex {
     }
 
     public void draw(Graphics2D g, int x, int y, int radius) {
-        if (type == Type.WATER)
+        if (type == Type.WATER && !town)
             return;
 
         final int[] xpoints = new int[6];
@@ -160,6 +161,17 @@ public class Hex {
         final Stroke oldStroke = g.getStroke();
         final Color oldColor = g.getColor();
 
+        if (type == Type.WATER) {
+            g.setColor(Type.BLUE.getHexColor());
+            g.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+            g.fillPolygon(xpointsSmall, ypointsSmall, 6);
+            g.setColor(Color.BLACK);
+            g.drawPolygon(xpointsSmall, ypointsSmall, 6);
+            g.setColor(oldColor);
+            g.setStroke(oldStroke);
+            return;
+        }
+
         g.setColor(type.color);
         g.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
 
@@ -169,7 +181,7 @@ public class Hex {
         g.drawPolygon(xpoints, ypoints, 6);
 
         g.setColor(type.getFontColor());
-        g.setFont(font);
+        g.setFont(town ? townFont : font);
         final FontMetrics metrics = g.getFontMetrics();
         final int w = metrics.stringWidth(id);
         final int h = metrics.getHeight();

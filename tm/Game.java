@@ -45,7 +45,7 @@ public class Game extends JPanel {
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new Dwarves());
+    private static final List<Faction> testFactions = List.of(new Mermaids());
 
     private final String[] mapData;
     private final int playerCount;
@@ -489,7 +489,7 @@ public class Game extends JPanel {
     public void confirmTurn() {
         if (phase == Phase.CONFIRM_ACTION) {
             final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
-            if (pendingActions.contains(Player.PendingType.BUILD)) {
+            if (pendingActions.size() == 1 && pendingActions.contains(Player.PendingType.BUILD)) {
                 getCurrentPlayer().clearPendingBuilds();
             } else if (!pendingActions.isEmpty()) {
                 return;

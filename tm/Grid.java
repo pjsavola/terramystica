@@ -314,7 +314,7 @@ public class Grid extends JPanel {
     }
 
     public boolean canPlaceMermaidTown(Hex waterHex, Player player) {
-        if (waterHex.getType() != Hex.Type.WATER) return false;
+        if (waterHex.getType() != Hex.Type.WATER || waterHex.town) return false;
 
         final int requiredSize = player.hasFavor(5) ? 6 : 7;
         final Map<Hex, Integer> sizes = new HashMap<>();
