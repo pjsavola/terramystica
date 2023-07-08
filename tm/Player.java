@@ -58,7 +58,7 @@ public class Player extends JPanel {
     private int pendingBridges;
     private int pendingTowns;
     private int pendingLeech;
-    private final List<Hex> pendingBuilds = new ArrayList<>();
+    List<Hex> pendingBuilds = null;
     private boolean rangeUsedForDigging;
 
     public boolean usedFactionAction;
@@ -105,7 +105,7 @@ public class Player extends JPanel {
         pendingWorkerToPriestConversions = 0;
         pendingBridges = 0;
         pendingLeech = 0;
-        pendingBuilds.clear();
+        pendingBuilds = null;
         rangeUsedForDigging = false;
         dwellings = 0;
         tradingPosts = 0;
@@ -423,12 +423,17 @@ public class Player extends JPanel {
 
     public void addPendingBuild(Hex hex) {
         if (dwellings < 8) {
-            pendingBuilds.add(hex);
+            if (pendingBuilds == null) {
+                pendingBuilds = new ArrayList<>();
+                pendingBuilds.add(hex);
+            } else if (!pendingBuilds.isEmpty()) {
+                pendingBuilds.add(hex);
+            }
         }
     }
 
     public boolean hasPendingBuild(Hex hex) {
-        return pendingBuilds.contains(hex);
+        return pendingBuilds != null && pendingBuilds.contains(hex);
     }
 
     public void clearPendingBuilds() {
@@ -870,7 +875,7 @@ public class Player extends JPanel {
         if (pendingSpades > 0) result.add(PendingType.USE_SPADES);
         if (pendingBridges > 0) result.add(PendingType.PLACE_BRIDGE);
         if (pendingWorkerToPriestConversions > 0) result.add(PendingType.CONVERT_W2P);
-        if (!pendingBuilds.isEmpty()) result.add(PendingType.BUILD);
+        if (pendingBuilds != null && !pendingBuilds.isEmpty()) result.add(PendingType.BUILD);
         return result;
     }
 

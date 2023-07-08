@@ -384,12 +384,17 @@ public class Game extends JPanel {
             }
             case CONFIRM_ACTION -> {
                 final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
-                if (pendingActions.contains(Player.PendingType.BUILD)) {
-                    if (getCurrentPlayer().hasPendingBuild(hex)) {
-                        resolveAction(new BuildAction(row, col, Hex.Structure.DWELLING));
+                final boolean build = pendingActions.contains(Player.PendingType.BUILD);
+                final boolean dig = pendingActions.contains(Player.PendingType.USE_SPADES);
+                if (build || dig) {
+                    if (build) {
+                        if (getCurrentPlayer().hasPendingBuild(hex)) {
+                            resolveAction(new BuildAction(row, col, Hex.Structure.DWELLING));
+                        }
                     }
-                } else if (pendingActions.contains(Player.PendingType.USE_SPADES)) {
-                    handleDigging(hex);
+                    if (dig) {
+                        handleDigging(hex);
+                    }
                 } else if (pendingActions.contains(Player.PendingType.PLACE_BRIDGE)) {
                     final Hex.Type homeType = getCurrentPlayer().getHomeType();
                     if (bridgeEnd == null) {
@@ -427,7 +432,7 @@ public class Game extends JPanel {
     }
 
     private void handleDigging(Hex hex) {
-        if (hex.getStructure() != null) {
+        if (hex.getStructure() != null || getCurrentPlayer().hasPendingBuild(hex)) {
             return;
         }
         final Player player = getCurrentPlayer();
@@ -490,10 +495,11 @@ public class Game extends JPanel {
         if (phase == Phase.CONFIRM_ACTION) {
             final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
             if (pendingActions.size() == 1 && pendingActions.contains(Player.PendingType.BUILD)) {
-                getCurrentPlayer().clearPendingBuilds();
+                // Fall through
             } else if (!pendingActions.isEmpty()) {
                 return;
             }
+            getCurrentPlayer().pendingBuilds = null;
             phase = Phase.ACTIONS;
             endTurn();
             refresh();
