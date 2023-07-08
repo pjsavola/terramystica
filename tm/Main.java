@@ -95,10 +95,28 @@ public class Main {
         });
         actionMenu.add(convertAction);
 
+        final MenuItem advanceShipAction = new ActionMenuItem("Advance ship") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.getCurrentPlayer().canAdvanceShipping() && game.phase == Game.Phase.ACTIONS;
+            }
+        };
+        advanceShipAction.addActionListener(l -> game.resolveAction(new AdvanceAction(false)));
+        actionMenu.add(advanceShipAction);
+
+        final MenuItem advanceDigAction = new ActionMenuItem("Advance dig") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.getCurrentPlayer().canAdvanceDigging() && game.phase == Game.Phase.ACTIONS;
+            }
+        };
+        advanceDigAction.addActionListener(l -> game.resolveAction(new AdvanceAction(true)));
+        actionMenu.add(advanceDigAction);
+
         final MenuItem passAction = new ActionMenuItem("Final Pass") {
             @Override
             public boolean canExecute(Game game) {
-                return game.getRound() == 6 && game.getCurrentPlayer().getPendingActions().isEmpty();
+                return game.getRound() == 6 && game.phase == Game.Phase.ACTIONS;
             }
         };
         passAction.addActionListener(l -> game.resolveAction(new PassAction()));

@@ -96,7 +96,7 @@ public abstract class Faction {
     }
 
     public Resources getAdvanceDiggingCost() {
-        return Resources.c6w2p1;
+        return Resources.c5w2p1;
     }
 
     public Resources getAdvanceShippingCost() {

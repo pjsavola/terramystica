@@ -159,9 +159,9 @@ public class Player extends JPanel {
         } else if (faction instanceof Fakirs) {
             range = 2;
             jumpCost = Resources.p1;
-        } else if (faction instanceof Mermaids) {
-            shipping = 1;
         }
+        shipping = faction instanceof Mermaids ? 1 : 0;
+        digging = 3;
         addIncome(faction.getInitialIncome());
         final int[] initialCultSteps = faction.getInitialCultSteps();
         System.arraycopy(initialCultSteps, 0, cultSteps, 0, cultSteps.length);
@@ -378,7 +378,7 @@ public class Player extends JPanel {
     }
 
     public boolean canAdvanceShipping() {
-        return faction.getMaxShipping() > shipping;
+        return faction.getMaxShipping() > shipping && canAfford(faction.getAdvanceShippingCost());
     }
 
     public void advanceShipping() {
@@ -387,10 +387,11 @@ public class Player extends JPanel {
 
         ++shipping;
         points += faction.getAdvanceShippingPoints(shipping);
+        pay(faction.getAdvanceShippingCost());
     }
 
     public boolean canAdvanceDigging() {
-        return faction.getMinDigging() < digging;
+        return faction.getMinDigging() < digging && canAfford(faction.getAdvanceDiggingCost());
     }
 
     public void advanceDigging() {
@@ -399,6 +400,7 @@ public class Player extends JPanel {
 
         --digging;
         points += 6;
+        pay(faction.getAdvanceDiggingCost());
     }
 
     public boolean canLeech() {
