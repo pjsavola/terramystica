@@ -456,6 +456,7 @@ public class Game extends JPanel {
             final int requiredSpades = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
             final int requiredDigging = Math.max(0, requiredSpades - player.getPendingSpades());
             if (!player.canDig(requiredDigging, jump)) continue;
+            if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) continue;
             if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades()) continue;
 
             terraformPanel.add(new TerrainButton(popup, hex.getId(), type, requiredDigging, result));

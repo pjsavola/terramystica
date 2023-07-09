@@ -51,6 +51,7 @@ public class DigAction extends Action {
         }
 
         // Partial usage of pending spades to anything but home terrain is not allowed.
+        if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) return false;
         if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades()) return false;
         return target.getStructure() == null && requiredSpades != 0 && player.canDig(requiredDigging, jump);
     }
@@ -61,6 +62,7 @@ public class DigAction extends Action {
             player.useRange(true);
         }
         if (requiredDigging > 0) {
+            if (player.getPendingSpades() > 0 && !player.allowExtraSpades) throw new RuntimeException("Adding extra spades not allowed");
             player.dig(requiredDigging);
         }
         player.useSpades(requiredSpades);

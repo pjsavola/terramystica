@@ -60,6 +60,7 @@ public class Player extends JPanel {
     private int pendingLeech;
     List<Hex> pendingBuilds = null;
     private boolean rangeUsedForDigging;
+    public boolean allowExtraSpades;
 
     public boolean usedFactionAction;
     public boolean[] usedFav6 = new boolean[1];
@@ -107,6 +108,7 @@ public class Player extends JPanel {
         pendingLeech = 0;
         pendingTowns = 0;
         pendingBuilds = null;
+        allowExtraSpades = false;
         rangeUsedForDigging = false;
         dwellings = 0;
         tradingPosts = 0;
@@ -284,7 +286,7 @@ public class Player extends JPanel {
         } else if (faction instanceof Fakirs) {
             ++range;
         } else if (faction instanceof Halflings) {
-            addSpades(3);
+            addSpades(3, false);
         } else if (faction instanceof Mermaids) {
             if (canAdvanceShipping()) {
                 advanceShipping();
@@ -373,8 +375,8 @@ public class Player extends JPanel {
             case 2 -> addIncome(Resources.p1);
             case 3 -> addIncome(Resources.w2);
             case 4 -> addIncome(Resources.c7);
-            case 5 -> addSpades(1);
-            case 6 -> addSpades(2);
+            case 5 -> addSpades(1, true);
+            case 6 -> addSpades(2, true);
         }
         game.usedPowerActions[act - 1] = true;
     }
@@ -510,7 +512,7 @@ public class Player extends JPanel {
         priests = Math.min(priests + income.priests, maxPriests);
         addPower(income.power);
         if (income == Resources.spade) {
-            addSpades(1);
+            addSpades(1, false);
         }
     }
 
@@ -546,7 +548,7 @@ public class Player extends JPanel {
 
             workers -= amount * digging;
         }
-        addSpades(amount);
+        addSpades(amount, false);
     }
 
     public boolean canDig(int amount, boolean useRange) {
@@ -568,8 +570,9 @@ public class Player extends JPanel {
         }
     }
 
-    public void addSpades(int amount) {
+    public void addSpades(int amount, boolean allowExtraSpades) {
         pendingSpades += amount;
+        this.allowExtraSpades = allowExtraSpades;
     }
 
     public int getPendingSpades() {
@@ -582,6 +585,7 @@ public class Player extends JPanel {
 
         pendingSpades -= amount;
         points += amount * round.spade;
+        allowExtraSpades = false;
         if (faction instanceof Halflings) {
             points += amount;
         } else if (faction instanceof Alchemists && strongholds > 0) {

@@ -11,7 +11,7 @@ public class SpadeAction extends Action {
 
     @Override
     public void execute() {
-        player.addSpades(1);
+        player.addSpades(1, true);
         game.bonUsed[0] = true;
     }
 
