@@ -453,10 +453,12 @@ public class Game extends JPanel {
             final Hex.Type type = Hex.Type.values()[i % 7];
             if (type == hex.getType()) continue;
 
-            final int cost = Math.max(0, (player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type)) - player.getPendingSpades());
-            if (!player.canDig(cost, jump)) continue;
+            final int requiredSpades = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
+            final int requiredDigging = Math.max(0, requiredSpades - player.getPendingSpades());
+            if (!player.canDig(requiredDigging, jump)) continue;
+            if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades()) continue;
 
-            terraformPanel.add(new TerrainButton(popup, hex.getId(), type, cost, result));
+            terraformPanel.add(new TerrainButton(popup, hex.getId(), type, requiredDigging, result));
             ++options;
         }
         if (options == 0) {

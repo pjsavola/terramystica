@@ -51,7 +51,7 @@ public class DigAction extends Action {
         }
 
         // Partial usage of pending spades to anything but home terrain is not allowed.
-        if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < 1) return false;
+        if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades()) return false;
         return target.getStructure() == null && requiredSpades != 0 && player.canDig(requiredDigging, jump);
     }
 
