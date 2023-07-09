@@ -18,4 +18,9 @@ public class Giants extends Faction {
     public Resources getStrongholdIncome() {
         return Resources.pw4;
     }
+
+    @Override
+    public String getPowerAction(boolean stronghold) {
+        return stronghold ? "2 spd" : null;
+    }
 }

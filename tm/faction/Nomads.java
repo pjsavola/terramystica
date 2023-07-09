@@ -32,6 +32,6 @@ public class Nomads extends Faction {
 
     @Override
     public String getPowerAction(boolean stronghold) {
-        return stronghold ? "" : null;
+        return stronghold ? "transform" : null;
     }
 }

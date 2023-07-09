@@ -718,6 +718,9 @@ public class Player extends JPanel {
             final int[] fav12 = { 0, 2, 3, 3, 4 };
             points += fav12[tradingPosts];
         }
+        if (faction instanceof Engineers && strongholds > 0) {
+            points += (3 - bridgesLeft) * 3;
+        }
         passed = true;
     }
 
@@ -766,6 +769,14 @@ public class Player extends JPanel {
                                 if (!usedFactionAction) {
                                     game.resolveAction(new ChaosMagiciansDoubleAction());
                                 }
+                            } else if (faction instanceof Giants) {
+
+                            } else if (faction instanceof  Nomads) {
+
+                            } else if (faction instanceof Swarmlings) {
+
+                            } else if (faction instanceof Witches) {
+
                             }
                         }
                     }
