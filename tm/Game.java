@@ -444,6 +444,7 @@ public class Game extends JPanel {
             }
             jump = true;
         }
+        int options = 0;
         final JDialog popup = new JDialog(frame, true);
         final JPanel terraformPanel = new JPanel();
         final int ordinal = hex.getType().ordinal();
@@ -456,6 +457,10 @@ public class Game extends JPanel {
             if (!player.canDig(cost, jump)) continue;
 
             terraformPanel.add(new TerrainButton(popup, hex.getId(), type, cost, result));
+            ++options;
+        }
+        if (options == 0) {
+            return;
         }
         popup.setTitle("Select target terrain");
         popup.setContentPane(terraformPanel);
