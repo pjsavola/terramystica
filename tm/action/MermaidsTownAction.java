@@ -25,7 +25,6 @@ public class MermaidsTownAction extends Action {
 
     @Override
     public void execute() {
-        game.pendingTownPlacement = false;
         game.placeMermaidTown(hex, player);
     }
 

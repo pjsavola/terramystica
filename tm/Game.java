@@ -40,12 +40,13 @@ public class Game extends JPanel {
     private boolean leechAccepted;
     public Player leechTrigger;
     private Hex bridgeEnd;
-    public boolean pendingTownPlacement;
+    private boolean pendingTownPlacement;
+    private boolean doubleTurn;
 
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new Mermaids());
+    private static final List<Faction> testFactions = List.of(new ChaosMagicians());
 
     private final String[] mapData;
     private final int playerCount;
@@ -534,7 +535,12 @@ public class Game extends JPanel {
                     nextRound();
                 }
             } else {
-                turnOrder.add(player);
+                if (doubleTurn) {
+                    turnOrder.add(0, player);
+                    doubleTurn = false;
+                } else {
+                    turnOrder.add(player);
+                }
             }
         } else {
             leechTurnOrder.remove(0);
@@ -628,6 +634,7 @@ public class Game extends JPanel {
     }
 
     public void placeMermaidTown(Hex hex, Player player) {
+        pendingTownPlacement = false;
         mapPanel.updateMermaidTown(hex, player);
         player.addPendingTowns(Math.min(towns.size(), 1));
     }
@@ -648,5 +655,9 @@ public class Game extends JPanel {
 
     public void clearHighlights() {
         mapPanel.getAllHexes().forEach(h -> h.highlight = false);
+    }
+
+    public void activateDoubleTurn() {
+        doubleTurn = true;
     }
 }

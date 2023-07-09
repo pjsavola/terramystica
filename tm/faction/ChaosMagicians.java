@@ -36,6 +36,6 @@ public class ChaosMagicians extends Faction {
 
     @Override
     public String getPowerAction(boolean stronghold) {
-        return stronghold ? "" : null;
+        return stronghold ? "2x act" : null;
     }
 }

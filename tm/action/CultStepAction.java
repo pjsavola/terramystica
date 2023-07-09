@@ -23,7 +23,7 @@ public class CultStepAction extends Action {
         return switch (source) {
             case BON2 -> player.getBon() == 2 && !game.bonUsed[1];
             case FAV6 -> player.hasFavor(6) && !player.usedFav6[0];
-            case ACTA -> player.getFaction() instanceof Auren && !player.usedFactionAction;
+            case ACTA -> player.getFaction() instanceof Auren && !player.usedFactionAction && player.hasStronghold();
             default -> true;
         };
     }

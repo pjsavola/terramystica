@@ -658,6 +658,7 @@ public class Player extends JPanel {
         addRoundIncome(round);
         usedFav6[0] = false;
         passed = false;
+        usedFactionAction = false;
     }
 
     public void burn(int amount) {
@@ -757,6 +758,10 @@ public class Player extends JPanel {
                                 game.resolveAction(new EngineersBridgeAction());
                             } else if (faction instanceof Mermaids) {
                                 game.highlightMermaidTownSpots();
+                            } else if (faction instanceof ChaosMagicians) {
+                                if (!usedFactionAction) {
+                                    game.resolveAction(new ChaosMagiciansDoubleAction());
+                                }
                             }
                         }
                     }
@@ -848,7 +853,7 @@ public class Player extends JPanel {
                 Graphics2D g2d = (Graphics2D) g;
                 final Color oldColor = g.getColor();
                 final Stroke oldStroke = g2d.getStroke();
-                PowerActions.drawPowerAction(g2d, 250, 24, faction.getPowerAction(strongholds > 0), false);
+                PowerActions.drawPowerAction(g2d, 250, 24, faction.getPowerAction(strongholds > 0), usedFactionAction);
                 g.setColor(oldColor);
                 g2d.setStroke(oldStroke);
             }
@@ -893,6 +898,10 @@ public class Player extends JPanel {
     public void getEngineerBridge() {
         workers -= 2;
         ++pendingBridges;
+    }
+
+    public boolean hasStronghold() {
+        return strongholds > 0;
     }
 
     @Override
