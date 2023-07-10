@@ -770,7 +770,7 @@ public class Player extends JPanel {
                                     game.resolveAction(new ChaosMagiciansDoubleAction());
                                 }
                             } else if (faction instanceof Giants) {
-
+                                game.resolveAction(new SpadeAction(SpadeAction.Source.ACTG));
                             } else if (faction instanceof  Nomads) {
 
                             } else if (faction instanceof Swarmlings) {
