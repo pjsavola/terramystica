@@ -46,7 +46,7 @@ public class Game extends JPanel {
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new ChaosMagicians());
+    private static final List<Faction> testFactions = List.of(new Swarmlings());
 
     private final String[] mapData;
     private final int playerCount;
@@ -385,9 +385,13 @@ public class Game extends JPanel {
             }
             case CONFIRM_ACTION -> {
                 final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
+                final boolean freeD = pendingActions.contains(Player.PendingType.FREE_D);
+                final boolean freeTP = pendingActions.contains(Player.PendingType.FREE_TP);
                 final boolean build = pendingActions.contains(Player.PendingType.BUILD);
                 final boolean dig = pendingActions.contains(Player.PendingType.USE_SPADES);
-                if (build || dig) {
+                if (freeD || freeTP) {
+                    resolveAction(new BuildAction(row, col, freeD ? Hex.Structure.DWELLING : Hex.Structure.TRADING_POST));
+                } else if (build || dig) {
                     if (build) {
                         if (getCurrentPlayer().hasPendingBuild(hex)) {
                             resolveAction(new BuildAction(row, col, Hex.Structure.DWELLING));
