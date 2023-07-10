@@ -20,7 +20,10 @@ public class Player extends JPanel {
         CONVERT_W2P("Convert W -> P"),
         PLACE_BRIDGE("Place Bridge"),
         USE_SPADES("Use Spades"),
-        BUILD("Build?");
+        BUILD("Build?"),
+        SANDSTORM("Sandstorm"),
+        FREE_TP("Free TP"),
+        FREE_D("Free D");
 
         private final String description;
 
@@ -59,6 +62,9 @@ public class Player extends JPanel {
     private int pendingTowns;
     private int pendingLeech;
     List<Hex> pendingBuilds = null;
+    private boolean pendingSandstorm;
+    public boolean pendingFreeTradingPost;
+    public boolean pendingFreeDwelling;
     private boolean rangeUsedForDigging;
     public boolean allowExtraSpades;
 
@@ -108,6 +114,9 @@ public class Player extends JPanel {
         pendingLeech = 0;
         pendingTowns = 0;
         pendingBuilds = null;
+        pendingSandstorm = false;
+        pendingFreeTradingPost = false;
+        pendingFreeDwelling = false;
         allowExtraSpades = false;
         rangeUsedForDigging = false;
         dwellings = 0;
@@ -201,7 +210,7 @@ public class Player extends JPanel {
         if (useRange && jumpCost == Resources.zero) {
             throw new RuntimeException("Cannot jump to build");
         }
-        return dwellings < 8 && canAfford(useRange ? jumpCost.combine(faction.getDwellingCost()) : faction.getDwellingCost());
+        return dwellings < 8 && (canAfford(useRange ? jumpCost.combine(faction.getDwellingCost()) : faction.getDwellingCost()) || pendingFreeDwelling);
     }
 
     public void buildDwelling() {
@@ -213,11 +222,15 @@ public class Player extends JPanel {
         if (ownedFavors[10]) {
             points += 2;
         }
-        pay(faction.getDwellingCost());
+        if (pendingFreeDwelling) {
+            pendingFreeDwelling = false;
+        } else {
+            pay(faction.getDwellingCost());
+        }
     }
 
     public boolean canBuildTradingPost(boolean expensive) {
-        return tradingPosts < 4 && dwellings > 0 && canAfford(expensive ? faction.getExpensiveTradingPostCost() : faction.getTradingPostCost());
+        return tradingPosts < 4 && dwellings > 0 && (canAfford(expensive ? faction.getExpensiveTradingPostCost() : faction.getTradingPostCost()) || pendingFreeTradingPost);
     }
 
     public void buildTradingPost(boolean expensive) {
@@ -230,7 +243,11 @@ public class Player extends JPanel {
         if (ownedFavors[9]) {
             points += 3;
         }
-        pay(expensive ? faction.getExpensiveTradingPostCost() : faction.getTradingPostCost());
+        if (pendingFreeTradingPost) {
+            pendingFreeTradingPost = false;
+        } else {
+            pay(expensive ? faction.getExpensiveTradingPostCost() : faction.getTradingPostCost());
+        }
     }
 
     public boolean canBuildTemple() {
@@ -774,9 +791,9 @@ public class Player extends JPanel {
                             } else if (faction instanceof  Nomads) {
 
                             } else if (faction instanceof Swarmlings) {
-
+                                game.resolveAction(new SwarmlingsFreeTradingPostAction());
                             } else if (faction instanceof Witches) {
-
+                                game.resolveAction(new WitchesFreeDwellingAction());
                             }
                         }
                     }
@@ -898,6 +915,9 @@ public class Player extends JPanel {
         if (pendingBridges > 0) result.add(PendingType.PLACE_BRIDGE);
         if (pendingWorkerToPriestConversions > 0) result.add(PendingType.CONVERT_W2P);
         if (pendingBuilds != null && !pendingBuilds.isEmpty()) result.add(PendingType.BUILD);
+        if (pendingSandstorm) result.add(PendingType.SANDSTORM);
+        if (pendingFreeTradingPost) result.add(PendingType.FREE_TP);
+        if (pendingFreeDwelling) result.add(PendingType.FREE_D);
         return result;
     }
 

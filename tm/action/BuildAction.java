@@ -45,6 +45,8 @@ public class BuildAction extends Action {
     @Override
     public final boolean validatePhase() {
         if (game.phase == Game.Phase.CONFIRM_ACTION) {
+            if (player.getPendingActions().contains(Player.PendingType.FREE_TP)) return true;
+            if (player.getPendingActions().contains(Player.PendingType.FREE_D)) return true;
             return player.getPendingActions().contains(Player.PendingType.BUILD);
         }
         return super.validatePhase();
@@ -56,6 +58,9 @@ public class BuildAction extends Action {
         if (hex.getType() != player.getHomeType()) return false;
         if (structure.getParent() != hex.getStructure()) return false;
         if (structure == Hex.Structure.DWELLING) {
+            if (player.getPendingActions().contains(Player.PendingType.FREE_D)) {
+                return player.canBuildDwelling(false);
+            }
             if (player.getPendingActions().contains(Player.PendingType.BUILD)) {
                 return player.hasPendingBuild(hex) && player.canBuildDwelling(false);
             }

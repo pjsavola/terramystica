@@ -7,7 +7,7 @@ public class ChaosMagiciansDoubleAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return player.getFaction() instanceof ChaosMagicians && player.hasStronghold();
+        return player.getFaction() instanceof ChaosMagicians && player.hasStronghold() && !player.usedFactionAction;
     }
 
     @Override
