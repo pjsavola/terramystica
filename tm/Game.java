@@ -672,4 +672,8 @@ public class Game extends JPanel {
     public void activateDoubleTurn() {
         doubleTurn = true;
     }
+
+    public Set<Hex> getBridgeNeighbors(Hex hex) {
+        return mapPanel.getBridgeNeighbors(hex);
+    }
 }

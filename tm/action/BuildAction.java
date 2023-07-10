@@ -114,6 +114,12 @@ public class BuildAction extends Action {
                 leech.put(n.getType(), leech.getOrDefault(n.getType(), 0) + power);
             }
         }
+        for (Hex n : game.getBridgeNeighbors(hex)) {
+            if (n.getStructure() != null && n.getType() != player.getHomeType()) {
+                final int power = n.getStructureSize(null); // TODO: Custom structure sizes
+                leech.put(n.getType(), leech.getOrDefault(n.getType(), 0) + power);
+            }
+        }
         game.leechTriggered(leech);
     }
 
