@@ -39,6 +39,12 @@ public class BuildAction extends Action {
                     break;
                 }
             }
+            for (Hex n : game.getBridgeNeighbors(hex)) {
+                if (n.getStructure() != null && n.getType() != player.getHomeType()) {
+                    expensive = false;
+                    break;
+                }
+            }
         }
     }
 
