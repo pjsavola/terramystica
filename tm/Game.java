@@ -46,7 +46,7 @@ public class Game extends JPanel {
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new Swarmlings());
+    private static final List<Faction> testFactions = List.of(new Nomads());
 
     private final String[] mapData;
     private final int playerCount;
@@ -389,7 +389,10 @@ public class Game extends JPanel {
                 final boolean freeTP = pendingActions.contains(Player.PendingType.FREE_TP);
                 final boolean build = pendingActions.contains(Player.PendingType.BUILD);
                 final boolean dig = pendingActions.contains(Player.PendingType.USE_SPADES);
-                if (freeD || freeTP) {
+                final boolean sandstorm = pendingActions.contains(Player.PendingType.SANDSTORM);
+                if (sandstorm) {
+                    resolveAction(new SandstormAction(hex));
+                } else if (freeD || freeTP) {
                     resolveAction(new BuildAction(row, col, freeD ? Hex.Structure.DWELLING : Hex.Structure.TRADING_POST));
                 } else if (build || dig) {
                     if (build) {
@@ -675,5 +678,13 @@ public class Game extends JPanel {
 
     public Set<Hex> getBridgeNeighbors(Hex hex) {
         return mapPanel.getBridgeNeighbors(hex);
+    }
+
+    public Set<Hex> getSandstormTiles(Player player) {
+        final Set<Hex> result = new HashSet<>();
+        mapPanel.getAllHexes().stream().filter(h -> h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
+            h.getNeighbors().stream().filter(n -> n.getType() != Hex.Type.WATER && n.getType() != player.getHomeType() && n.getStructure() == null).forEach(result::add);
+        });
+        return result;
     }
 }

@@ -62,7 +62,7 @@ public class Player extends JPanel {
     private int pendingTowns;
     private int pendingLeech;
     List<Hex> pendingBuilds = null;
-    private boolean pendingSandstorm;
+    public boolean pendingSandstorm;
     public boolean pendingFreeTradingPost;
     public boolean pendingFreeDwelling;
     private boolean rangeUsedForDigging;
@@ -789,7 +789,7 @@ public class Player extends JPanel {
                             } else if (faction instanceof Giants) {
                                 game.resolveAction(new SpadeAction(SpadeAction.Source.ACTG));
                             } else if (faction instanceof  Nomads) {
-
+                                game.resolveAction(new NomadsSandstormAction());
                             } else if (faction instanceof Swarmlings) {
                                 game.resolveAction(new SwarmlingsFreeTradingPostAction());
                             } else if (faction instanceof Witches) {

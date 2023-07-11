@@ -184,14 +184,6 @@ public class Grid extends JPanel {
         bridges.add(bridge);
     }
 
-    public Set<Hex> getSandstormTiles(Player player) {
-        final Set<Hex> result = new HashSet<>();
-        getAllHexes().stream().filter(h -> h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
-            h.getNeighbors().stream().filter(n -> n.getType() != Hex.Type.WATER && h.getType() != player.getHomeType() && h.getStructure() == null).forEach(result::add);
-        });
-        return result;
-    }
-
     public Set<Hex> getReachableTiles(Player player) {
         final Map<Hex, Integer> distances = new HashMap<>();
         final Deque<Hex> work = new ArrayDeque<>();
