@@ -6,30 +6,32 @@ import java.awt.*;
 public class Hex {
 
     public enum Type {
-        BLACK(new Color(0x444444), Color.BLACK, Color.LIGHT_GRAY),
-        BROWN(new Color(0xBB9977), new Color(0x997755)),
-        YELLOW(new Color(0xFFFF55), new Color(0xDDDD33)),
-        RED(new Color(0xFF8888), new Color(0xDD6666)),
-        GRAY(new Color(0xCCCCCC), new Color(0xAAAAAA)),
-        GREEN(new Color(0x44EE44), new Color(0x22CC22)),
-        BLUE(new Color(0x66BBFF), new Color(0x4499DD)),
+        BLACK(new Color(0x444444), Color.BLACK, new Color(0x555555), Color.LIGHT_GRAY),
+        BROWN(new Color(0xBB9977), new Color(0x997755), new Color(0xCCAA88)),
+        YELLOW(new Color(0xFFFF55), new Color(0xDDDD33), new Color(0xFFFF88)),
+        RED(new Color(0xFF8888), new Color(0xDD6666), new Color(0xFF9999)),
+        GRAY(new Color(0xCCCCCC), new Color(0xAAAAAA), new Color(0xDDDDDD)),
+        GREEN(new Color(0x44EE44), new Color(0x22CC22), new Color(0x55FF55)),
+        BLUE(new Color(0x66BBFF), new Color(0x4499DD), new Color(0x77CCFF)),
         WATER(Color.WHITE);
 
         private final Color color;
         private final Color buildingColor;
         private final Color fontColor;
-        Type(Color color, Color buildingColor, Color fontColor) {
+        private final Color highlightColor;
+        Type(Color color, Color buildingColor, Color highlightColor, Color fontColor) {
             this.color = color;
             this.buildingColor = buildingColor;
             this.fontColor = fontColor;
+            this.highlightColor = highlightColor;
         }
 
-        Type(Color color, Color buildingColor) {
-            this(color, buildingColor, Color.BLACK);
+        Type(Color color, Color buildingColor, Color highlightColor) {
+            this(color, buildingColor, highlightColor, Color.BLACK);
         }
 
         Type(Color color) {
-            this(color, color);
+            this(color, color, color);
         }
 
         public Color getHexColor() {
@@ -113,6 +115,10 @@ public class Hex {
         return structure;
     }
 
+    public boolean isEmpty() {
+        return structure == null;
+    }
+
     public void setStructure(Structure structure) {
         this.structure = structure;
     }
@@ -174,17 +180,13 @@ public class Hex {
 
         final int[] xpoints = new int[6];
         final int[] ypoints = new int[6];
-        final int[] xpointsSmall = new int[6];
-        final int[] ypointsSmall = new int[6];
         for (int i = 0; i < 6; ++i) {
             final double angle = i * Math.PI / 3 + Math.toRadians(270);
             xpoints[i] = (int) (x + Math.cos(angle) * radius + 0.5);
             ypoints[i] = (int) (y + Math.sin(angle) * radius + 0.5);
-            xpointsSmall[i] = (int) (x + Math.cos(angle) * (radius - 2) + 0.5);
-            ypointsSmall[i] = (int) (y + Math.sin(angle) * (radius - 2) + 0.5);
         }
 
-        g.setColor(type.color);
+        g.setColor(highlight ? type.highlightColor : type.color);
         g.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
 
         g.fillPolygon(xpoints, ypoints, 6);
@@ -233,11 +235,6 @@ public class Hex {
             } else {
                 throw new RuntimeException("Invalid structure");
             }
-        }
-
-        if (highlight) {
-            g.setColor(Color.WHITE);
-            g.drawPolygon(xpointsSmall, ypointsSmall, 6);
         }
 
         g.setColor(oldColor);

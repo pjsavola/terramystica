@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Game extends JPanel {
@@ -351,6 +352,45 @@ public class Game extends JPanel {
         return false;
     }
 
+    public Set<Hex> getClickableHexes() {
+        final Player player = getCurrentPlayer();
+        if (player == null) return Collections.emptySet();
+
+        switch (phase) {
+            case INITIAL_DWELLINGS -> {
+                return mapPanel.getAllHexes().stream().filter(hex -> hex.isEmpty() && hex.getType() == player.getHomeType()).collect(Collectors.toSet());
+            }
+            case CONFIRM_ACTION -> {
+                final Set<Hex> result = new HashSet<>();
+                player.getPendingActions().forEach(type -> {
+                    switch (type) {
+                        case FREE_D -> mapPanel.getAllHexes().stream().filter(hex -> hex.isEmpty() && hex.getType() == player.getHomeType()).forEach(result::add);
+                        case FREE_TP -> mapPanel.getAllHexes().stream().filter(hex -> hex.getStructure() == Hex.Structure.DWELLING && hex.getType() == player.getHomeType()).forEach(result::add);
+                        case BUILD -> {
+                            if (player.pendingBuilds != null) result.addAll(player.pendingBuilds);
+                        }
+                        case USE_SPADES -> {
+                            result.addAll(mapPanel.getReachableTiles(player));
+                            if (player.pendingBuilds == null) {
+                                if (player.canUseRange()) {
+                                    result.addAll(mapPanel.getJumpableTiles(player));
+                                }
+                            } else {
+                                player.pendingBuilds.forEach(result::remove);
+                            }
+                        }
+                        case SANDSTORM -> result.addAll(getSandstormTiles(player));
+                        case PLACE_BRIDGE -> {}
+                    }
+                });
+                return result;
+            }
+            default -> {
+                return Collections.emptySet();
+            }
+        }
+    }
+
     public void hexClicked(int row, int col, int button) {
         final Hex hex = getHex(row, col);
         if (hex == null) return;
@@ -623,6 +663,8 @@ public class Game extends JPanel {
             }
             item.setEnabled(enable);
         }
+        final Set<Hex> clickables = getClickableHexes();
+        mapPanel.getAllHexes().forEach(h -> h.highlight = clickables.contains(h));
         repaint();
     }
 
