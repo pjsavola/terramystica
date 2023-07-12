@@ -9,7 +9,7 @@ public abstract class Favs {
     public static Resources getFavIncome(int fav) {
         return switch (fav) {
             case 7 -> Resources.w2pw1;
-            case 8 -> Resources.w4;
+            case 8 -> Resources.pw4;
             case 9 -> Resources.c3;
             default -> Resources.zero;
         };
