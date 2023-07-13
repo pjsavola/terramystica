@@ -48,9 +48,13 @@ public class TurnOrder extends JPanel {
                 drawPlayers(g, 0, topMargin, txt + "?", leechTurnOrder);
             }
             case CONFIRM_ACTION -> {
-                final String pending = game.getCurrentPlayer().getPendingActions().stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / "));
-                final String txt = pending.isEmpty() ? "Confirm turn" : pending;
-                drawPlayers(g, 0, topMargin, txt, List.of(game.getCurrentPlayer()));
+                if (game.resolvingCultSpades()) {
+                    drawPlayers(g, 0, topMargin, "Cult Spades", turnOrder);
+                } else {
+                    final String pending = game.getCurrentPlayer().getPendingActions().stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / "));
+                    final String txt = pending.isEmpty() ? "Confirm turn" : pending;
+                    drawPlayers(g, 0, topMargin, txt, List.of(game.getCurrentPlayer()));
+                }
             }
         };
         g.setColor(oldColor);

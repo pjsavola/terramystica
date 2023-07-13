@@ -31,6 +31,7 @@ public class Game extends JPanel {
     private final Rounds roundPanel;
     private final Pool pool;
     private int round;
+    private int cultIncome;
 
     private final List<Player> turnOrder = new ArrayList<>();
     private final List<Player> nextTurnOrder = new ArrayList<>();
@@ -47,7 +48,7 @@ public class Game extends JPanel {
     public Phase phase;
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new Nomads());
+    private static final List<Faction> testFactions = List.of(new Witches());
 
     private final String[] mapData;
     private final int playerCount;
@@ -79,6 +80,7 @@ public class Game extends JPanel {
     private void reset() {
         phase = Phase.INITIAL_DWELLINGS;
         round = 0;
+        cultIncome = 0;
         pendingPass = false;
         leechAccepted = false;
         leechTrigger = null;
@@ -370,9 +372,9 @@ public class Game extends JPanel {
                             if (player.pendingBuilds != null) result.addAll(player.pendingBuilds);
                         }
                         case USE_SPADES -> {
-                            result.addAll(mapPanel.getReachableTiles(player));
+                            mapPanel.getReachableTiles(player).stream().filter(h -> h.getStructure() == null).forEach(result::add);
                             if (player.pendingBuilds == null) {
-                                if (player.canUseRange()) {
+                                if (player.canUseRange() && !resolvingCultSpades()) {
                                     result.addAll(mapPanel.getJumpableTiles(player));
                                 }
                             } else {
@@ -580,14 +582,33 @@ public class Game extends JPanel {
 
         if (phase != Phase.LEECH) {
             final Player player = turnOrder.remove(0);
-            if (leechTrigger != null && leechTurnOrder.isEmpty()) {
+            if (resolvingCultSpades()) {
+                if (turnOrder.isEmpty()) {
+                    nextRound();
+                }
+            } else if (leechTrigger != null && leechTurnOrder.isEmpty()) {
                 leechTrigger = null;
             } else if (pendingPass) {
                 if (phase == Phase.ACTIONS) {
                     nextTurnOrder.add(player);
                 }
                 if (turnOrder.isEmpty()) {
-                    nextRound();
+                    if (cultIncome == round) {
+                        if (cultIncome > 0) {
+                            for (Player p : nextTurnOrder) {
+                                p.addCultIncome(rounds.get(cultIncome - 1));
+                                if (p.getPendingSpades() > 0) {
+                                    turnOrder.add(p);
+                                }
+                            }
+                        }
+                        ++cultIncome;
+                    }
+                    if (turnOrder.isEmpty()) {
+                        nextRound();
+                    } else {
+                        phase = Phase.CONFIRM_ACTION;
+                    }
                 }
             } else {
                 if (doubleTurn) {
@@ -728,5 +749,9 @@ public class Game extends JPanel {
             h.getNeighbors().stream().filter(n -> n.getType() != Hex.Type.WATER && n.getType() != player.getHomeType() && n.getStructure() == null).forEach(result::add);
         });
         return result;
+    }
+
+    public boolean resolvingCultSpades() {
+        return round > 0 && cultIncome > round;
     }
 }

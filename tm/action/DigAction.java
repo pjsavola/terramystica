@@ -41,6 +41,11 @@ public class DigAction extends Action {
 
     @Override
     public boolean canExecute() {
+        if (game.resolvingCultSpades()) {
+            if (jump || requiredDigging > 0) {
+                return false;
+            }
+        }
         final boolean reachable = game.isReachable(target, player);
         if (jump) {
             if (reachable || !game.isJumpable(target, player)) {
@@ -67,7 +72,7 @@ public class DigAction extends Action {
         }
         player.useSpades(requiredSpades);
         target.setType(type);
-        if (type == player.getHomeType()) {
+        if (type == player.getHomeType() && !game.resolvingCultSpades()) {
             player.addPendingBuild(target);
         }
     }

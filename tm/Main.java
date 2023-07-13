@@ -38,7 +38,7 @@ public class Main {
                 "B,S,U,I,I,I,I,I,I,B,G,S",
                 "K,R,G,S,K,S,G,K,R,Y,U,R,Y",
         };
-        final int seed = new Random().nextInt();
+        final int seed = 100; //new Random().nextInt();
         final int playerCount = 1;
 
         final Menu actionMenu = new Menu("Actions");

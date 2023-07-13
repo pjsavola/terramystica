@@ -648,7 +648,7 @@ public class Player extends JPanel {
         return income;
     }
 
-    private void addRoundIncome(Round round) {
+    private void addRoundIncome() {
         addIncome(favorIncome);
         addIncome(faction.getBaseIncome());
         for (int i = 0; i < dwellings; ++i) {
@@ -667,6 +667,9 @@ public class Player extends JPanel {
             addIncome(faction.getSanctuaryIncome());
         }
         addIncome(Bons.getBonIncome(bons.get(0)));
+    }
+
+    public void addCultIncome(Round round) {
         addIncomeFromCults(cultSteps[0], round.fire, round.income);
         addIncomeFromCults(cultSteps[1], round.water, round.income);
         addIncomeFromCults(cultSteps[2], round.earth, round.income);
@@ -676,7 +679,7 @@ public class Player extends JPanel {
 
     public void startRound(Round round) {
         this.round = round;
-        addRoundIncome(round);
+        addRoundIncome();
         usedFav6[0] = false;
         passed = false;
         usedFactionAction = false;
