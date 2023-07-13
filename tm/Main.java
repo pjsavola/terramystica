@@ -9,6 +9,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -166,7 +168,19 @@ public class Main {
                     case ACTIONS:
                     case CONFIRM_ACTION:
                         switch (e.getKeyCode()) {
-                            case KeyEvent.VK_ENTER -> game.confirmTurn();
+                            case KeyEvent.VK_ENTER -> {
+                                final Set<Player.PendingType> skippableActions = game.getCurrentPlayer().getSkippablePendingActions();
+                                if (game.getCurrentPlayer().getPendingActions().isEmpty() || !skippableActions.isEmpty()) {
+                                    int option = JOptionPane.OK_OPTION;
+                                    if (!skippableActions.isEmpty()) {
+                                        final String pending = "Are you sure you want to skip: " + skippableActions.stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / ")) + "?";
+                                        option = JOptionPane.showConfirmDialog(null, pending, "Skip Action?", JOptionPane.OK_CANCEL_OPTION);
+                                    }
+                                    if (option == JOptionPane.OK_OPTION) {
+                                        game.confirmTurn();
+                                    }
+                                }
+                            }
                             case KeyEvent.VK_C -> game.resolveAction(new ConvertAction(Resources.c1, 0, 0, 0));
                             case KeyEvent.VK_W -> game.resolveAction(new ConvertAction(Resources.w1, 0, 0, 0));
                             case KeyEvent.VK_P -> game.resolveAction(new ConvertAction(Resources.p1, 0, 0, 0));

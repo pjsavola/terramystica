@@ -15,24 +15,30 @@ import java.util.stream.IntStream;
 public class Player extends JPanel {
 
     public enum PendingType {
-        SELECT_FAV("Select Fav"),
-        SELECT_TOWN("Select Town"),
-        CONVERT_W2P("Convert W -> P"),
-        PLACE_BRIDGE("Place Bridge"),
-        USE_SPADES("Use Spades"),
-        BUILD("Build?"),
-        SANDSTORM("Sandstorm"),
-        FREE_TP("Free TP"),
-        FREE_D("Free D");
+        SELECT_FAV("Select Fav", false),
+        SELECT_TOWN("Select Town", false),
+        CONVERT_W2P("Convert W -> P", true),
+        PLACE_BRIDGE("Place Bridge", true),
+        USE_SPADES("Use Spades", true),
+        BUILD("Build Dwelling", true),
+        SANDSTORM("Sandstorm", true),
+        FREE_TP("Free TP", true),
+        FREE_D("Free D", true);
 
         private final String description;
+        private final boolean skippable;
 
-        private PendingType(String description) {
+        private PendingType(String description, boolean skippable) {
             this.description = description;
+            this.skippable = skippable;
         }
 
         public String getDescription() {
             return description;
+        }
+
+        public boolean isSkippable() {
+            return skippable;
         }
     };
 
@@ -911,9 +917,14 @@ public class Player extends JPanel {
     }
 
     public Set<PendingType> getPendingActions() {
-        final Set<PendingType> result = new HashSet<>();
+        final Set<PendingType> result = getSkippablePendingActions();
         if (pendingTowns > 0) result.add(PendingType.SELECT_TOWN);
         if (pendingFavors > 0) result.add(PendingType.SELECT_FAV);
+        return result;
+    }
+
+    public Set<PendingType> getSkippablePendingActions() {
+        final Set<PendingType> result = new HashSet<>();
         if (pendingSpades > 0) result.add(PendingType.USE_SPADES);
         if (pendingBridges > 0) result.add(PendingType.PLACE_BRIDGE);
         if (pendingWorkerToPriestConversions > 0) result.add(PendingType.CONVERT_W2P);
@@ -922,6 +933,22 @@ public class Player extends JPanel {
         if (pendingFreeTradingPost) result.add(PendingType.FREE_TP);
         if (pendingFreeDwelling) result.add(PendingType.FREE_D);
         return result;
+    }
+
+    public void clearPendingActions(Set<PendingType> types) {
+        for (PendingType type : types) {
+            switch (type) {
+                case SELECT_TOWN -> pendingTowns = 0;
+                case SELECT_FAV -> pendingFavors = 0;
+                case USE_SPADES -> pendingSpades = 0;
+                case PLACE_BRIDGE -> pendingBridges = 0;
+                case CONVERT_W2P -> pendingWorkerToPriestConversions = 0;
+                case BUILD -> pendingBuilds = null;
+                case SANDSTORM -> pendingSandstorm = false;
+                case FREE_TP -> pendingFreeTradingPost = false;
+                case FREE_D -> pendingFreeDwelling = false;
+            }
+        }
     }
 
     public int getBridgesLeft() {

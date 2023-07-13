@@ -551,16 +551,15 @@ public class Game extends JPanel {
 
     public void confirmTurn() {
         if (phase == Phase.CONFIRM_ACTION) {
-            final Set<Player.PendingType> pendingActions = getCurrentPlayer().getPendingActions();
-            if (pendingActions.size() == 1 && pendingActions.contains(Player.PendingType.BUILD)) {
-                // Fall through
-            } else if (!pendingActions.isEmpty()) {
-                return;
+            final Set<Player.PendingType> skippablePendingActions = getCurrentPlayer().getPendingActions();
+            if (getCurrentPlayer().getPendingActions().isEmpty() || !skippablePendingActions.isEmpty()) {
+                if (!skippablePendingActions.isEmpty()) {
+                    resolveAction(new ForfeitAction());
+                }
+                phase = Phase.ACTIONS;
+                endTurn();
+                refresh();
             }
-            getCurrentPlayer().pendingBuilds = null;
-            phase = Phase.ACTIONS;
-            endTurn();
-            refresh();
         }
     }
 
