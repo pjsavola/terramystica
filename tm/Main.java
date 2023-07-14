@@ -40,13 +40,12 @@ public class Main {
                 "B,S,U,I,I,I,I,I,I,B,G,S",
                 "K,R,G,S,K,S,G,K,R,Y,U,R,Y",
         };
-        final int seed = 100; //new Random().nextInt();
-        final int playerCount = 1;
-
         final Menu actionMenu = new Menu("Actions");
+        final GameData solo = new GameData(1, new Random().nextInt());
+        final GameData test = new GameData("data");
 
         final JFrame frame = new JFrame();
-        final Game game = new Game(frame, playerCount, mapData, seed, actionMenu);
+        final Game game = new Game(frame, mapData, test, actionMenu);
 
         final MenuItem convertAction = new ActionMenuItem("Convert") {
             @Override

@@ -24,6 +24,8 @@ public class Round {
     public static final Round airS = new Round(0, 0, 0, 4, 0, Resources.spade, 0, 3, 0, 0, 0, 0);
     public static final Round priestC = new Round(0, 0, 0, 0, 1, Resources.c2, 0, 0, 0, 4, 0, 0);
 
+    public static final Round[] snellmanMapping = { earthC, earthS, waterP, fireW, firePw, waterS, airW, airS, priestC };
+
     private Round(int fire, int water, int earth, int air, int priests, Resources income, int d, int tp, int shsa, int te, int spade, int town) {
         this.fire = fire;
         this.water = water;

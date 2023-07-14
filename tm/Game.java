@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,9 +18,9 @@ import java.util.stream.IntStream;
 public class Game extends JPanel {
     public enum Phase { PICK_FACTIONS, AUCTION_FACTIONS, INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, CONFIRM_ACTION, LEECH, END };
 
+    private final GameData gameData;
     private final List<Player> players = new ArrayList<>();
     private final List<Integer> bons = new ArrayList<>();
-    private final List<Round> rounds = new ArrayList<>();
     private final int[] bonusCoins = new int[3];
     public final boolean[] bonUsed = new boolean[2];
     private final List<Integer> favs = new ArrayList<>();
@@ -47,12 +49,7 @@ public class Game extends JPanel {
 
     public Phase phase;
 
-    private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
-    private static final List<Faction> testFactions = List.of(new Witches());
-
     private final String[] mapData;
-    private final int playerCount;
-    private final int seed;
 
     private boolean rewinding;
 
@@ -60,18 +57,17 @@ public class Game extends JPanel {
 
     private final JFrame frame;
 
-    public Game(JFrame frame, int playerCount, String[] mapData, int seed, Menu actionMenu) {
+    public Game(JFrame frame, String[] mapData, GameData gameData, Menu actionMenu) {
         this.frame = frame;
-        this.playerCount = playerCount;
         this.mapData = mapData;
-        this.seed = seed;
+        this.gameData = gameData;
         this.actionMenu = actionMenu;
 
         mapPanel = new Grid(this, mapData);
         cultPanel = new Cults(this, players);
         powerActionPanel = new PowerActions(this, usedPowerActions);
         turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder, leechTurnOrder);
-        roundPanel = new Rounds(rounds);
+        roundPanel = new Rounds(gameData.rounds);
         pool = new Pool(this, null, bons, bonusCoins, favs, towns, bonUsed, null);
         reset();
         addComponents();
@@ -95,14 +91,6 @@ public class Game extends JPanel {
         bridgeEnd = null;
         pendingTownPlacement = false;
 
-        final Random random = new Random(seed);
-
-        bons.clear();
-        final List<Integer> allBons = new ArrayList<>(IntStream.range(1, 11).boxed().toList());
-        Collections.shuffle(allBons, random);
-        allBons.stream().limit(playerCount + 3).sorted().forEach(bons::add);
-        Arrays.fill(bonusCoins, 0);
-
         favs.clear();
         IntStream.range(1, 5).boxed().forEach(favs::add);
         for (int i = 5; i < 13; ++i) {
@@ -118,25 +106,17 @@ public class Game extends JPanel {
                 towns.add(i);
             }
         }
-
-        rounds.clear();
-        final List<Round> allRounds = new ArrayList<>(List.of(Round.fireW, Round.firePw, Round.waterP, Round.waterS, Round.earthC, Round.earthS, Round.airW, Round.airS, Round.priestC));
-        int spadeRound;
-        do {
-            Collections.shuffle(allRounds, random);
-            spadeRound = allRounds.indexOf(Round.earthC) + 1;
-        } while (spadeRound == 5 || spadeRound == 6);
-        allRounds.stream().limit(6).forEach(rounds::add);
-
-        final List<Faction> allFactions = new ArrayList<>(Game.testFactions);
-        Collections.shuffle(allFactions, random);
+        Arrays.fill(bonusCoins, 0);
+        bons.clear();
+        bons.addAll(gameData.bons);
+        final List<Faction> factions = new ArrayList<>(gameData.factions);
 
         if (!players.isEmpty()) {
             // Reuse existing players but sort them back to the original order.
             turnOrder.clear();
             nextTurnOrder.clear();
-            for (int i = allFactions.size() - 1; i >= 0; --i) {
-                final Faction faction = allFactions.get(i);
+            for (int i = factions.size() - 1; i >= 0; --i) {
+                final Faction faction = factions.get(i);
                 for (int j = players.size() - 1; j >= 0; --j) {
                     final Player player = players.get(j);
                     if (player.getFaction() == faction) {
@@ -174,11 +154,11 @@ public class Game extends JPanel {
         } else {
             Player chaosMagiciansPlayer = null;
             Player nomadsPlayer = null;
-            while (players.size() < playerCount) {
+            while (players.size() < gameData.playerCount) {
                 final Player player = new Player(this);
-                final Faction faction = allFactions.remove(allFactions.size() - 1);
+                final Faction faction = factions.remove(factions.size() - 1);
                 player.selectFaction(faction, 20);
-                allFactions.removeIf(f -> f.getHomeType() == faction.getHomeType());
+                factions.removeIf(f -> f.getHomeType() == faction.getHomeType());
                 players.add(player);
                 nextTurnOrder.add(0, player);
                 if (faction instanceof ChaosMagicians) {
@@ -340,7 +320,7 @@ public class Game extends JPanel {
             players.clear();
             players.addAll(turnOrder);
             for (Player player : players) {
-                player.startRound(rounds.get(round - 1));
+                player.startRound(gameData.rounds.get(round - 1));
             }
         }
     }
@@ -595,7 +575,7 @@ public class Game extends JPanel {
                     if (cultIncome == round) {
                         if (cultIncome > 0) {
                             for (Player p : nextTurnOrder) {
-                                p.addCultIncome(rounds.get(cultIncome - 1));
+                                p.addCultIncome(gameData.rounds.get(cultIncome - 1));
                                 if (p.getPendingSpades() > 0) {
                                     turnOrder.add(p);
                                 }
