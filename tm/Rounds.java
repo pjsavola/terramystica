@@ -28,6 +28,7 @@ public class Rounds extends JPanel {
         int y = 2;
         for (int i = 0; i < rounds.size(); ++i) {
             final Round round = rounds.get(i);
+            final boolean lastRound = i == rounds.size() - 1;
             if (i + 1 == this.round) {
                 g.setColor(new Color(0x55FF99));
                 g.fillRect(x, y, 100, 100);
@@ -38,7 +39,7 @@ public class Rounds extends JPanel {
             final String cultCondition = cultConditionToString(round) + " ->";
             final String cultIncome = cultRewardToString(round);
             Color cultColor = getCultColor(round);
-            if (cultColor != null) {
+            if (cultColor != null && !lastRound) {
                 if (i + 1 < this.round) {
                     cultColor = new Color(cultColor.getRed(), cultColor.getGreen(), cultColor.getBlue(), 50);
                 }
@@ -58,8 +59,10 @@ public class Rounds extends JPanel {
 
             final String cultScoring = scoringToString(round);
             g.drawString(cultScoring, x + 2, y + 20);
-            g.drawString(cultCondition, x + 2, y + 56);
-            g.drawString(cultIncome, x + 2, y + 72);
+            if (!lastRound) {
+                g.drawString(cultCondition, x + 2, y + 56);
+                g.drawString(cultIncome, x + 2, y + 72);
+            }
 
             x += 110;
         }
