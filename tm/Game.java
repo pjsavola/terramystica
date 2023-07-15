@@ -70,6 +70,7 @@ public class Game extends JPanel {
         roundPanel = new Rounds(gameData.rounds);
         pool = new Pool(this, null, bons, bonusCoins, favs, towns, bonUsed, null);
         reset();
+        replay(gameData.actionFeed);
         addComponents();
     }
 
@@ -732,5 +733,31 @@ public class Game extends JPanel {
 
     public boolean resolvingCultSpades() {
         return round > 0 && cultIncome > round;
+    }
+
+    public void replay(List<String> actionFeed) {
+        int setupCompleteCount = 0;
+        for (String action : actionFeed) {
+            if (action.matches("[Bb][Uu][Ii][Ll][Dd] [A-Za-z][1-9][0-9]*")) {
+                final Point p = mapPanel.getPoint(action.split(" ")[1]);
+                if (setupCompleteCount == 0) resolveAction(new PlaceInitialDwellingAction(p.x, p.y));
+                else resolveAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
+            } else if (action.matches("[Pp][Aa][Ss][Ss] [Bb][Oo][Nn][1-9][0-9]*")) {
+                final int bon = Integer.parseInt(action.split(" ")[1].substring(3));
+                boolean found = false;
+                for (int idx = 0; idx < bons.size(); ++idx) {
+                    if (bons.get(idx) == bon) {
+                        resolveAction(new SelectBonAction(idx));
+                        ++setupCompleteCount;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) throw new RuntimeException("Bon not available " + bon);
+            }
+            if (setupCompleteCount == gameData.playerCount) {
+                break;
+            }
+        }
     }
 }

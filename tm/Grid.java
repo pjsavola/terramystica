@@ -16,11 +16,10 @@ public class Grid extends JPanel {
     private final Point[][] points;
     private final int radius = 40;
     private final Dimension size;
-    private final Game game;
     private final List<Bridge> bridges = new ArrayList<>();
+    private final List<Hex> allHexes = new ArrayList<>();
 
     public Grid(Game game, String[] mapData) {
-        this.game = game;
         final double halfWidth = Math.sqrt(3) / 2 * radius;
         map = new Hex[mapData.length][];
         points = new Point[mapData.length][];
@@ -74,6 +73,10 @@ public class Grid extends JPanel {
                 }
                 map[row][col].setNeighbors(neighbors);
             }
+        }
+
+        for (Hex[] hexes : map) {
+            Collections.addAll(allHexes, hexes);
         }
 
         final int width = (int) (map[0].length * halfWidth * 2 + 4);
@@ -145,11 +148,7 @@ public class Grid extends JPanel {
     }
 
     public List<Hex> getAllHexes() {
-        final List<Hex> result = new ArrayList<>();
-        for (Hex[] hexes : map) {
-            Collections.addAll(result, hexes);
-        }
-        return result;
+        return allHexes;
     }
 
     @Override
@@ -414,5 +413,16 @@ public class Grid extends JPanel {
             return hex.getType() == Hex.Type.WATER && player.getFaction() instanceof Mermaids;
         }
         return false;
+    }
+
+    Point getPoint(String id) {
+        for (int row = 0; row < map.length; ++row) {
+            for (int col = 0; col < map[row].length; ++col) {
+                if (map[row][col].getId().equalsIgnoreCase(id)) {
+                    return new Point(row, col);
+                }
+            }
+        }
+        return null;
     }
 }

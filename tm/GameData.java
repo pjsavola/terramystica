@@ -1,5 +1,7 @@
 package tm;
 
+import tm.action.Action;
+import tm.action.BuildAction;
 import tm.faction.*;
 
 import java.io.File;
@@ -15,6 +17,7 @@ public class GameData {
     final List<Faction> factions;
     final List<Integer> bons;
     final List<Round> rounds;
+    final List<String> actionFeed = new ArrayList<>();
 
     public GameData(int playerCount, int seed) {
         this.playerCount = playerCount;
@@ -43,6 +46,7 @@ public class GameData {
         factions = new ArrayList<>();
         rounds = new ArrayList<>(6);
         bons = new ArrayList<>(IntStream.range(1, 11).boxed().toList());
+        final Map<String, Faction> factionMap = new HashMap<>();
         try {
             final Scanner scanner = new Scanner(new File(inputFile));
             while (scanner.hasNextLine()) {
@@ -57,7 +61,24 @@ public class GameData {
                     ++players;
                 } else if (line.matches("[a-z]*\\t.*") && line.endsWith("setup")) {
                     final String faction = line.split("\\t")[0];
-                    allFactions.stream().filter(f -> f.getName().equalsIgnoreCase(faction)).findFirst().ifPresent(f -> factions.add(0, f));
+                    allFactions.stream().filter(f -> f.getName().equalsIgnoreCase(faction)).findFirst().ifPresent(f -> {
+                        factions.add(0, f);
+                        factionMap.put(faction, f);
+                    });
+                } else {
+                    final String[] s = line.split("\\t");
+                    if (s.length == 0) throw new RuntimeException("Empty line: " + line);
+                    if (factionMap.containsKey(s[0])) {
+                        final String actionLine = s[s.length - 1];
+                        if (actionLine.equals("other_income_for_faction")) continue;
+                        if (actionLine.equals("cult_income_for_action")) continue;
+                        if (actionLine.equals("[opponent accepted power]")) continue;
+                        if (actionLine.matches("\\+\\dvp for (FIRE|WATER|EARTH|AIR)")) continue;
+                        if (actionLine.matches("\\+[1-9][0-9]*vp for network")) continue;
+                        if (actionLine.equals("score_resources")) continue;
+                        final String[] actions = actionLine.split("\\. ");
+                        actionFeed.addAll(Arrays.asList(actions));
+                    }
                 }
             }
         } catch (FileNotFoundException e) {
