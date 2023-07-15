@@ -18,6 +18,7 @@ public class BuildAction extends Action {
     private final int col;
     private final Hex.Structure structure;
     private boolean expensive;
+    private boolean pendingBuild;
 
     public BuildAction(int row, int col, Hex.Structure structure) {
         this.row = row;
@@ -31,7 +32,9 @@ public class BuildAction extends Action {
         final Hex hex = game.getHex(row, col);
         if (hex == null) throw new RuntimeException("Invalid hex");
 
-        if (structure == Hex.Structure.TRADING_POST) {
+        if (structure == Hex.Structure.DWELLING) {
+            pendingBuild = player.getPendingActions().contains(Player.PendingType.BUILD);
+        } else if (structure == Hex.Structure.TRADING_POST) {
             expensive = true;
             for (Hex n : hex.getNeighbors()) {
                 if (n.getStructure() != null && n.getType() != player.getHomeType()) {
@@ -53,7 +56,7 @@ public class BuildAction extends Action {
         if (game.phase == Game.Phase.CONFIRM_ACTION) {
             if (player.getPendingActions().contains(Player.PendingType.FREE_TP)) return true;
             if (player.getPendingActions().contains(Player.PendingType.FREE_D)) return true;
-            return player.getPendingActions().contains(Player.PendingType.BUILD);
+            return pendingBuild;
         }
         return super.validatePhase();
     }
@@ -67,7 +70,7 @@ public class BuildAction extends Action {
             if (player.getPendingActions().contains(Player.PendingType.FREE_D)) {
                 return player.canBuildDwelling(false);
             }
-            if (player.getPendingActions().contains(Player.PendingType.BUILD)) {
+            if (pendingBuild) {
                 return player.hasPendingBuild(hex) && player.canBuildDwelling(false);
             }
             boolean jump = false;
@@ -93,7 +96,7 @@ public class BuildAction extends Action {
     public void execute() {
         final Hex hex = game.getHex(row, col);
         if (structure == Hex.Structure.DWELLING) {
-            if (player.getPendingActions().contains(Player.PendingType.BUILD)) {
+            if (pendingBuild) {
                 player.clearPendingBuilds();
             } else if (!game.isReachable(hex, player)) {
                 player.useRange(false);
@@ -127,6 +130,11 @@ public class BuildAction extends Action {
             }
         }
         game.leechTriggered(leech);
+    }
+
+    @Override
+    public boolean isFree() {
+        return pendingBuild || super.isFree();
     }
 
     @Override
