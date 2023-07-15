@@ -29,7 +29,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        final String[] mapData = {
+        final String[] arrowMapData = {
                 "G,B,Y,U,G,Y,R,B,S,G,S,G,K",
                 "R,K,B,I,I,I,I,I,I,Y,R,B",
                 "S,U,I,I,S,R,Y,U,R,I,I,K,Y",
@@ -40,12 +40,23 @@ public class Main {
                 "B,S,U,I,I,I,I,I,I,B,G,S",
                 "K,R,G,S,K,S,G,K,R,Y,U,R,Y",
         };
+        final String[] baseMapData = {
+                "U,S,G,B,Y,R,U,K,R,G,B,R,K",
+                "Y,I,I,U,K,I,I,Y,K,I,I,Y",
+                "I,I,K,I,S,I,G,I,G,I,S,I,I",
+                "G,B,Y,I,I,R,B,I,R,I,R,U",
+                "K,U,R,B,K,U,S,Y,I,I,G,K,B",
+                "S,G,I,I,Y,G,I,I,I,U,S,U",
+                "I,I,I,S,I,R,I,G,I,Y,K,B,Y",
+                "Y,B,U,I,I,I,B,K,I,S,U,S",
+                "R,K,S,B,R,G,Y,U,S,I,B,G,R",
+        };
         final Menu actionMenu = new Menu("Actions");
         final GameData solo = new GameData(1, new Random().nextInt());
         final GameData test = new GameData("data");
 
         final JFrame frame = new JFrame();
-        final Game game = new Game(frame, mapData, test, actionMenu);
+        final Game game = new Game(frame, baseMapData, test, actionMenu);
 
         final MenuItem convertAction = new ActionMenuItem("Convert") {
             @Override
