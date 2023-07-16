@@ -540,6 +540,7 @@ public class Game extends JPanel {
                 if (!skippablePendingActions.isEmpty()) {
                     resolveAction(new ForfeitAction());
                 }
+                getCurrentPlayer().pendingBuilds = null;
                 phase = Phase.ACTIONS;
                 endTurn();
                 refresh();
