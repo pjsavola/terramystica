@@ -11,13 +11,19 @@ import java.util.stream.IntStream;
 
 public class GameData {
 
+    public static class Pair {
+        public Faction faction;
+        public String action;
+    }
+
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
 
     final int playerCount;
     final List<Faction> factions;
     final List<Integer> bons;
     final List<Round> rounds;
-    final List<String> actionFeed = new ArrayList<>();
+    final Deque<Pair> actionFeed = new ArrayDeque<>();
+    final Deque<Pair> leechFeed = new ArrayDeque<>();
 
     public GameData(int playerCount, int seed) {
         this.playerCount = playerCount;
@@ -68,7 +74,8 @@ public class GameData {
                 } else {
                     final String[] s = line.split("\\t");
                     if (s.length == 0) throw new RuntimeException("Empty line: " + line);
-                    if (factionMap.containsKey(s[0])) {
+                    final Faction faction = factionMap.get(s[0]);
+                    if (faction != null) {
                         final String actionLine = s[s.length - 1];
                         if (actionLine.equals("other_income_for_faction")) continue;
                         if (actionLine.equals("cult_income_for_action")) continue;
@@ -77,7 +84,16 @@ public class GameData {
                         if (actionLine.matches("\\+[1-9][0-9]*vp for network")) continue;
                         if (actionLine.equals("score_resources")) continue;
                         final String[] actions = actionLine.split("\\. ");
-                        actionFeed.addAll(Arrays.asList(actions));
+                        for (String action : actions) {
+                            final Pair pair = new Pair();
+                            pair.faction = faction;
+                            pair.action = action;
+                            if (Game.leechPattern.matcher(action).matches()) {
+                                leechFeed.addLast(pair);
+                            } else {
+                                actionFeed.addLast(pair);
+                            }
+                        }
                     }
                 }
             }

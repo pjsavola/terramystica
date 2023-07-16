@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -70,7 +71,7 @@ public class Game extends JPanel {
         roundPanel = new Rounds(gameData.rounds);
         pool = new Pool(this, null, bons, bonusCoins, favs, towns, bonUsed, null);
         reset();
-        replay(gameData.actionFeed);
+        replay(gameData.actionFeed, gameData.leechFeed);
         addComponents();
     }
 
@@ -735,29 +736,179 @@ public class Game extends JPanel {
         return round > 0 && cultIncome > round;
     }
 
-    public void replay(List<String> actionFeed) {
-        int setupCompleteCount = 0;
-        for (String action : actionFeed) {
-            if (action.matches("[Bb][Uu][Ii][Ll][Dd] [A-Za-z][1-9][0-9]*")) {
-                final Point p = mapPanel.getPoint(action.split(" ")[1]);
-                if (setupCompleteCount == 0) resolveAction(new PlaceInitialDwellingAction(p.x, p.y));
-                else resolveAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
-            } else if (action.matches("[Pp][Aa][Ss][Ss] [Bb][Oo][Nn][1-9][0-9]*")) {
-                final int bon = Integer.parseInt(action.split(" ")[1].substring(3));
-                boolean found = false;
-                for (int idx = 0; idx < bons.size(); ++idx) {
-                    if (bons.get(idx) == bon) {
-                        resolveAction(new SelectBonAction(idx));
-                        ++setupCompleteCount;
-                        found = true;
+
+    private static final Pattern buildPattern = Pattern.compile("[Bb][Uu][Ii][Ll][Dd] [A-Za-z][1-9][0-9]*");
+    private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] [A-Za-z][1-9][0-9]* [Tt][Oo] .*");
+    public static final Pattern leechPattern = Pattern.compile("([Ll][Ee][Ee][Cc][Hh]|[Dd][Ee][Cc][Ll][Ii][Nn][Ee]) [1-9][0-9]* from [A-Za-z]*");
+    private static final Pattern cultStepPattern = Pattern.compile("\\+([Ff][Ii][Rr][Ee]|[Ww][Aa][Tt][Ee][Rr]|[Ee][Aa][Rr][Tt][Hh]|[Aa][Ii][Rr])");
+
+    public void replayLeech(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
+        while (phase == Phase.LEECH) {
+            if (getCurrentPlayer() != null) {
+                final Iterator<GameData.Pair> it = leechFeed.iterator();
+                while (it.hasNext()) {
+                    final GameData.Pair pair = it.next();
+                    if (pair.faction == getCurrentPlayer().getFaction()) {
+                        if (!leechPattern.matcher(pair.action).matches()) {
+                            throw new RuntimeException("Invalid leech");
+                        }
+                        System.err.println(pair.faction.getName() + ": " + pair.action);
+                        final String[] s = pair.action.split(" ");
+                        final boolean accept = s[0].equalsIgnoreCase("Leech");
+                        resolveAction(new LeechAction(accept));
+                        if (accept && s[3].equalsIgnoreCase("Cultists") && phase == Phase.ACTIONS) {
+                            // Check if next Cultist action is cult step.
+                            final Iterator<GameData.Pair> it2 = actionFeed.iterator();
+                            while (it2.hasNext()) {
+                                final GameData.Pair pair2 = it2.next();
+                                if (pair.faction instanceof Cultists) {
+                                    if (cultStepPattern.matcher(pair2.action).matches()) {
+                                        it2.remove();
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        it.remove();
                         break;
                     }
                 }
-                if (!found) throw new RuntimeException("Bon not available " + bon);
-            }
-            if (setupCompleteCount == gameData.playerCount) {
-                break;
             }
         }
+    }
+
+    public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
+        rewinding = true;
+        int setupCompleteCount = 0;
+        boolean pendingDigging = false;
+        CultStepAction.Source pendingCultSource = null;
+        boolean pendingCultStep = false;
+        while (getCurrentPlayer() != null) {
+            final Deque<String> actions = new ArrayDeque<>();
+            final Iterator<GameData.Pair> it = actionFeed.iterator();
+            while (it.hasNext()) {
+                final GameData.Pair pair = it.next();
+                if (pair.faction == getCurrentPlayer().getFaction()) {
+                    actions.addLast(pair.action);
+                    it.remove();
+                } else if (!actions.isEmpty()) {
+                    break;
+                }
+            }
+            while (!actions.isEmpty()) {
+                final String action = actions.removeFirst();
+                System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
+                if (buildPattern.matcher(action).matches()) {
+                    final Point p = mapPanel.getPoint(action.split(" ")[1]);
+                    if (setupCompleteCount == 0) {
+                        resolveAction(new PlaceInitialDwellingAction(p.x, p.y));
+                    } else if (!pendingDigging) {
+                        resolveAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
+                    } else {
+                        final Hex hex = mapPanel.getHex(p.x, p.y);
+                        resolveAction(new DigAction(hex, getCurrentPlayer().getHomeType(), mapPanel.getJumpableTiles(getCurrentPlayer()).contains(hex)));
+                        resolveAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
+                    }
+                } else if (transformPattern.matcher(action).matches()) {
+                    final Point p = mapPanel.getPoint(action.split(" ")[1]);
+                    final Hex hex = mapPanel.getHex(p.x, p.y);
+                    final String type = action.split(" ")[3];
+                    Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> resolveAction(new DigAction(hex, t, mapPanel.getJumpableTiles(getCurrentPlayer()).contains(hex))));
+                } else if (action.matches("[Pp][Aa][Ss][Ss] [Bb][Oo][Nn][1-9][0-9]*")) {
+                    final int bon = Integer.parseInt(action.split(" ")[1].substring(3));
+                    boolean found = false;
+                    for (int idx = 0; idx < bons.size(); ++idx) {
+                        if (bons.get(idx) == bon) {
+                            resolveAction(new SelectBonAction(idx));
+                            ++setupCompleteCount;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) throw new RuntimeException("Bon not available " + bon);
+                } else if (action.matches("[Dd][Ii][Gg] \\d")) {
+                    pendingDigging = true;
+                } else if (action.matches("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] [A-Za-z][1-9][0-9]* to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])")) {
+                    final Point p = mapPanel.getPoint(action.split(" ")[1]);
+                    final String type = action.split(" ")[3];
+                    Hex.Structure structure = null;
+                    if (type.equalsIgnoreCase("TP")) structure = Hex.Structure.TRADING_POST;
+                    if (type.equalsIgnoreCase("TE")) structure = Hex.Structure.TEMPLE;
+                    if (type.equalsIgnoreCase("SH")) structure = Hex.Structure.STRONGHOLD;
+                    if (type.equalsIgnoreCase("SA")) structure = Hex.Structure.SANCTUARY;
+                    resolveAction(new BuildAction(p.x, p.y, structure));
+                } else if (action.matches("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6)")) {
+                    final String[] s = action.split(" ");
+                    final String str = s[1].toLowerCase();
+                    if (str.startsWith("act")) {
+                        switch (str.charAt(3)) {
+                            case '1':
+                            case '2':
+                            case '3':
+                            case '4':
+                            case '5':
+                            case '6':
+                                pendingDigging = str.charAt(3) == '5' || str.charAt(3) == '6';
+                                resolveAction(new SelectPowerActionAction(str.charAt(3) - '0'));
+                                break;
+                            case 'a':
+                            case 'c':
+                            case 'e':
+                            case 'g':
+                            case 'n':
+                            case 's':
+                            case 'w':
+                                break;
+                        }
+                    } else if (str.startsWith("bon")) {
+                        switch (str.charAt(3)) {
+                            case '1' -> {
+                                pendingDigging = true;
+                                resolveAction(new SpadeAction(SpadeAction.Source.BON1));
+                            }
+                            case '2' -> pendingCultSource = CultStepAction.Source.BON2;
+                        }
+                    } else {
+                        pendingCultSource = CultStepAction.Source.FAV6;
+                    }
+                } else if (action.matches("\\+([Ff][Ii][Rr][Ee]|[Ww][Aa][Tt][Ee][Rr]|[Ee][Aa][Rr][Tt][Hh]|[Aa][Ii][Rr])")) {
+                    if (pendingCultSource == null) {
+                        if (getCurrentPlayer().getFaction() instanceof Cultists) {
+                            while (!actions.isEmpty()) {
+                                final GameData.Pair pair = new GameData.Pair();
+                                pair.action = actions.removeLast();
+                                actionFeed.addFirst(pair);
+                            }
+                            final GameData.Pair pair = new GameData.Pair();
+                            pair.action = action;
+                            actionFeed.addFirst(pair);
+                            break;
+                        } else {
+                            throw new RuntimeException("Unknown cult step source");
+                        }
+                    }
+                    final String cultStep = action.substring(1);
+                    for (int i = 0; i < 4; ++i) {
+                        if (Cults.getCultName(i).equalsIgnoreCase(cultStep)) {
+                            resolveAction(new CultStepAction(i, 1, pendingCultSource));
+                            break;
+                        }
+                    }
+                } else {
+                    System.err.println(action);
+                    break;
+                }
+            }
+            if (phase == Phase.CONFIRM_ACTION) {
+                confirmTurn();
+                replayLeech(actionFeed, leechFeed);
+            }
+            if (!actions.isEmpty()) {
+                throw new RuntimeException("Action stack not cleared");
+            }
+            pendingDigging = false;
+            pendingCultSource = null;
+        }
+        rewinding = false;
     }
 }
