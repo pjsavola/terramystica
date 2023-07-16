@@ -414,7 +414,7 @@ public class Player extends JPanel {
     }
 
     public void advanceShipping() {
-        if (!canAdvanceDigging())
+        if (!canAdvanceShipping())
             throw new RuntimeException("Trying to advance shipping too much");
 
         ++shipping;
