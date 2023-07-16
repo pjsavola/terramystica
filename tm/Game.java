@@ -258,7 +258,7 @@ public class Game extends JPanel {
         final int oldBon = player.pickBon(newBon, coins);
         if (oldBon != 0) {
             bons.set(bonIndex, oldBon);
-            if (oldBon < bonUsed.length) {
+            if (oldBon - 1 < bonUsed.length) {
                 bonUsed[oldBon - 1] = false;
             }
         } else {
