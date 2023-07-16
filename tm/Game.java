@@ -773,6 +773,7 @@ public class Game extends JPanel {
     private static final Pattern bridgePattern = Pattern.compile("[Bb][Rr][Ii][Dd][Gg][Ee] " + hexRegex + ":" + hexRegex);
     private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]*" + resourceRegex + " to [1-9][0-9]*" + resourceRegex);
     private static final Pattern advancePattern = Pattern.compile("[Aa][Dd][Vv][Aa][Nn][Cc][Ee] ([Dd][Ii][Gg]|[Ss][Hh][Ii][Pp])");
+    private static final Pattern forfeitAction = Pattern.compile("\\-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
     private int findCult(String cultName) {
         for (int i = 0; i < 4; ++i) {
             if (Cults.getCultName(i).equalsIgnoreCase(cultName)) {
@@ -1059,6 +1060,8 @@ public class Game extends JPanel {
                 } else if (advancePattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     replayAction(new AdvanceAction(s[1].equalsIgnoreCase("dig")));
+                } else if (forfeitAction.matcher(action).matches()) {
+                    replayAction(new ForfeitAction());
                 } else {
                     System.err.println("Unhandled action: " + action);
                     break;

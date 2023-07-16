@@ -37,7 +37,7 @@ public class ForfeitAction extends PendingAction {
         StringBuilder txt = new StringBuilder();
         for (Player.PendingType type : types) {
             switch (type) {
-                case USE_SPADES -> txt.append("-").append(spadeCount).append(" spd");
+                case USE_SPADES -> txt.append("-").append("spade");
                 case PLACE_BRIDGE -> txt.append("-bridge");
             }
         }
