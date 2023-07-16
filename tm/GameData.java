@@ -24,6 +24,7 @@ public class GameData {
     final List<Round> rounds;
     final Deque<Pair> actionFeed = new ArrayDeque<>();
     final Deque<Pair> leechFeed = new ArrayDeque<>();
+    final boolean turnOrderVariant;
 
     public GameData(int playerCount, int seed) {
         this.playerCount = playerCount;
@@ -45,6 +46,7 @@ public class GameData {
         factions = new ArrayList<>(allFactions);
         Collections.shuffle(factions, random);
         while (factions.size() > playerCount) factions.remove(factions.size() - 1);
+        turnOrderVariant = true;
     }
 
     public GameData(String inputFile) {
@@ -110,5 +112,6 @@ public class GameData {
             throw new RuntimeException("Invalid number of rounds");
         }
         playerCount = players;
+        turnOrderVariant = false;
     }
 }

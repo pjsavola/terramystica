@@ -574,7 +574,22 @@ public class Game extends JPanel {
                 leechTrigger = null;
             } else if (pendingPass) {
                 if (phase == Phase.ACTIONS) {
-                    nextTurnOrder.add(player);
+                    if (gameData.turnOrderVariant) {
+                        nextTurnOrder.add(player);
+                    } else {
+                        if (nextTurnOrder.isEmpty()) {
+                            nextTurnOrder.add(player);
+                        } else {
+                            final int myIdx = gameData.factions.indexOf(player.getFaction());
+                            final int startPlayerIdx = gameData.factions.indexOf(nextTurnOrder.get(0).getFaction());
+                            final int delta = (startPlayerIdx - myIdx + gameData.playerCount) % gameData.playerCount;
+                            if (nextTurnOrder.size() <= delta) {
+                                nextTurnOrder.add(player);
+                            } else {
+                                nextTurnOrder.add(delta, player);
+                            }
+                        }
+                    }
                 }
                 if (turnOrder.isEmpty()) {
                     if (cultIncome == round) {
@@ -741,18 +756,22 @@ public class Game extends JPanel {
 
 
     private static final String cultRegex = "([Ff][Ii][Rr][Ee]|[Ww][Aa][Tt][Ee][Rr]|[Ee][Aa][Rr][Tt][Hh]|[Aa][Ii][Rr])";
-    private static final Pattern buildPattern = Pattern.compile("[Bb][Uu][Ii][Ll][Dd] [A-Za-z][1-9][0-9]*");
-    private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] [A-Za-z][1-9][0-9]* [Tt][Oo] .*");
+    private static final String hexRegex = "[A-Za-z][1-9][0-9]*";
+    private static final String resourceRegex = "([Pp][Ww]|[Ww]|[Cc]|[Pp]|[Vv][Pp])";
+    private static final Pattern buildPattern = Pattern.compile("[Bb][Uu][Ii][Ll][Dd] " + hexRegex);
+    private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] " + hexRegex + " [Tt][Oo] .*");
     public static final Pattern leechPattern = Pattern.compile("([Ll][Ee][Ee][Cc][Hh]|[Dd][Ee][Cc][Ll][Ii][Nn][Ee]) [1-9][0-9]* from [A-Za-z]*");
     private static final Pattern cultStepPattern = Pattern.compile("\\+" + cultRegex);
     private static final Pattern passPattern = Pattern.compile("[Pp][Aa][Ss][Ss]( [Bb][Oo][Nn][1-9][0-9]*)*");
     private static final Pattern digPattern = Pattern.compile("[Dd][Ii][Gg] \\d");
-    private static final Pattern upgradePattern = Pattern.compile("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] [A-Za-z][1-9][0-9]* to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])");
+    private static final Pattern upgradePattern = Pattern.compile("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] " + hexRegex + " to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])");
     private static final Pattern actionPattern = Pattern.compile("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6)");
     private static final Pattern priestPattern = Pattern.compile("[Ss][Ee][Nn][Dd] [Pp] to " + cultRegex + "( for [1-3])*");
     private static final Pattern favorPattern = Pattern.compile("\\+[Ff][Aa][Vv][1-9][0-9]*");
     private static final Pattern townPattern = Pattern.compile("\\+[Tt][Ww][1-9]");
     private static final Pattern burnPattern = Pattern.compile("[Bb][Uu][Rr][Nn] [1-9][0-9]*");
+    private static final Pattern bridgePattern = Pattern.compile("[Bb][Rr][Ii][Dd][Gg][Ee] " + hexRegex + ":" + hexRegex);
+    private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]*" + resourceRegex + " to [1-9][0-9]*" + resourceRegex);
     private int findCult(String cultName) {
         for (int i = 0; i < 4; ++i) {
             if (Cults.getCultName(i).equalsIgnoreCase(cultName)) {
@@ -794,7 +813,6 @@ public class Game extends JPanel {
     private Deque<GameData.Pair> actionFeed;
     private Deque<String> actions;
     boolean pendingDigging = false;
-    boolean pendingSanstorm = false;
     CultStepAction.Source pendingCultSource = null;
 
     private void postponeActions() {
@@ -819,13 +837,12 @@ public class Game extends JPanel {
                 throw new RuntimeException("Action stack not cleared");
             }
             pendingDigging = false;
-            pendingSanstorm = false;
             pendingCultSource = null;
             if (player != getCurrentPlayer()) {
                 throw new RuntimeException("Player changed " + action);
             }
             if (!resolveAction(action)) {
-                throw new RuntimeException("Failure");
+                throw new RuntimeException("Failure " + action);
             }
         }
         System.err.println(player.getFaction().getName() + ": " + action);
@@ -838,11 +855,12 @@ public class Game extends JPanel {
         rewinding = true;
         int setupCompleteCount = 0;
         while (getCurrentPlayer() != null) {
+            final Player player = getCurrentPlayer();
             actions = new ArrayDeque<>();
             final Iterator<GameData.Pair> it = actionFeed.iterator();
             while (it.hasNext()) {
                 final GameData.Pair pair = it.next();
-                if (pair.faction == getCurrentPlayer().getFaction()) {
+                if (pair.faction == player.getFaction()) {
                     actions.addLast(pair.action);
                     it.remove();
                 } else if (!actions.isEmpty()) {
@@ -860,8 +878,8 @@ public class Game extends JPanel {
                     } else {
                         if (pendingDigging) {
                             final Hex hex = mapPanel.getHex(p.x, p.y);
-                            replayAction(new DigAction(hex, getCurrentPlayer().getHomeType(), mapPanel.getJumpableTiles(getCurrentPlayer()).contains(hex)));
-                        } else if (pendingSanstorm) {
+                            replayAction(new DigAction(hex, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
+                        } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                             final Hex hex = mapPanel.getHex(p.x, p.y);
                             replayAction(new SandstormAction(hex));
                         }
@@ -871,7 +889,7 @@ public class Game extends JPanel {
                     final Point p = mapPanel.getPoint(action.split(" ")[1]);
                     final Hex hex = mapPanel.getHex(p.x, p.y);
                     final String type = action.split(" ")[3];
-                    Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> replayAction(new DigAction(hex, t, mapPanel.getJumpableTiles(getCurrentPlayer()).contains(hex))));
+                    Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> replayAction(new DigAction(hex, t, mapPanel.getJumpableTiles(player).contains(hex))));
                 } else if (passPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     if (s.length == 1) {
@@ -930,7 +948,6 @@ public class Game extends JPanel {
                                 replayAction(new SpadeAction(SpadeAction.Source.ACTG));
                                 break;
                             case 'n':
-                                pendingSanstorm = true;
                                 replayAction(new NomadsSandstormAction());
                                 break;
                             case 's':
@@ -953,11 +970,11 @@ public class Game extends JPanel {
                     }
                 } else if (cultStepPattern.matcher(action).matches()) {
                     if (pendingCultSource == null) {
-                        if (getCurrentPlayer().getFaction() instanceof Cultists) {
+                        if (player.getFaction() instanceof Cultists) {
                             postponeActions();
                             if (phase != Phase.ACTIONS) {
                                 final GameData.Pair pair = new GameData.Pair();
-                                pair.faction = getCurrentPlayer().getFaction();
+                                pair.faction = player.getFaction();
                                 pair.action = action;
                                 actionFeed.addFirst(pair);
                                 break;
@@ -988,16 +1005,66 @@ public class Game extends JPanel {
                     replayAction(new SelectTownAction(Integer.parseInt(action.substring(3))));
                 } else if (burnPattern.matcher(action).matches()) {
                     replayAction(new BurnAction(Integer.parseInt(action.split(" ")[1])));
+                } else if (bridgePattern.matcher(action).matches()) {
+                    final String[] s = action.split(" ");
+                    final Point p1 = mapPanel.getPoint(s[1].split(":")[0]);
+                    final Point p2 = mapPanel.getPoint(s[1].split(":")[1]);
+                    replayAction(new PlaceBridgeAction(mapPanel.getHex(p1.x, p1.y), mapPanel.getHex(p2.x, p2.y)));
+                } else if (convertPattern.matcher(action).matches()) {
+                    final String[] s = action.split(" ");
+                    String from = s[1];
+                    String to = s[3];
+                    int fromCount = 0;
+                    int toCount = 0;
+                    for (int i = 0; i < from.length(); ++i) {
+                        if (from.charAt(i) < '0' || from.charAt(i) > '9') {
+                            fromCount = Integer.parseInt(from.substring(0, i));
+                            from = from.substring(i);
+                            break;
+                        }
+                    }
+                    for (int i = 0; i < to.length(); ++i) {
+                        if (to.charAt(i) < '0' || to.charAt(i) > '9') {
+                            toCount = Integer.parseInt(to.substring(0, i));
+                            to = to.substring(i);
+                            break;
+                        }
+                    }
+                    int priestsToWorkers = 0;
+                    int workersToCoins = 0;
+                    int pointsToCoins = 0;
+                    Resources power = Resources.zero;
+                    if (from.equalsIgnoreCase("pw")) {
+                        if (to.equalsIgnoreCase("p")) {
+                            power = Resources.fromPriests(toCount);
+                        } else if (to.equalsIgnoreCase("w")) {
+                            power = Resources.fromWorkers(toCount);
+                        } else if (to.equalsIgnoreCase("c")) {
+                            power = Resources.fromCoins(toCount);
+                        }
+                    } else if (from.equalsIgnoreCase("p")) {
+                        priestsToWorkers = fromCount;
+                        if (to.equalsIgnoreCase("c")) {
+                            workersToCoins = fromCount;
+                        }
+                    }
+                    else if (from.equalsIgnoreCase("w")) {
+                        workersToCoins = fromCount;
+                    }
+                    else if (from.equalsIgnoreCase("vp")) {
+                        pointsToCoins = fromCount;
+                    }
+                    replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins));
                 } else {
-                    System.err.println(action);
+                    System.err.println("Unhandled action: " + action);
                     break;
                 }
-                if (pendingCultSource == null && !pendingDigging && !pendingSanstorm) {
+                if (player.getPendingActions().isEmpty() && pendingCultSource == null && !pendingDigging) {
                     postponeActions();
                 }
             }
             if (phase == Phase.CONFIRM_ACTION) {
-                final Faction faction = getCurrentPlayer().getFaction();
+                final Faction faction = player.getFaction();
                 confirmTurn();
                 replayLeech(faction);
             }
@@ -1005,7 +1072,6 @@ public class Game extends JPanel {
                 throw new RuntimeException("Action stack not cleared");
             }
             pendingDigging = false;
-            pendingSanstorm = false;
             pendingCultSource = null;
         }
         rewinding = false;
