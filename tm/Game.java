@@ -259,7 +259,7 @@ public class Game extends JPanel {
         if (oldBon != 0) {
             bons.set(bonIndex, oldBon);
             if (oldBon < bonUsed.length) {
-                bonUsed[oldBon] = false;
+                bonUsed[oldBon - 1] = false;
             }
         } else {
             bons.remove(bonIndex);
