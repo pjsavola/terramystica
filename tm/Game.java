@@ -535,7 +535,7 @@ public class Game extends JPanel {
 
     public void confirmTurn() {
         if (phase == Phase.CONFIRM_ACTION) {
-            final Set<Player.PendingType> skippablePendingActions = getCurrentPlayer().getPendingActions();
+            final Set<Player.PendingType> skippablePendingActions = getCurrentPlayer().getSkippablePendingActions();
             if (getCurrentPlayer().getPendingActions().isEmpty() || !skippablePendingActions.isEmpty()) {
                 if (!skippablePendingActions.isEmpty()) {
                     resolveAction(new ForfeitAction());
@@ -822,7 +822,7 @@ public class Game extends JPanel {
             pendingSanstorm = false;
             pendingCultSource = null;
             if (player != getCurrentPlayer()) {
-                throw new RuntimeException("PLayer changed");
+                throw new RuntimeException("Player changed " + action);
             }
             if (!resolveAction(action)) {
                 throw new RuntimeException("Failure");
@@ -849,7 +849,7 @@ public class Game extends JPanel {
                     break;
                 }
             }
-            //System.err.println(actions);
+            //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
             while (!actions.isEmpty()) {
                 final String action = actions.removeFirst();
                 //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
@@ -970,6 +970,7 @@ public class Game extends JPanel {
                     }
                     final int cult = findCult(action.substring(1));
                     replayAction(new CultStepAction(cult, 1, pendingCultSource));
+                    pendingCultSource = null;
                 } else if (priestPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     final int cult = findCult(s[3]);
@@ -990,6 +991,9 @@ public class Game extends JPanel {
                 } else {
                     System.err.println(action);
                     break;
+                }
+                if (pendingCultSource == null && !pendingDigging && !pendingSanstorm) {
+                    postponeActions();
                 }
             }
             if (phase == Phase.CONFIRM_ACTION) {
