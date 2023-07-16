@@ -62,7 +62,7 @@ public class GameData {
                     rounds.add(Round.snellmanMapping[scoring]);
                 } else if (line.matches("Removing tile BON\\d.*")) {
                     final int bon = Integer.parseInt(line.split("[ \\t]")[2].substring(3));
-                    bons.remove(bon - 1);
+                    bons.remove((Integer) bon);
                 } else if (line.matches("Player \\d: .*")) {
                     ++players;
                 } else if (line.matches("[a-z]*\\t.*") && line.endsWith("setup")) {
@@ -78,7 +78,7 @@ public class GameData {
                     if (faction != null) {
                         final String actionLine = s[s.length - 1];
                         if (actionLine.equals("other_income_for_faction")) continue;
-                        if (actionLine.equals("cult_income_for_action")) continue;
+                        if (actionLine.equals("cult_income_for_faction")) continue;
                         if (actionLine.equals("[opponent accepted power]")) continue;
                         if (actionLine.matches("\\+\\dvp for (FIRE|WATER|EARTH|AIR)")) continue;
                         if (actionLine.matches("\\+[1-9][0-9]*vp for network")) continue;
