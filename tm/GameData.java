@@ -82,6 +82,7 @@ public class GameData {
                         if (actionLine.equals("other_income_for_faction")) continue;
                         if (actionLine.equals("cult_income_for_faction")) continue;
                         if (actionLine.equals("[opponent accepted power]")) continue;
+                        if (actionLine.equals("[all opponents declined power]")) continue;
                         if (actionLine.matches("\\+\\dvp for (FIRE|WATER|EARTH|AIR)")) continue;
                         if (actionLine.matches("\\+[1-9][0-9]*vp for network")) continue;
                         if (actionLine.equals("score_resources")) continue;

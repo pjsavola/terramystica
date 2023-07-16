@@ -158,7 +158,8 @@ public class Player extends JPanel {
     }
 
     public int getShipping() {
-        return shipping;
+        final int tmp = bons.isEmpty() ? 0 : (bons.get(0) == 4 ? 1 : 0);
+        return shipping + tmp;
     }
 
     public int getRange() {
@@ -312,8 +313,9 @@ public class Player extends JPanel {
         } else if (faction instanceof Halflings) {
             addSpades(3, false);
         } else if (faction instanceof Mermaids) {
-            if (canAdvanceShipping()) {
-                advanceShipping();
+            if (faction.getMaxShipping() > shipping) {
+                ++shipping;
+                points += faction.getAdvanceShippingPoints(shipping);
             }
         }
     }
@@ -353,8 +355,9 @@ public class Player extends JPanel {
                 addCultSteps(new int[] { 2, 2, 2, 2 });
             }
             case 7 -> {
-                if (canAdvanceShipping()) {
-                    advanceShipping();
+                if (faction.getMaxShipping() > shipping) {
+                    ++shipping;
+                    points += faction.getAdvanceShippingPoints(shipping);
                 } else if (faction instanceof Fakirs) {
                     ++range;
                 }

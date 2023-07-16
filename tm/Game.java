@@ -828,6 +828,7 @@ public class Game extends JPanel {
     private void replayAction(Action action) {
         final Player player = getCurrentPlayer();
         if (!resolveAction(action)) {
+            System.err.println("Unable to execute " + action);
             postponeActions();
             if (phase == Phase.CONFIRM_ACTION) {
                 final Faction faction = getCurrentPlayer().getFaction();

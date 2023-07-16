@@ -54,7 +54,6 @@ public class DigAction extends Action {
         } else if (!reachable) {
             return false;
         }
-
         // Partial usage of pending spades to anything but home terrain is not allowed.
         if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) return false;
         if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades()) return false;
