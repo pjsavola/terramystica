@@ -270,10 +270,11 @@ public class Player extends JPanel {
         pay(faction.getTempleCost());
         final List<Integer> favOptions = game.getSelectableFavs(this);
         final int newFavs = Math.max(favOptions.size(), faction instanceof ChaosMagicians ? 2 : 1);
-        pendingFavors += newFavs;
         if (newFavs == favOptions.size()) {
             // Automatically add the new favors because there are no other choices.
             favOptions.forEach(this::addFavor);
+        } else {
+            pendingFavors += newFavs;
         }
     }
 
@@ -329,9 +330,13 @@ public class Player extends JPanel {
         --temples;
         points += round.shsa;
         pay(faction.getSanctuaryCost());
-        ++pendingFavors;
-        if (faction instanceof ChaosMagicians) {
-            ++pendingFavors;
+        final List<Integer> favOptions = game.getSelectableFavs(this);
+        final int newFavs = Math.max(favOptions.size(), faction instanceof ChaosMagicians ? 2 : 1);
+        if (newFavs == favOptions.size()) {
+            // Automatically add the new favors because there are no other choices.
+            favOptions.forEach(this::addFavor);
+        } else {
+            pendingFavors += newFavs;
         }
     }
 

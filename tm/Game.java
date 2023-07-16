@@ -828,6 +828,7 @@ public class Game extends JPanel {
                 throw new RuntimeException("Failure");
             }
         }
+        System.err.println(player.getFaction().getName() + ": " + action);
     }
 
     public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
@@ -848,10 +849,10 @@ public class Game extends JPanel {
                     break;
                 }
             }
-            System.err.println(actions);
+            //System.err.println(actions);
             while (!actions.isEmpty()) {
                 final String action = actions.removeFirst();
-                System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
+                //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
                 if (buildPattern.matcher(action).matches()) {
                     final Point p = mapPanel.getPoint(action.split(" ")[1]);
                     if (setupCompleteCount == 0) {
@@ -880,7 +881,6 @@ public class Game extends JPanel {
                         boolean found = false;
                         for (int idx = 0; idx < bons.size(); ++idx) {
                             if (bons.get(idx) == bon) {
-                                postponeActions();
                                 replayAction(new SelectBonAction(idx));
                                 ++setupCompleteCount;
                                 found = true;
@@ -955,7 +955,7 @@ public class Game extends JPanel {
                     if (pendingCultSource == null) {
                         if (getCurrentPlayer().getFaction() instanceof Cultists) {
                             postponeActions();
-                            if (phase == Phase.CONFIRM_ACTION) {
+                            if (phase != Phase.ACTIONS) {
                                 final GameData.Pair pair = new GameData.Pair();
                                 pair.faction = getCurrentPlayer().getFaction();
                                 pair.action = action;

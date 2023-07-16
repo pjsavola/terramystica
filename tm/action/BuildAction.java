@@ -146,7 +146,7 @@ public class BuildAction extends Action {
         final StringBuilder autoPicks = new StringBuilder();
         if (structure == Hex.Structure.TEMPLE || structure == Hex.Structure.SANCTUARY) {
             final List<Integer> favOptions = game.getSelectableFavs(player);
-            final int newFavs = Math.max(favOptions.size(), player.getFaction() instanceof ChaosMagicians ? 2 : 1);
+            final int newFavs = Math.min(favOptions.size(), player.getFaction() instanceof ChaosMagicians ? 2 : 1);
             if (newFavs == favOptions.size()) {
                 favOptions.forEach(fav -> autoPicks.append(". +FAV").append(fav));
             }
