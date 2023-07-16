@@ -737,10 +737,26 @@ public class Game extends JPanel {
     }
 
 
+    private static final String cultRegex = "([Ff][Ii][Rr][Ee]|[Ww][Aa][Tt][Ee][Rr]|[Ee][Aa][Rr][Tt][Hh]|[Aa][Ii][Rr])";
     private static final Pattern buildPattern = Pattern.compile("[Bb][Uu][Ii][Ll][Dd] [A-Za-z][1-9][0-9]*");
     private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] [A-Za-z][1-9][0-9]* [Tt][Oo] .*");
     public static final Pattern leechPattern = Pattern.compile("([Ll][Ee][Ee][Cc][Hh]|[Dd][Ee][Cc][Ll][Ii][Nn][Ee]) [1-9][0-9]* from [A-Za-z]*");
-    private static final Pattern cultStepPattern = Pattern.compile("\\+([Ff][Ii][Rr][Ee]|[Ww][Aa][Tt][Ee][Rr]|[Ee][Aa][Rr][Tt][Hh]|[Aa][Ii][Rr])");
+    private static final Pattern cultStepPattern = Pattern.compile("\\+" + cultRegex);
+    private static final Pattern passPattern = Pattern.compile("[Pp][Aa][Ss][Ss]( [Bb][Oo][Nn][1-9][0-9]*)*");
+    private static final Pattern digPattern = Pattern.compile("[Dd][Ii][Gg] \\d");
+    private static final Pattern upgradePattern = Pattern.compile("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] [A-Za-z][1-9][0-9]* to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])");
+    private static final Pattern actionPattern = Pattern.compile("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6)");
+    private static final Pattern priestPattern = Pattern.compile("[Ss][Ee][Nn][Dd] [Pp] to " + cultRegex + "( for [1-3])*");
+    private static final Pattern favorPattern = Pattern.compile("\\+[Ff][Aa][Vv][1-9][0-9]*");
+    private static final Pattern townPattern = Pattern.compile("\\+[Tt][Ww][1-9]");
+    private int findCult(String cultName) {
+        for (int i = 0; i < 4; ++i) {
+            if (Cults.getCultName(i).equalsIgnoreCase(cultName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     public void replayLeech(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
         while (phase == Phase.LEECH) {
@@ -814,21 +830,26 @@ public class Game extends JPanel {
                     final Hex hex = mapPanel.getHex(p.x, p.y);
                     final String type = action.split(" ")[3];
                     Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> resolveAction(new DigAction(hex, t, mapPanel.getJumpableTiles(getCurrentPlayer()).contains(hex))));
-                } else if (action.matches("[Pp][Aa][Ss][Ss] [Bb][Oo][Nn][1-9][0-9]*")) {
-                    final int bon = Integer.parseInt(action.split(" ")[1].substring(3));
-                    boolean found = false;
-                    for (int idx = 0; idx < bons.size(); ++idx) {
-                        if (bons.get(idx) == bon) {
-                            resolveAction(new SelectBonAction(idx));
-                            ++setupCompleteCount;
-                            found = true;
-                            break;
+                } else if (passPattern.matcher(action).matches()) {
+                    final String[] s = action.split(" ");
+                    if (s.length == 1) {
+                        resolveAction(new PassAction());
+                    } else {
+                        final int bon = Integer.parseInt(action.split(" ")[1].substring(3));
+                        boolean found = false;
+                        for (int idx = 0; idx < bons.size(); ++idx) {
+                            if (bons.get(idx) == bon) {
+                                resolveAction(new SelectBonAction(idx));
+                                ++setupCompleteCount;
+                                found = true;
+                                break;
+                            }
                         }
+                        if (!found) throw new RuntimeException("Bon not available " + bon);
                     }
-                    if (!found) throw new RuntimeException("Bon not available " + bon);
-                } else if (action.matches("[Dd][Ii][Gg] \\d")) {
+                } else if (digPattern.matcher(action).matches()) {
                     pendingDigging = true;
-                } else if (action.matches("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] [A-Za-z][1-9][0-9]* to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])")) {
+                } else if (upgradePattern.matcher(action).matches()) {
                     final Point p = mapPanel.getPoint(action.split(" ")[1]);
                     final String type = action.split(" ")[3];
                     Hex.Structure structure = null;
@@ -837,7 +858,7 @@ public class Game extends JPanel {
                     if (type.equalsIgnoreCase("SH")) structure = Hex.Structure.STRONGHOLD;
                     if (type.equalsIgnoreCase("SA")) structure = Hex.Structure.SANCTUARY;
                     resolveAction(new BuildAction(p.x, p.y, structure));
-                } else if (action.matches("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6)")) {
+                } else if (actionPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     final String str = s[1].toLowerCase();
                     if (str.startsWith("act")) {
@@ -871,7 +892,7 @@ public class Game extends JPanel {
                     } else {
                         pendingCultSource = CultStepAction.Source.FAV6;
                     }
-                } else if (action.matches("\\+([Ff][Ii][Rr][Ee]|[Ww][Aa][Tt][Ee][Rr]|[Ee][Aa][Rr][Tt][Hh]|[Aa][Ii][Rr])")) {
+                } else if (cultStepPattern.matcher(action).matches()) {
                     if (pendingCultSource == null) {
                         if (getCurrentPlayer().getFaction() instanceof Cultists) {
                             while (!actions.isEmpty()) {
@@ -887,13 +908,23 @@ public class Game extends JPanel {
                             throw new RuntimeException("Unknown cult step source");
                         }
                     }
-                    final String cultStep = action.substring(1);
-                    for (int i = 0; i < 4; ++i) {
-                        if (Cults.getCultName(i).equalsIgnoreCase(cultStep)) {
-                            resolveAction(new CultStepAction(i, 1, pendingCultSource));
-                            break;
-                        }
+                    final int cult = findCult(action.substring(1));
+                    resolveAction(new CultStepAction(cult, 1, pendingCultSource));
+                } else if (priestPattern.matcher(action).matches()) {
+                    final String s[] = action.split(" ");
+                    final int cult = findCult(s[3]);
+                    int steps = 1;
+                    if (s.length == 4) {
+                        if (cultPanel.isCultSpotFree(cult, 3)) steps = 3;
+                        else if (cultPanel.isCultSpotFree(cult, 2)) steps = 2;
+                    } else {
+                        steps = Integer.parseInt(s[5]);
                     }
+                    resolveAction(new PriestToCultAction(cult, steps));
+                } else if (favorPattern.matcher(action).matches()) {
+                    resolveAction(new SelectFavAction(Integer.parseInt(action.substring(4))));
+                } else if (townPattern.matcher(action).matches()) {
+                    resolveAction(new SelectTownAction(Integer.parseInt(action.substring(3))));
                 } else {
                     System.err.println(action);
                     break;
