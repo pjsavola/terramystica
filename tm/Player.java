@@ -571,7 +571,7 @@ public class Player extends JPanel {
             if (workers < amount * digging)
                 throw new RuntimeException("Cannot afford to dig " + amount);
 
-            if (amount % 2 != 0 && faction instanceof Giants)
+            if ((amount + pendingSpades) % 2 != 0 && faction instanceof Giants)
                 throw new RuntimeException("Giants can only dig even amounts");
 
             workers -= amount * digging;
@@ -586,7 +586,7 @@ public class Player extends JPanel {
         if (faction instanceof Darklings) {
             return priests >= amount;
         } else {
-            if (amount % 2 != 0 && faction instanceof Giants) return false;
+            if ((amount + pendingSpades) % 2 != 0 && faction instanceof Giants) return false;
             if (useRange) {
                 if (rangeUsedForDigging) {
                     return false;
