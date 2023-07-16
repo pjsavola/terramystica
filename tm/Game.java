@@ -867,7 +867,7 @@ public class Game extends JPanel {
                     break;
                 }
             }
-            //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
+            System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
             while (!actions.isEmpty()) {
                 final String action = actions.removeFirst();
                 //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
@@ -876,11 +876,10 @@ public class Game extends JPanel {
                     if (setupCompleteCount == 0) {
                         replayAction(new PlaceInitialDwellingAction(p.x, p.y));
                     } else {
-                        if (pendingDigging) {
-                            final Hex hex = mapPanel.getHex(p.x, p.y);
+                        final Hex hex = mapPanel.getHex(p.x, p.y);
+                        if (pendingDigging && !player.hasPendingBuild(hex)) {
                             replayAction(new DigAction(hex, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
                         } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
-                            final Hex hex = mapPanel.getHex(p.x, p.y);
                             replayAction(new SandstormAction(hex));
                         }
                         replayAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
