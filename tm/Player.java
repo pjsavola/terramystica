@@ -569,7 +569,16 @@ public class Player extends JPanel {
         }
         this.points += pointsFromCoins;
         this.coins -= ratio * pointsFromCoins;
+    }
 
+    public int autoConvert() {
+        burn(getMaxBurn());
+        convert(Resources.fromCoins(power[2]));
+        convert(priests, workers + priests, 0, 0);
+        final int ratio = faction instanceof Alchemists ? 2 : 3;
+        final int vp = coins / ratio;
+        convert(0, 0, 0, vp);
+        return vp;
     }
 
     public void dig(int amount) {
@@ -849,7 +858,7 @@ public class Player extends JPanel {
             g.fillRect(dx, dy, 300, 16);
             g.setColor(faction.getHomeType().getFontColor());
             String factionName = faction.getName();
-            if (myTurn) {
+            if (myTurn && game.phase != Game.Phase.END) {
                 if (game.phase == Game.Phase.CONFIRM_ACTION) {
                     final String pending = game.getCurrentPlayer().getPendingActions().stream().map(PendingType::getDescription).collect(Collectors.joining(" / ")).toUpperCase();
                     final String txt = pending.isEmpty() ? "CONFIRM TURN" : pending;

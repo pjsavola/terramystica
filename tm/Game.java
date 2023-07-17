@@ -311,7 +311,9 @@ public class Game extends JPanel {
             phase = Phase.ACTIONS;
         }
         if (round > 6) {
+            System.err.println("--- End Scoring ---");
             phase = Phase.END;
+            endScoring();
         } else {
             for (int i = 0; i < 6; ++i) {
                 usedPowerActions[i] = false;
@@ -593,7 +595,7 @@ public class Game extends JPanel {
                 }
                 if (turnOrder.isEmpty()) {
                     if (cultIncome == round) {
-                        if (cultIncome > 0) {
+                        if (cultIncome > 0 && cultIncome < 6) {
                             for (Player p : nextTurnOrder) {
                                 p.addCultIncome(gameData.rounds.get(cultIncome - 1));
                                 if (p.getPendingSpades() > 0) {
@@ -752,6 +754,13 @@ public class Game extends JPanel {
 
     public boolean resolvingCultSpades() {
         return round > 0 && cultIncome > round;
+    }
+
+    private void endScoring() {
+        for (Player player : players) {
+            final int vp = player.autoConvert();
+            System.err.println(player + " VP from resources: " + vp);
+        }
     }
 
 
@@ -1084,7 +1093,7 @@ public class Game extends JPanel {
             // R4: 128
             // R5: 170
             // R6: 240
-            /*if (counter == 215) {
+            /*if (counter == 303) {
                 break;
             }*/
             if (!actions.isEmpty()) {
