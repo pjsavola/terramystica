@@ -765,23 +765,22 @@ public class Game extends JPanel {
         for (int i = 0; i < 4; ++i) {
             final int cult = i;
             final List<Player> sorted = players.stream().sorted((p1, p2) -> p2.getCultSteps(cult) - p1.getCultSteps(cult)).toList();
-            int reward = 8;
+            final int[] rewards = { 8, 4, 2 };
+            int rewardIdx = 0;
             for (int j = 0; j < sorted.size(); ) {
                 final Player player = sorted.get(j);
                 final int steps = player.getCultSteps(cult);
                 if (steps == 0) {
                     break;
                 }
-                int totalReward = reward;
-                reward /= 2;
+                int totalReward = rewards[rewardIdx++];
                 int k = j + 1;
                 while (k < sorted.size()) {
                     if (sorted.get(k).getCultSteps(cult) < steps) {
                         break;
                     }
-                    totalReward += reward;
+                    totalReward += rewardIdx >= rewards.length ? 0 : rewards[rewardIdx++];
                     ++k;
-                    reward /= 2;
                 }
                 int tiedPlayers = k - j;
                 final int playerReward = totalReward / tiedPlayers;
@@ -792,11 +791,45 @@ public class Game extends JPanel {
                     --tiedPlayers;
                     ++j;
                 }
-                if (reward < 2) {
+                if (rewardIdx >= rewards.length) {
                     break;
                 }
             }
         }
+
+        final Map<Player, Integer> networkSizes = new HashMap<>();
+        for (Player player : players) {
+            networkSizes.put(player, mapPanel.getNetworkSize(player));
+        }
+        final List<Player> sorted = players.stream().sorted((p1, p2) -> networkSizes.get(p2) - networkSizes.get(p1)).toList();
+        final int[] rewards = { 18, 12, 6 };
+        int rewardIdx = 0;
+        for (int j = 0; j < sorted.size(); ) {
+            final Player player = sorted.get(j);
+            final int steps = networkSizes.get(player);
+            int totalReward = rewards[rewardIdx++];
+            int k = j + 1;
+            while (k < sorted.size()) {
+                if (networkSizes.get(sorted.get(k)) < steps) {
+                    break;
+                }
+                totalReward += rewardIdx >= rewards.length ? 0 : rewards[rewardIdx++];
+                ++k;
+            }
+            int tiedPlayers = k - j;
+            final int playerReward = totalReward / tiedPlayers;
+            while (tiedPlayers > 0) {
+                final Player p = sorted.get(j + tiedPlayers - 1);
+                p.score(playerReward);
+                System.err.println(p + " " + playerReward + " VP from from network");
+                --tiedPlayers;
+                ++j;
+            }
+            if (rewardIdx >= rewards.length) {
+                break;
+            }
+        }
+
     }
 
 

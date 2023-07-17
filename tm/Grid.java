@@ -425,4 +425,66 @@ public class Grid extends JPanel {
         }
         return null;
     }
+
+    public int getNetworkSize(Player player) {
+        final Deque<Hex> work = new ArrayDeque<>();
+        final int shipping = player.getShipping();
+        final int range = player.getRange();
+        final Set<Hex> visited = new HashSet<>();
+        int maxSize = 0;
+
+        if (range == 1) {
+            Hex a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).findAny().orElse(null);
+            while (a != null) {
+                int size = 0;
+                work.add(a);
+                visited.add(a);
+                while (!work.isEmpty()) {
+                    final Hex hex = work.removeFirst();
+                    if (!hex.isEmpty() && hex.getType() == player.getHomeType()) {
+                        ++size;
+                    }
+                    final Deque<Hex> water = new ArrayDeque<>();
+                    final Map<Hex, Integer> waterDistances = new HashMap<>();
+                    hex.getNeighbors().stream().filter(n -> n.getType() == Hex.Type.WATER).forEach(n -> {
+                        waterDistances.put(n, 1);
+                        water.add(n);
+                    });
+                    while (!water.isEmpty()) {
+                        final Hex waterHex = water.removeFirst();
+                        final int distance = waterDistances.get(waterHex) + 1;
+                        waterHex.getNeighbors().stream().filter(n -> n.getType() == Hex.Type.WATER && !waterDistances.containsKey(n)).forEach(n -> {
+                            waterDistances.put(n, distance);
+                            if (shipping >= distance) {
+                                water.add(n);
+                            }
+                        });
+                        waterHex.getNeighbors().stream().filter(n -> n.getType() == player.getHomeType() && !n.isEmpty()).forEach(n -> {
+                            if (visited.add(n)) {
+                                work.add(n);
+                            }
+                        });
+                    }
+                    hex.getNeighbors().stream().filter(n -> n.getType() == player.getHomeType() && !n.isEmpty()).forEach(n -> {
+                        if (visited.add(n)) {
+                            work.add(n);
+                        }
+                    });
+                    for (Bridge bridge : bridges) {
+                        final Hex neighbor = bridge.getOtherEnd(hex);
+                        if (neighbor != null) {
+                            if (visited.add(neighbor)) {
+                                work.add(neighbor);
+                            }
+                        }
+                    }
+                }
+                if (size > maxSize) {
+                    maxSize = size;
+                }
+                a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
+            }
+        }
+        return maxSize;
+    }
 }
