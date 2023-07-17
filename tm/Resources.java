@@ -60,7 +60,7 @@ public class Resources {
     public static final Resources c5w2p1 = c5.combine(w2).combine(p1);
     public static final Resources c1w2p1 = c1.combine(w2).combine(p1);
     public static final Resources w1pw3 = w1.combine(pw3);
-    public static final Resources w2pw1 = w2.combine(pw1);
+    public static final Resources w1pw1 = w1.combine(pw1);
 
     public static Resources fromCoins(int coins) {
         return new Resources(coins, 0, 0, 0);
