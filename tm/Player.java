@@ -581,6 +581,10 @@ public class Player extends JPanel {
         return vp;
     }
 
+    public void score(int vp) {
+        points += vp;
+    }
+
     public void dig(int amount) {
         if (faction instanceof Darklings) {
             if (priests < amount) {

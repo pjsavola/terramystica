@@ -761,6 +761,42 @@ public class Game extends JPanel {
             final int vp = player.autoConvert();
             System.err.println(player + " VP from resources: " + vp);
         }
+
+        for (int i = 0; i < 4; ++i) {
+            final int cult = i;
+            final List<Player> sorted = players.stream().sorted((p1, p2) -> p2.getCultSteps(cult) - p1.getCultSteps(cult)).toList();
+            int reward = 8;
+            for (int j = 0; j < sorted.size(); ) {
+                final Player player = sorted.get(j);
+                final int steps = player.getCultSteps(cult);
+                if (steps == 0) {
+                    break;
+                }
+                int totalReward = reward;
+                reward /= 2;
+                int k = j + 1;
+                while (k < sorted.size()) {
+                    if (sorted.get(k).getCultSteps(cult) < steps) {
+                        break;
+                    }
+                    totalReward += reward;
+                    ++k;
+                    reward /= 2;
+                }
+                int tiedPlayers = k - j;
+                final int playerReward = totalReward / tiedPlayers;
+                while (tiedPlayers > 0) {
+                    final Player p = sorted.get(j + tiedPlayers - 1);
+                    p.score(playerReward);
+                    System.err.println(p + " " + playerReward + " VP from from " + Cults.getCultName(cult));
+                    --tiedPlayers;
+                    ++j;
+                }
+                if (reward < 2) {
+                    break;
+                }
+            }
+        }
     }
 
 
