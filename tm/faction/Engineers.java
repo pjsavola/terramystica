@@ -61,7 +61,7 @@ public class Engineers extends Faction {
 
     @Override
     public Resources getStrongholdIncome() {
-        return Resources.pw4;
+        return Resources.pw2;
     }
 
     @Override

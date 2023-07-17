@@ -816,6 +816,7 @@ public class Game extends JPanel {
     private Deque<String> actions;
     boolean pendingDigging = false;
     CultStepAction.Source pendingCultSource = null;
+    int counter = 0;
 
     private void postponeActions() {
         while (!actions.isEmpty()) {
@@ -848,7 +849,7 @@ public class Game extends JPanel {
                 throw new RuntimeException("Failure " + action);
             }
         }
-        System.err.println(player.getFaction().getName() + ": " + action);
+        System.err.println((++counter) + " -- " + player.getFaction().getName() + ": " + action);
     }
 
     public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
@@ -870,7 +871,7 @@ public class Game extends JPanel {
                     break;
                 }
             }
-            System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
+            //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
             while (!actions.isEmpty()) {
                 final String action = actions.removeFirst();
                 //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
@@ -1075,6 +1076,10 @@ public class Game extends JPanel {
                 confirmTurn();
                 replayLeech(faction);
             }
+            /*
+            if (counter == 170) {
+                break;
+            }*/
             if (!actions.isEmpty()) {
                 throw new RuntimeException("Action stack not cleared");
             }

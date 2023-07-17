@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ForfeitAction extends PendingAction {
+public class ForfeitAction extends Action {
 
     private Set<Player.PendingType> types;
     private int spadeCount;
@@ -20,6 +20,11 @@ public class ForfeitAction extends PendingAction {
         if (types.contains(Player.PendingType.USE_SPADES)) {
             spadeCount = player.getPendingSpades();
         }
+    }
+
+    @Override
+    public boolean validatePhase() {
+        return (game.phase == Game.Phase.ACTIONS && spadeCount > 0) || game.phase == Game.Phase.CONFIRM_ACTION;
     }
 
     @Override
