@@ -399,10 +399,7 @@ public class Player extends JPanel {
 
         payPower(actionCost[act - 1]);
         switch (act) {
-            case 1 -> {
-                ++pendingBridges;
-                --bridgesLeft;
-            }
+            case 1 -> ++pendingBridges;
             case 2 -> addIncome(Resources.p1);
             case 3 -> addIncome(Resources.w2);
             case 4 -> addIncome(Resources.c7);
@@ -965,6 +962,7 @@ public class Player extends JPanel {
 
     public void placeBridge(Hex hex1, Hex hex2) {
         --pendingBridges;
+        --bridgesLeft;
         game.bridgePlaced(new Bridge(this, hex1, hex2));
     }
 
