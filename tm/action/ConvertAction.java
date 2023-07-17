@@ -9,12 +9,14 @@ public class ConvertAction extends Action {
     private final int priestsToWorkers;
     private final int workersToCoins;
     private final int pointsToCoins;
+    private final int coinsToPoints;
 
-    public ConvertAction(Resources powerConversions, int priestsToWorkers, int workersToCoins, int pointsToCoins) {
+    public ConvertAction(Resources powerConversions, int priestsToWorkers, int workersToCoins, int pointsToCoins, int coinsToPoints) {
         this.powerConversions = powerConversions;
         this.priestsToWorkers = priestsToWorkers;
         this.workersToCoins = workersToCoins;
         this.pointsToCoins = pointsToCoins;
+        this.coinsToPoints = coinsToPoints;
     }
 
     public boolean validatePhase() {
@@ -23,12 +25,12 @@ public class ConvertAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return powerConversions.power == 0 && player.canAffordPower(getPowerCost(powerConversions)) && player.canConvert(priestsToWorkers, workersToCoins, pointsToCoins);
+        return powerConversions.power == 0 && player.canAffordPower(getPowerCost(powerConversions)) && player.canConvert(priestsToWorkers, workersToCoins, pointsToCoins, coinsToPoints);
     }
 
     @Override
     public void execute() {
-        player.convert(priestsToWorkers, workersToCoins, pointsToCoins);
+        player.convert(priestsToWorkers, workersToCoins, pointsToCoins, coinsToPoints);
         player.convert(powerConversions);
     }
 

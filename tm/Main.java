@@ -98,7 +98,7 @@ public class Main {
                     if (pw2w > 0) powerConversions = powerConversions.combine(Resources.fromWorkers(pw2w));
                     if (pw2c > 0) powerConversions = powerConversions.combine(Resources.fromCoins(pw2c));
                     if (powerConversions != Resources.zero || p2w > 0 || w2c > 0 || vp2c > 0) {
-                        game.resolveAction(new ConvertAction(powerConversions, p2w, w2c, vp2c));
+                        game.resolveAction(new ConvertAction(powerConversions, p2w, w2c, vp2c, 0));
                     }
                 } catch (NumberFormatException ex) {
                     System.err.println("Invalid number: " + ex.getMessage());
@@ -191,10 +191,10 @@ public class Main {
                                     }
                                 }
                             }
-                            case KeyEvent.VK_C -> game.resolveAction(new ConvertAction(Resources.c1, 0, 0, 0));
-                            case KeyEvent.VK_W -> game.resolveAction(new ConvertAction(Resources.w1, 0, 0, 0));
-                            case KeyEvent.VK_P -> game.resolveAction(new ConvertAction(Resources.p1, 0, 0, 0));
-                            case KeyEvent.VK_A -> game.resolveAction(new ConvertAction(Resources.zero, 0, 0, 1));
+                            case KeyEvent.VK_C -> game.resolveAction(new ConvertAction(Resources.c1, 0, 0, 0, 0));
+                            case KeyEvent.VK_W -> game.resolveAction(new ConvertAction(Resources.w1, 0, 0, 0, 0));
+                            case KeyEvent.VK_P -> game.resolveAction(new ConvertAction(Resources.p1, 0, 0, 0, 0));
+                            case KeyEvent.VK_A -> game.resolveAction(new ConvertAction(Resources.zero, 0, 0, 1, 0));
                             case KeyEvent.VK_ESCAPE -> game.rewind();
                         }
                         break;

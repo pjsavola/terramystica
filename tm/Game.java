@@ -1036,6 +1036,7 @@ public class Game extends JPanel {
                     int priestsToWorkers = 0;
                     int workersToCoins = 0;
                     int pointsToCoins = 0;
+                    int pointsFromCoins = 0;
                     Resources power = Resources.zero;
                     if (from.equalsIgnoreCase("pw")) {
                         if (to.equalsIgnoreCase("p")) {
@@ -1057,7 +1058,10 @@ public class Game extends JPanel {
                     else if (from.equalsIgnoreCase("vp")) {
                         pointsToCoins = fromCount;
                     }
-                    replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins));
+                    if (to.equalsIgnoreCase("vp")) {
+                        pointsFromCoins = toCount;
+                    }
+                    replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins, pointsFromCoins));
                 } else if (advancePattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     replayAction(new AdvanceAction(s[1].equalsIgnoreCase("dig")));

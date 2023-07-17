@@ -544,20 +544,32 @@ public class Player extends JPanel {
         }
     }
 
-    public boolean canConvert(int priests, int workers, int points) {
+    public boolean canConvert(int priests, int workers, int pointsToCoins, int pointsFromCoins) {
         final int priestsToCoins = Math.min(priests, workers);
-        return this.priests >= priests && this.workers >= workers - priestsToCoins && (points == 0 || (faction instanceof Alchemists && this.points >= points));
+        if (this.priests >= priests && this.workers >= workers - priestsToCoins && (pointsToCoins == 0 || (faction instanceof Alchemists && points >= pointsToCoins))) {
+            if (pointsFromCoins > 0) {
+                final int ratio = faction instanceof Alchemists ? 2 : 3;
+                return (coins + workers + priestsToCoins) * ratio >= pointsFromCoins;
+            }
+            return true;
+        }
+        return false;
     }
 
-    public void convert(int priests, int workers, int points) {
+    public void convert(int priests, int workers, int pointsToCoins, int pointsFromCoins) {
         this.priests -= priests;
         this.workers -= workers;
         this.workers += priests;
         this.coins += workers;
+        int ratio = 3;
         if (faction instanceof Alchemists) {
-            this.points -= points;
-            this.coins += points;
+            points -= pointsToCoins;
+            coins += pointsToCoins;
+            ratio = 2;
         }
+        this.points += pointsFromCoins;
+        this.coins -= ratio * pointsFromCoins;
+
     }
 
     public void dig(int amount) {
