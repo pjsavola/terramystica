@@ -141,7 +141,7 @@ public class Pool extends JPanel {
                 ++count;
                 ++i;
             }
-            final boolean used = count == 1 && fav == 6 && fav6Used[0];
+            final boolean used = count == 1 && fav == 6 && fav6Used != null && fav6Used[0];
             Favs.drawFav(g, x, y, fav, count, used);
             x += 105;
             if (++items == 10) {

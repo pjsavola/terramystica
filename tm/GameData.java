@@ -79,6 +79,18 @@ public class GameData {
                     final Faction faction = factionMap.get(s[0]);
                     if (faction != null) {
                         final String actionLine = s[s.length - 1];
+                        boolean skip = false;
+                        for (String str : s) {
+                            if (str.matches("0/0/[1-9][0-9]* PW")) {
+                                if (actionLine.matches("[Dd][Ee][Cc][Ll][Ii][Nn][Ee].*")) {
+                                    // Skip redundant decline
+                                    skip = true;
+                                    break;
+                                }
+                                break;
+                            }
+                        }
+                        if (skip) continue;
                         if (actionLine.equals("other_income_for_faction")) continue;
                         if (actionLine.equals("cult_income_for_faction")) continue;
                         if (actionLine.equals("[opponent accepted power]")) continue;
