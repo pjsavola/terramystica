@@ -784,12 +784,13 @@ public class Game extends JPanel {
                 }
                 int tiedPlayers = k - j;
                 final int playerReward = totalReward / tiedPlayers;
-                while (tiedPlayers > 0) {
-                    final Player p = sorted.get(j + tiedPlayers - 1);
+                while (j < k) {
+                    final Player p = sorted.get(j);
                     p.score(playerReward);
                     System.err.println(p + " " + playerReward + " VP from from " + Cults.getCultName(cult));
-                    --tiedPlayers;
-                    ++j;
+                    if (++j >= sorted.size()) {
+                        break;
+                    }
                 }
                 if (rewardIdx >= rewards.length) {
                     break;
@@ -816,20 +817,21 @@ public class Game extends JPanel {
                 totalReward += rewardIdx >= rewards.length ? 0 : rewards[rewardIdx++];
                 ++k;
             }
-            int tiedPlayers = k - j;
+            final int tiedPlayers = k - j;
             final int playerReward = totalReward / tiedPlayers;
-            while (tiedPlayers > 0) {
-                final Player p = sorted.get(j + tiedPlayers - 1);
+            while (j < k) {
+                final Player p = sorted.get(j);
                 p.score(playerReward);
                 System.err.println(p + " " + playerReward + " VP from from network");
-                --tiedPlayers;
-                ++j;
+                if (++j >= sorted.size()) {
+                    break;
+                }
             }
             if (rewardIdx >= rewards.length) {
                 break;
             }
         }
-
+        refresh();
     }
 
 
