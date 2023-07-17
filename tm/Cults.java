@@ -118,6 +118,7 @@ public class Cults extends JPanel {
             int x = i * 50;
             final int w = metrics.stringWidth(getCultName(i));
             final int h = metrics.getHeight();
+            g.setColor(Color.BLACK);
             g.drawString(getCultName(i), x + 3, h);
             for (int step = 10; step >= 0; --step) {
                 int y = 18 + 48 * (10 - step);
@@ -158,7 +159,7 @@ public class Cults extends JPanel {
                     g.drawString(j == 0 ? "3" : "2", x + 3 + 10 * j, 540 + h);
                 } else {
                     g.setColor(cultPriests[i][j].getHomeType().getBuildingColor());
-                    g.drawString("P", x + 3, 540 + h);
+                    g.drawString("P", x + 3 + 10 * j, 540 + h);
                 }
             }
         }
