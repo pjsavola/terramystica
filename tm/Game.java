@@ -601,10 +601,18 @@ public class Game extends JPanel {
                             final int myIdx = gameData.factions.indexOf(player.getFaction());
                             final int startPlayerIdx = gameData.factions.indexOf(nextTurnOrder.get(0).getFaction());
                             final int delta = (startPlayerIdx - myIdx + gameData.playerCount) % gameData.playerCount;
-                            if (nextTurnOrder.size() <= delta) {
+                            boolean added = false;
+                            for (int i = 0; i < nextTurnOrder.size(); ++i) {
+                                final int idx = gameData.factions.indexOf(nextTurnOrder.get(i).getFaction());
+                                final int d = (startPlayerIdx - idx + gameData.playerCount) % gameData.playerCount;
+                                if (delta < d) {
+                                    nextTurnOrder.add(i, player);
+                                    added = true;
+                                    break;
+                                }
+                            }
+                            if (!added) {
                                 nextTurnOrder.add(player);
-                            } else {
-                                nextTurnOrder.add(delta, player);
                             }
                         }
                     }
@@ -896,7 +904,7 @@ public class Game extends JPanel {
                             throw new RuntimeException("Faction not found " + s[3]);
                         }
                         if (faction == from) {
-                            //System.err.println(pair.faction.getName() + ": " + pair.action);
+                            System.err.println(pair.faction.getName() + ": " + pair.action);
                             resolveAction(new LeechAction(accept));
                             it.remove();
                             break;
@@ -926,7 +934,6 @@ public class Game extends JPanel {
     private void replayAction(Action action) {
         final Player player = getCurrentPlayer();
         if (!resolveAction(action)) {
-            System.err.println("Unable to execute " + action);
             postponeActions();
             if (phase == Phase.CONFIRM_ACTION) {
                 final Faction faction = getCurrentPlayer().getFaction();
@@ -946,7 +953,7 @@ public class Game extends JPanel {
             }
         }
         ++counter;
-        //System.err.println(counter + " -- " + player.getFaction().getName() + ": " + action);
+        System.err.println(counter + " -- " + player.getFaction().getName() + ": " + action);
     }
 
     public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
@@ -1159,6 +1166,7 @@ public class Game extends JPanel {
                         pointsFromCoins = toCount;
                     }
                     replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins, pointsFromCoins));
+                    pendingDigging = false;
                 } else if (advancePattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     replayAction(new AdvanceAction(s[1].equalsIgnoreCase("dig")));
@@ -1181,6 +1189,9 @@ public class Game extends JPanel {
             // R4: 128
             // R5: 170
             // R6: 240
+            if (counter >= 500) {
+                break;
+            }
             if (!actions.isEmpty()) {
                 throw new RuntimeException("Action stack not cleared");
             }
