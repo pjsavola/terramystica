@@ -218,11 +218,19 @@ public class Game extends JPanel {
         reset();
         for (int i = 0; i < history.size(); ++i) {
             final Action action = history.get(i);
+            boolean freeAction = action.isFree();
             resolveAction(action);
             if (phase == Phase.CONFIRM_ACTION) {
                 for (int j = i + 1; j < history.size(); ++j) {
                     final Action futureAction = history.get(j);
-                    if (futureAction.isFree() && futureAction.getPlayer() == action.getPlayer()) {
+                    if (futureAction.getPlayer() != action.getPlayer()) {
+                        break;
+                    }
+                    final boolean futureActionFree = futureAction.isFree();
+                    if (freeAction || futureActionFree) {
+                        if (!futureActionFree) {
+                            freeAction = false;
+                        }
                         resolveAction(futureAction);
                         ++i;
                     } else {
@@ -531,6 +539,9 @@ public class Game extends JPanel {
             }
             refresh();
             return true;
+        }
+        if (rewinding) {
+            System.err.println("!!! " + action + " failed");
         }
         return false;
     }
@@ -880,7 +891,7 @@ public class Game extends JPanel {
                             throw new RuntimeException("Faction not found " + s[3]);
                         }
                         if (faction == from) {
-                            System.err.println(pair.faction.getName() + ": " + pair.action);
+                            //System.err.println(pair.faction.getName() + ": " + pair.action);
                             resolveAction(new LeechAction(accept));
                             it.remove();
                             break;
@@ -929,7 +940,8 @@ public class Game extends JPanel {
                 throw new RuntimeException("Failure " + action);
             }
         }
-        System.err.println((++counter) + " -- " + player.getFaction().getName() + ": " + action);
+        ++counter;
+        System.err.println(counter + " -- " + player.getFaction().getName() + ": " + action);
     }
 
     public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
@@ -1164,9 +1176,9 @@ public class Game extends JPanel {
             // R4: 128
             // R5: 170
             // R6: 240
-            /*if (counter == 303) {
+            if (counter == 170) {
                 break;
-            }*/
+            }
             if (!actions.isEmpty()) {
                 throw new RuntimeException("Action stack not cleared");
             }

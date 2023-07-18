@@ -13,6 +13,7 @@ public class DigAction extends Action {
     private int requiredSpades;
     private int requiredDigging;
     private int pendingSpades;
+    private boolean resolvingCultSpades;
 
     public DigAction(Hex target, Hex.Type type, boolean jump) {
         this.target = target;
@@ -26,6 +27,7 @@ public class DigAction extends Action {
         requiredSpades = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
         pendingSpades = player.getPendingSpades();
         requiredDigging = Math.max(0, requiredSpades - pendingSpades);
+        resolvingCultSpades = game.resolvingCultSpades();
     }
 
     public static int getSpadeCost(Hex hex, Hex.Type type) {
@@ -43,7 +45,7 @@ public class DigAction extends Action {
 
     @Override
     public boolean canExecute() {
-        if (game.resolvingCultSpades()) {
+        if (resolvingCultSpades) {
             if (jump || requiredDigging > 0) {
                 return false;
             }
@@ -73,14 +75,14 @@ public class DigAction extends Action {
         }
         player.useSpades(requiredSpades);
         target.setType(type);
-        if (type == player.getHomeType() && !game.resolvingCultSpades()) {
+        if (type == player.getHomeType() && !resolvingCultSpades) {
             player.addPendingBuild(target);
         }
     }
 
     @Override
     public boolean isFree() {
-        return pendingSpades > 0;
+        return pendingSpades > 0 && !resolvingCultSpades;
     }
 
     @Override
