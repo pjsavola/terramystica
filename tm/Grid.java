@@ -484,6 +484,55 @@ public class Grid extends JPanel {
                 }
                 a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
             }
+        } else {
+            Hex a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).findAny().orElse(null);
+            while (a != null) {
+                int size = 0;
+                work.add(a);
+                visited.add(a);
+                while (!work.isEmpty()) {
+                    final Hex hex = work.removeFirst();
+                    if (!hex.isEmpty() && hex.getType() == player.getHomeType()) {
+                        ++size;
+                    }
+                    final Deque<Hex> other = new ArrayDeque<>();
+                    final Map<Hex, Integer> otherDistances = new HashMap<>();
+                    for (Hex n : hex.getNeighbors()) {
+                        if (n.getType() == player.getHomeType() && !n.isEmpty()) {
+                            if (visited.add(n)) {
+                                work.add(n);
+                            }
+                        } else {
+                            if (!otherDistances.containsKey(n)) {
+                                otherDistances.put(n, 1);
+                                other.add(n);
+                            }
+                        }
+                    }
+                    while (!other.isEmpty()) {
+                        final Hex otherHex = other.removeFirst();
+                        final int distance = otherDistances.get(otherHex) + 1;
+                        for (Hex n : otherHex.getNeighbors()) {
+                            if (n.getType() == player.getHomeType() && !n.isEmpty()) {
+                                if (visited.add(n)) {
+                                    work.add(n);
+                                }
+                            } else {
+                                if (!otherDistances.containsKey(n)) {
+                                    otherDistances.put(n, distance);
+                                    if (range > distance) {
+                                        other.add(hex);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (size > maxSize) {
+                    maxSize = size;
+                }
+                a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
+            }
         }
         return maxSize;
     }
