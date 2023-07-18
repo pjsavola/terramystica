@@ -12,6 +12,7 @@ public class DigAction extends Action {
     private final boolean jump;
     private int requiredSpades;
     private int requiredDigging;
+    private int pendingSpades;
 
     public DigAction(Hex target, Hex.Type type, boolean jump) {
         this.target = target;
@@ -23,7 +24,8 @@ public class DigAction extends Action {
     public void setData(Game game, Player player) {
         super.setData(game, player);
         requiredSpades = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
-        requiredDigging = Math.max(0, requiredSpades - player.getPendingSpades());
+        pendingSpades = player.getPendingSpades();
+        requiredDigging = Math.max(0, requiredSpades - pendingSpades);
     }
 
     public static int getSpadeCost(Hex hex, Hex.Type type) {
@@ -55,8 +57,8 @@ public class DigAction extends Action {
             return false;
         }
         // Partial usage of pending spades to anything but home terrain is not allowed.
-        if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) return false;
-        if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades()) return false;
+        if (requiredDigging > 0 && pendingSpades > 0 && !player.allowExtraSpades) return false;
+        if (pendingSpades > 1 && type != player.getHomeType() && requiredSpades < pendingSpades) return false;
         return target.getStructure() == null && requiredSpades != 0 && player.canDig(requiredDigging, jump);
     }
 
@@ -66,7 +68,7 @@ public class DigAction extends Action {
             player.useRange(true);
         }
         if (requiredDigging > 0) {
-            if (player.getPendingSpades() > 0 && !player.allowExtraSpades) throw new RuntimeException("Adding extra spades not allowed");
+            if (pendingSpades > 0 && !player.allowExtraSpades) throw new RuntimeException("Adding extra spades not allowed");
             player.dig(requiredDigging);
         }
         player.useSpades(requiredSpades);
@@ -74,6 +76,11 @@ public class DigAction extends Action {
         if (type == player.getHomeType() && !game.resolvingCultSpades()) {
             player.addPendingBuild(target);
         }
+    }
+
+    @Override
+    public boolean isFree() {
+        return pendingSpades > 0;
     }
 
     @Override

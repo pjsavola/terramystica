@@ -134,7 +134,7 @@ public class BuildAction extends Action {
 
     @Override
     public boolean isFree() {
-        return pendingBuild || super.isFree();
+        return pendingBuild;
     }
 
     @Override
