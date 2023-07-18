@@ -68,11 +68,14 @@ public class GameData {
                 } else if (line.matches("Player \\d: .*")) {
                     ++players;
                 } else if (line.matches("[a-z]*\\t.*") && line.endsWith("setup")) {
-                    final String faction = line.split("\\t")[0];
-                    allFactions.stream().filter(f -> f.getName().equalsIgnoreCase(faction)).findFirst().ifPresent(f -> {
-                        factions.add(0, f);
-                        factionMap.put(faction, f);
-                    });
+                    final String factionName = line.split("\\t")[0];
+                    final Faction faction = allFactions.stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(factionName)).findFirst().orElse(null);
+                    if (faction != null) {
+                        factions.add(0, faction);
+                        factionMap.put(factionName, faction);
+                    } else {
+                        System.err.println(factionName + " not found");
+                    }
                 } else {
                     final String[] s = line.split("\\t");
                     if (s.length == 0) throw new RuntimeException("Empty line: " + line);

@@ -891,7 +891,7 @@ public class Game extends JPanel {
                         }
                         final String[] s = pair.action.split(" ");
                         final boolean accept = s[0].equalsIgnoreCase("Leech");
-                        final Faction faction = gameData.factions.stream().filter(f -> f.getName().equalsIgnoreCase(s[3])).findAny().orElse(null);
+                        final Faction faction = gameData.factions.stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(s[3])).findAny().orElse(null);
                         if (faction == null) {
                             throw new RuntimeException("Faction not found " + s[3]);
                         }
@@ -1181,9 +1181,6 @@ public class Game extends JPanel {
             // R4: 128
             // R5: 170
             // R6: 240
-            if (counter == 170) {
-                break;
-            }
             if (!actions.isEmpty()) {
                 throw new RuntimeException("Action stack not cleared");
             }
