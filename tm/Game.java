@@ -275,6 +275,10 @@ public class Game extends JPanel {
         }
     }
 
+    public void finalPass(Player player) {
+        bons.add(player.removeBon());
+    }
+
     public boolean canSelectTown(int town) {
         return towns.contains(town);
     }

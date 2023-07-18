@@ -795,6 +795,12 @@ public class Player extends JPanel {
         return oldBon;
     }
 
+    public int removeBon() {
+        final int bon = bons.remove(0);
+        pool.setSize(pool.getPreferredSize());
+        return bon;
+    }
+
     public int getBon() {
         return bons.get(0);
     }

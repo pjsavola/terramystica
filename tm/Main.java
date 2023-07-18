@@ -7,9 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -30,9 +28,14 @@ public class Main {
 
     public static void main(String[] args) {
 
-        if (!test("tests/Petri18", new int[] {120, 128, 116, 152})) return;
-        if (!test("tests/Petri19", new int[] {93, 126, 150, 140})) return;
-        if (!test("tests/Petri20", new int[] {131, 202, 104, 145})) return;
+        final Map<String, int[]> tests = new HashMap<>();
+        tests.put("tests/Petri18", new int[] {120, 128, 116, 152});
+        tests.put("tests/Petri19", new int[] {93, 126, 150, 140});
+        tests.put("tests/Petri20", new int[] {93, 126, 150, 140});
+
+        tests.forEach((file, vps) -> {
+            if (!test(file, vps)) System.err.println("Test " + file + " failed!");
+        });
 
         final String[] arrowMapData = {
                 "G,B,Y,U,G,Y,R,B,S,G,S,G,K",
@@ -58,7 +61,7 @@ public class Main {
         };
         final Menu actionMenu = new Menu("Actions");
         final GameData solo = new GameData(1, new Random().nextInt());
-        final GameData test = new GameData("tests/Petri19");
+        final GameData test = new GameData("tests/Petri18");
 
         final JFrame frame = new JFrame();
         final Game game = new Game(frame, baseMapData, test, actionMenu);

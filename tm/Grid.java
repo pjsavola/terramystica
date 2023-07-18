@@ -1,5 +1,6 @@
 package tm;
 
+import tm.faction.Giants;
 import tm.faction.Mermaids;
 
 import javax.swing.*;

@@ -13,6 +13,7 @@ public class PassAction extends Action {
     @Override
     public void execute() {
         player.pass();
+        game.finalPass(player);
     }
 
     @Override
