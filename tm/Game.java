@@ -53,6 +53,7 @@ public class Game extends JPanel {
     private final String[] mapData;
 
     private boolean rewinding;
+    private boolean importing;
 
     private final Menu actionMenu;
 
@@ -540,7 +541,7 @@ public class Game extends JPanel {
             refresh();
             return true;
         }
-        if (rewinding) {
+        if (rewinding || importing) {
             System.err.println("!!! " + action + " failed");
         }
         return false;
@@ -551,6 +552,10 @@ public class Game extends JPanel {
             final Set<Player.PendingType> skippablePendingActions = getCurrentPlayer().getSkippablePendingActions();
             if (getCurrentPlayer().getPendingActions().isEmpty() || !skippablePendingActions.isEmpty()) {
                 if (!skippablePendingActions.isEmpty()) {
+                    if (rewinding) {
+                        // Forfeit actions are explicit in the history when rewinding.
+                        return;
+                    }
                     resolveAction(new ForfeitAction());
                 }
                 getCurrentPlayer().pendingBuilds = null;
@@ -570,7 +575,7 @@ public class Game extends JPanel {
     public void endTurn() {
         history.addAll(newActions);
         for (Action action : newActions) {
-            if (!rewinding) {
+            if (!rewinding && !importing) {
                 System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
             }
             action.confirmed();
@@ -637,7 +642,7 @@ public class Game extends JPanel {
                 if (leechTrigger != null) {
                     if (leechAccepted) {
                         turnOrder.add(0, leechTrigger);
-                        if (!rewinding) {
+                        if (!rewinding && !importing) {
                             final int cult = Cults.selectCult(this, 1, true);
                             resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
                         }
@@ -941,14 +946,14 @@ public class Game extends JPanel {
             }
         }
         ++counter;
-        System.err.println(counter + " -- " + player.getFaction().getName() + ": " + action);
+        //System.err.println(counter + " -- " + player.getFaction().getName() + ": " + action);
     }
 
     public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
         this.actionFeed = actionFeed;
         this.leechFeed = leechFeed;
 
-        rewinding = true;
+        importing = true;
         int setupCompleteCount = 0;
         while (getCurrentPlayer() != null) {
             final Player player = getCurrentPlayer();
@@ -1188,6 +1193,6 @@ public class Game extends JPanel {
                 break;
             }
         }
-        rewinding = false;
+        importing = false;
     }
 }
