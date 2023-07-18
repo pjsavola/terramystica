@@ -371,6 +371,7 @@ public class Player extends JPanel {
         points += round.town;
         towns.add(number);
         --pendingTowns;
+        pool.setSize(pool.getPreferredSize());
     }
 
     public void convert(Resources r) {
