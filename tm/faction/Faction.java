@@ -35,7 +35,7 @@ public abstract class Faction {
     }
 
     public Resources getDwellingIncome(int dwelling) {
-        return dwelling == 8 ? Resources.zero : Resources.w1;
+        return dwelling == 7 ? Resources.zero : Resources.w1;
     }
 
     public Resources getTradingPostIncome(int tradingPost) {
