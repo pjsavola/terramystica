@@ -1203,4 +1203,8 @@ public class Game extends JPanel {
         }
         importing = false;
     }
+
+    public int[] getVictoryPoints() {
+        return players.stream().sorted((p1, p2) -> gameData.factions.indexOf(p2.getFaction()) - gameData.factions.indexOf(p1.getFaction())).mapToInt(Player::getPoints).toArray();
+    }
 }

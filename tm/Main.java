@@ -29,6 +29,12 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        if (!test("tests/Petri19", new int[] {93, 126, 150, 140})) {
+            return;
+        }
+        if (!test("tests/Petri20", new int[] {131, 202, 104, 145})) {
+            return;
+        }
         final String[] arrowMapData = {
                 "G,B,Y,U,G,Y,R,B,S,G,S,G,K",
                 "R,K,B,I,I,I,I,I,I,Y,R,B",
@@ -209,5 +215,33 @@ public class Main {
         });
         game.refresh();
         frame.setVisible(true);
+    }
+
+    public static boolean test(String file, int[] vpTargets) {
+        try {
+            final String[] baseMapData = {
+                    "U,S,G,B,Y,R,U,K,R,G,B,R,K",
+                    "Y,I,I,U,K,I,I,Y,K,I,I,Y",
+                    "I,I,K,I,S,I,G,I,G,I,S,I,I",
+                    "G,B,Y,I,I,R,B,I,R,I,R,U",
+                    "K,U,R,B,K,U,S,Y,I,I,G,K,B",
+                    "S,G,I,I,Y,G,I,I,I,U,S,U",
+                    "I,I,I,S,I,R,I,G,I,Y,K,B,Y",
+                    "Y,B,U,I,I,I,B,K,I,S,U,S",
+                    "R,K,S,B,R,G,Y,U,S,I,B,G,R",
+            };
+            final Menu actionMenu = new Menu("Actions");
+            final GameData test = new GameData(file);
+            final JFrame frame = new JFrame();
+            final Game game = new Game(frame, baseMapData, test, actionMenu);
+            final int[] vps = game.getVictoryPoints();
+            if (Arrays.equals(vpTargets, vps)) {
+                return true;
+            }
+            System.err.println("Wrong vps: " + Arrays.stream(vps).mapToObj(String::valueOf).collect(Collectors.joining(",")));
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

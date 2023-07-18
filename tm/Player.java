@@ -166,6 +166,10 @@ public class Player extends JPanel {
         return range;
     }
 
+    public int getPoints() {
+        return points;
+    }
+
     public void selectFaction(Faction faction, int points) {
         this.faction = faction;
         this.points = points;
