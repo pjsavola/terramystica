@@ -29,12 +29,11 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        if (!test("tests/Petri19", new int[] {93, 126, 150, 140})) {
-            return;
-        }
-        if (!test("tests/Petri20", new int[] {131, 202, 104, 145})) {
-            return;
-        }
+
+        if (!test("tests/Petri18", new int[] {120, 128, 116, 152})) return;
+        if (!test("tests/Petri19", new int[] {93, 126, 150, 140})) return;
+        if (!test("tests/Petri20", new int[] {131, 202, 104, 145})) return;
+
         final String[] arrowMapData = {
                 "G,B,Y,U,G,Y,R,B,S,G,S,G,K",
                 "R,K,B,I,I,I,I,I,I,Y,R,B",

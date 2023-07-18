@@ -865,7 +865,7 @@ public class Game extends JPanel {
     private static final Pattern buildPattern = Pattern.compile("[Bb][Uu][Ii][Ll][Dd] " + hexRegex);
     private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] " + hexRegex + " [Tt][Oo] .*");
     public static final Pattern leechPattern = Pattern.compile("([Ll][Ee][Ee][Cc][Hh]|[Dd][Ee][Cc][Ll][Ii][Nn][Ee]) [1-9][0-9]* from [A-Za-z]*");
-    private static final Pattern cultStepPattern = Pattern.compile("\\+" + cultRegex);
+    private static final Pattern cultStepPattern = Pattern.compile("\\+[1-9]*" + cultRegex);
     private static final Pattern passPattern = Pattern.compile("[Pp][Aa][Ss][Ss]( [Bb][Oo][Nn][1-9][0-9]*)*");
     private static final Pattern digPattern = Pattern.compile("[Dd][Ii][Gg] \\d");
     private static final Pattern upgradePattern = Pattern.compile("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] " + hexRegex + " to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])");
@@ -1092,8 +1092,14 @@ public class Game extends JPanel {
                             throw new RuntimeException("Unknown cult step source");
                         }
                     }
-                    final int cult = findCult(action.substring(1));
-                    replayAction(new CultStepAction(cult, 1, pendingCultSource));
+                    int cultIdx = 1;
+                    int amount = 1;
+                    if (Character.isDigit(action.charAt(1))) {
+                        amount = 2;
+                        cultIdx = 2;
+                    }
+                    final int cult = findCult(action.substring(cultIdx));
+                    replayAction(new CultStepAction(cult, amount, pendingCultSource));
                     pendingCultSource = null;
                 } else if (priestPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
