@@ -28,6 +28,7 @@ public class SandstormAction extends Action {
     public void execute() {
         player.pendingSandstorm = false;
         target.setType(player.getHomeType());
+        player.addPendingBuild(target);
     }
 
     @Override
