@@ -86,9 +86,9 @@ public abstract class Towns {
             dy += 14;
         }
         if (town == 7) {
-            g.drawString(r.power + "1 carpet range", x + dx, y + dy + 8);
+            g.drawString("1 carpet range", x + dx, y + dy + 8);
             dy += 14;
-            g.drawString(r.power + "1 shipping", x + dx, y + dy + 8);
+            g.drawString("1 shipping", x + dx, y + dy + 8);
             dy += 14;
         }
     }
