@@ -302,7 +302,7 @@ public class Grid extends JPanel {
                     }
                 }
             }
-            if (nearTown || size >= requiredSize) {
+            if (nearTown || (size >= requiredSize && (town.size() >= 4 || (town.size() >= 3 && town.stream().anyMatch(h -> h.getStructure() == Hex.Structure.SANCTUARY))))) {
                 for (Hex n : town) {
                     n.town = true;
                 }
