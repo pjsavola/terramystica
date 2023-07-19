@@ -24,6 +24,7 @@ public class Grid extends JPanel {
         final double halfWidth = Math.sqrt(3) / 2 * radius;
         map = new Hex[mapData.length][];
         points = new Point[mapData.length][];
+        int waterCount = 0;
         for (int row = 0; row < mapData.length; ++row) {
             String[] cols = mapData[row].split(",");
             map[row] = new Hex[cols.length];
@@ -33,7 +34,7 @@ public class Grid extends JPanel {
                 final Hex.Type type = Main.getType(cols[col]);
                 final String id;
                 if (type == Hex.Type.WATER) {
-                    id = "";
+                    id = "r" + (waterCount++);
                 } else {
                     id = "" + (char) ('A' + row) + (number + 1);
                     ++number;

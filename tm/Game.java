@@ -882,6 +882,7 @@ public class Game extends JPanel {
     private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]*" + resourceRegex + " to [1-9][0-9]*" + resourceRegex);
     private static final Pattern advancePattern = Pattern.compile("[Aa][Dd][Vv][Aa][Nn][Cc][Ee] ([Dd][Ii][Gg]|[Ss][Hh][Ii][Pp])");
     private static final Pattern forfeitAction = Pattern.compile("\\-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
+    private static final Pattern connectPattern = Pattern.compile("[Cc][Oo][Nn][Nn][Ee][Cc][Tt] [Rr][0-9]*");
     private int findCult(String cultName) {
         for (int i = 0; i < 4; ++i) {
             if (Cults.getCultName(i).equalsIgnoreCase(cultName)) {
@@ -1213,6 +1214,10 @@ public class Game extends JPanel {
                     replayAction(new AdvanceAction(s[1].equalsIgnoreCase("dig")));
                 } else if (forfeitAction.matcher(action).matches()) {
                     replayAction(new ForfeitAction());
+                } else if (connectPattern.matcher(action).matches()) {
+                    final String id = action.split(" ")[1];
+                    final Hex hex = mapPanel.getAllHexes().stream().filter(h -> h.getId().equals(id)).findAny().orElse(null);
+                    replayAction(new MermaidsTownAction(hex));
                 } else {
                     System.err.println("Unhandled action: " + action);
                     break;
