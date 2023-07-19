@@ -867,7 +867,7 @@ public class Game extends JPanel {
     private static final String hexRegex = "[A-Za-z][1-9][0-9]*";
     private static final String resourceRegex = "([Pp][Ww]|[Ww]|[Cc]|[Pp]|[Vv][Pp])";
     private static final Pattern buildPattern = Pattern.compile("[Bb][Uu][Ii][Ll][Dd] " + hexRegex);
-    private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] " + hexRegex + " [Tt][Oo] .*");
+    private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] " + hexRegex + "( [Tt][Oo] .*)?");
     public static final Pattern leechPattern = Pattern.compile("([Ll][Ee][Ee][Cc][Hh]|[Dd][Ee][Cc][Ll][Ii][Nn][Ee]) [1-9][0-9]* from [A-Za-z]*");
     private static final Pattern cultStepPattern = Pattern.compile("\\+[1-9]*" + cultRegex);
     private static final Pattern passPattern = Pattern.compile("[Pp][Aa][Ss][Ss]( [Bb][Oo][Nn][1-9][0-9]*)*");
@@ -997,9 +997,10 @@ public class Game extends JPanel {
                         replayAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
                     }
                 } else if (transformPattern.matcher(action).matches()) {
-                    final Point p = mapPanel.getPoint(action.split(" ")[1]);
+                    final String[] s = action.split(" ");
+                    final Point p = mapPanel.getPoint(s[1]);
                     final Hex hex = mapPanel.getHex(p.x, p.y);
-                    final String type = action.split(" ")[3];
+                    final String type = s.length > 3 ? s[3] : player.getHomeType().name();
                     Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> replayAction(new DigAction(hex, t, mapPanel.getJumpableTiles(player).contains(hex))));
                 } else if (passPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
@@ -1199,9 +1200,9 @@ public class Game extends JPanel {
             // R4: 128
             // R5: 170
             // R6: 240
-            if (counter >= 500) {
+            /*if (counter >= 10) {
                 break;
-            }
+            }*/
             if (!actions.isEmpty()) {
                 throw new RuntimeException("Action stack not cleared");
             }
