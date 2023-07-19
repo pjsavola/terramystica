@@ -98,7 +98,7 @@ public class BuildAction extends Action {
         if (structure == Hex.Structure.DWELLING) {
             if (pendingBuild) {
                 player.clearPendingBuilds();
-            } else if (!game.isReachable(hex, player)) {
+            } else if (!game.isReachable(hex, player) && !player.getPendingActions().contains(Player.PendingType.FREE_D)) {
                 player.useRange(false);
             }
         }
