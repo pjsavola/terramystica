@@ -896,6 +896,7 @@ public class Game extends JPanel {
     public void replayLeech(Faction from) {
         while (phase == Phase.LEECH) {
             if (getCurrentPlayer() != null) {
+                boolean found = false;
                 final Iterator<GameData.Pair> it = leechFeed.iterator();
                 while (it.hasNext()) {
                     final GameData.Pair pair = it.next();
@@ -913,9 +914,13 @@ public class Game extends JPanel {
                             System.err.println(pair.faction.getName() + ": " + pair.action);
                             resolveAction(new LeechAction(accept));
                             it.remove();
+                            found = true;
                             break;
                         }
                     }
+                }
+                if (!found) {
+                    throw new RuntimeException("Leech not found");
                 }
             }
         }

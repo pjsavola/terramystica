@@ -29,7 +29,12 @@ public class MermaidsTownAction extends Action {
     }
 
     @Override
+    public boolean isFree() {
+        return true;
+    }
+
+    @Override
     public String toString() {
-        return "Action ACTM";
+        return "Connect " + hex.getId();
     }
 }

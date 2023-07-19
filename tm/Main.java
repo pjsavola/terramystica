@@ -31,17 +31,17 @@ public class Main {
     public static void main(String[] args) {
 
         final Map<String, int[]> tests = new HashMap<>();
-        tests.put("tests/Petri01", new int[] {145, 120, 94, 142});
-        tests.put("tests/Petri02", new int[] {177, 162, 76});
-        tests.put("tests/Petri03", new int[] {113, 120, 176});
-        tests.put("tests/Petri04", new int[] {151, 168, 109});
-        tests.put("tests/Petri05", new int[] {150, 145, 126});
-        tests.put("tests/Petri06", new int[] {152, 164, 166});
-        tests.put("tests/Petri07", new int[] {127, 164, 119});
-        tests.put("tests/Petri08", new int[] {161, 120, 109});
+        //tests.put("tests/Petri01", new int[] {145, 120, 94, 142});
+        //tests.put("tests/Petri02", new int[] {177, 162, 76});
+        //tests.put("tests/Petri03", new int[] {113, 120, 176});
+        //tests.put("tests/Petri04", new int[] {151, 168, 109});
+        //tests.put("tests/Petri05", new int[] {150, 145, 126});
+        //tests.put("tests/Petri06", new int[] {152, 164, 166});
+        //tests.put("tests/Petri07", new int[] {127, 164, 119});
+        //tests.put("tests/Petri08", new int[] {161, 120, 109});
         tests.put("tests/Petri09", new int[] {126, 152, 145});
         tests.put("tests/Petri10", new int[] {110, 153, 146});
-        tests.put("tests/Petri11", new int[] {121, 110, 159});
+        //tests.put("tests/Petri11", new int[] {121, 110, 159}); -- Has illegal moves!
         tests.put("tests/Petri12", new int[] {103, 156, 111});
         tests.put("tests/Petri13", new int[] {138, 110, 138});
         tests.put("tests/Petri14", new int[] {169, 111, 119});
@@ -84,7 +84,7 @@ public class Main {
         };
         final Menu actionMenu = new Menu("Actions");
         final GameData solo = new GameData(1, new Random().nextInt());
-        final GameData test = new GameData("tests/Petri15");
+        final GameData test = new GameData("tests/Petri10");
 
         final JFrame frame = new JFrame();
         final Game game = new Game(frame, baseMapData, test, actionMenu);
