@@ -821,28 +821,28 @@ public class Player extends JPanel {
                 public void mouseReleased(MouseEvent e) {
                     if (faction.getPowerAction(strongholds > 0) != null) {
                         if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
-                            if (faction instanceof Auren) {
+                            if (faction instanceof Auren && game.getCurrentPlayer().getFaction() instanceof Auren) {
                                 if (CultStepAction.isSourceValid(CultStepAction.Source.ACTA, game, Player.this)) {
-                                    final int cult = Cults.selectCult(game, 1, false);
+                                    final int cult = Cults.selectCult(game, 2, false);
                                     if (cult >= 0 && cult < 4) {
                                         game.resolveAction(new CultStepAction(cult, 2, CultStepAction.Source.ACTA));
                                     }
                                 }
-                            } else if (faction instanceof Engineers) {
+                            } else if (faction instanceof Engineers && game.getCurrentPlayer().getFaction() instanceof Engineers) {
                                 game.resolveAction(new EngineersBridgeAction());
-                            } else if (faction instanceof Mermaids) {
+                            } else if (faction instanceof Mermaids && game.getCurrentPlayer().getFaction() instanceof Mermaids) {
                                 game.highlightMermaidTownSpots();
-                            } else if (faction instanceof ChaosMagicians) {
+                            } else if (faction instanceof ChaosMagicians && game.getCurrentPlayer().getFaction() instanceof ChaosMagicians) {
                                 if (!usedFactionAction) {
                                     game.resolveAction(new ChaosMagiciansDoubleAction());
                                 }
-                            } else if (faction instanceof Giants) {
+                            } else if (faction instanceof Giants && game.getCurrentPlayer().getFaction() instanceof Giants) {
                                 game.resolveAction(new SpadeAction(SpadeAction.Source.ACTG));
-                            } else if (faction instanceof  Nomads) {
+                            } else if (faction instanceof Nomads && game.getCurrentPlayer().getFaction() instanceof Nomads) {
                                 game.resolveAction(new NomadsSandstormAction());
-                            } else if (faction instanceof Swarmlings) {
+                            } else if (faction instanceof Swarmlings && game.getCurrentPlayer().getFaction() instanceof Swarmlings) {
                                 game.resolveAction(new SwarmlingsFreeTradingPostAction());
-                            } else if (faction instanceof Witches) {
+                            } else if (faction instanceof Witches && game.getCurrentPlayer().getFaction() instanceof Witches) {
                                 game.resolveAction(new WitchesFreeDwellingAction());
                             }
                         }
