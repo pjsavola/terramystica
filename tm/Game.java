@@ -953,7 +953,9 @@ public class Game extends JPanel {
                 throw new RuntimeException("Player changed " + action);
             }
             if (!resolveAction(action)) {
-                throw new RuntimeException("Failure " + action);
+                System.err.println("Failure " + action);
+                counter = 2000;
+                return;
             }
         }
         ++counter;
@@ -1209,7 +1211,11 @@ public class Game extends JPanel {
                     break;
                 }
                 if (player.getPendingActions().isEmpty() && pendingCultSource == null && pendingDigging == 0) {
-                    postponeActions();
+                    if (!actions.isEmpty()) {
+                        if (!convertPattern.matcher(actions.getFirst()).matches() && !burnPattern.matcher(actions.getFirst()).matches()) {
+                            postponeActions();
+                        }
+                    }
                 }
             }
             if (phase == Phase.CONFIRM_ACTION) {
@@ -1221,7 +1227,7 @@ public class Game extends JPanel {
             // R4: 128
             // R5: 170
             // R6: 240
-            if (counter >= 500) {
+            if (counter >= 2000) {
                 break;
             }
             if (!actions.isEmpty()) {
