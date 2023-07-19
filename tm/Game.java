@@ -1024,22 +1024,29 @@ public class Game extends JPanel {
                         if (s.length <= 3) {
                             final Hex.Type home = player.getHomeType();
                             final Hex.Type hexType = hex.getType();
+                            if (hexType == home) {
+                                throw new RuntimeException("Invalid implicit transform");
+                            }
 
-                            int delta = 0;
-                            for (int i = 1; i <= 3; ++i) {
-                                if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
-                                    delta = Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
-                                    break;
+                            if (player.getFaction() instanceof Giants) {
+                                type = home;
+                            } else {
+                                int delta = 0;
+                                for (int i = 1; i <= 3; ++i) {
+                                    if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
+                                        delta = Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
+                                        break;
+                                    }
                                 }
-                            }
-                            for (int i = 1; i <= 3; ++i) {
-                                if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
-                                    delta = -Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
-                                    break;
+                                for (int i = 1; i <= 3; ++i) {
+                                    if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
+                                        delta = -Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
+                                        break;
+                                    }
                                 }
+                                final int ordinal = (hexType.ordinal() + delta + 7) % 7;
+                                type = Hex.Type.values()[ordinal];
                             }
-                            final int ordinal = (hexType.ordinal() + delta + 7) % 7;
-                            type = Hex.Type.values()[ordinal];
                         } else {
                             type = Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(s[3])).findAny().orElse(null);
                         }
