@@ -34,7 +34,7 @@ public class Main {
         //tests.put("tests/Petri01", new int[] {145, 120, 94, 142});
         //tests.put("tests/Petri02", new int[] {177, 162, 76});
         //tests.put("tests/Petri03", new int[] {113, 120, 176});
-        //tests.put("tests/Petri04", new int[] {151, 168, 109});
+        tests.put("tests/Petri04", new int[] {151, 168, 109});
         tests.put("tests/Petri05", new int[] {150, 145, 126});
         tests.put("tests/Petri06", new int[] {152, 164, 166});
         tests.put("tests/Petri07", new int[] {127, 164, 119});
@@ -84,7 +84,7 @@ public class Main {
         };
         final Menu actionMenu = new Menu("Actions");
         final GameData solo = new GameData(1, new Random().nextInt());
-        final GameData test = new GameData("tests/Petri04");
+        final GameData test = new GameData("tests/Petri03");
 
         final JFrame frame = new JFrame();
         final Game game = new Game(frame, baseMapData, test, actionMenu);
