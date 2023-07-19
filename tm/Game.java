@@ -1055,7 +1055,9 @@ public class Game extends JPanel {
                                 type = Hex.Type.values()[ordinal];
                             }
                         } else {
-                            type = Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(s[3])).findAny().orElse(null);
+                            String typeName = s[3].toUpperCase();
+                            final String finalTypeName = typeName.equals("GREY") ? "GRAY" : typeName;
+                            type = Arrays.stream(Hex.Type.values()).filter(h -> h.name().equals(finalTypeName)).findAny().orElse(null);
                         }
                         final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
                         if (!resolvingCultSpades()) {
