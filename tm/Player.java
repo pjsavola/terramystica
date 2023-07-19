@@ -945,7 +945,11 @@ public class Player extends JPanel {
 
         @Override
         public Dimension getPreferredSize() {
-            return new Dimension(400, 128);
+            final int itemsPerRow = 7;
+            final int itemCount = (int) (bons.size() + favs.stream().distinct().count() + towns.stream().distinct().count());
+            final int rows = (itemCount - 1) / itemsPerRow + 1;
+            final int minHeight = 20 + 105 * rows;
+            return new Dimension(400, Math.max(128, minHeight));
         }
     }
 

@@ -122,13 +122,14 @@ public class Pool extends JPanel {
             g.drawString("Pool", x, y + 12);
             y += 16;
         }
+        final int itemsPerRow = player == null ? 10 : 7;
         int items = 0;
         for (int i = 0; i < bons.size(); ++i) {
             final int bon = bons.get(i);
             final boolean used = player != null && bon - 1 < bonUsed.length && bonUsed[bon - 1];
             Bons.drawBon(g, x, y, bon, showCoins ? bonusCoins[i] : 0, used);
             x += 105;
-            if (++items == 10) {
+            if (++items == itemsPerRow) {
                 items = 0;
                 x = 5;
                 y += 105;
@@ -144,7 +145,7 @@ public class Pool extends JPanel {
             final boolean used = count == 1 && fav == 6 && fav6Used != null && fav6Used[0];
             Favs.drawFav(g, x, y, fav, count, used);
             x += 105;
-            if (++items == 10) {
+            if (++items == itemsPerRow) {
                 items = 0;
                 x = 5;
                 y += 105;
@@ -159,7 +160,7 @@ public class Pool extends JPanel {
             }
             Towns.drawTown(g, x, y, town, count);
             x += 105;
-            if (++items == 10) {
+            if (++items == itemsPerRow) {
                 items = 0;
                 x = 5;
                 y += 105;
@@ -169,9 +170,10 @@ public class Pool extends JPanel {
 
     @Override
     public Dimension getPreferredSize() {
+        final int itemsPerRow = player == null ? 10 : 7;
         final int itemCount = (int) (bons.size() + favs.stream().distinct().count() + towns.stream().distinct().count());
-        final int cols = Math.min(itemCount, 10);
-        final int rows = (itemCount - 1) / 10 + 1;
+        final int cols = Math.min(itemCount, itemsPerRow);
+        final int rows = (itemCount - 1) / itemsPerRow + 1;
         return new Dimension(5 + 105 * cols, 20 + 105 * rows);
     }
 }
