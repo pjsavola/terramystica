@@ -52,8 +52,8 @@ public class Game extends JPanel {
 
     private final String[] mapData;
 
-    private boolean rewinding;
-    private boolean importing;
+    boolean rewinding;
+    boolean importing;
 
     private final Menu actionMenu;
 
@@ -883,6 +883,7 @@ public class Game extends JPanel {
     private static final Pattern advancePattern = Pattern.compile("[Aa][Dd][Vv][Aa][Nn][Cc][Ee] ([Dd][Ii][Gg]|[Ss][Hh][Ii][Pp])");
     private static final Pattern forfeitAction = Pattern.compile("\\-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
     private static final Pattern connectPattern = Pattern.compile("[Cc][Oo][Nn][Nn][Ee][Cc][Tt] [Rr][0-9]*");
+
     private int findCult(String cultName) {
         for (int i = 0; i < 4; ++i) {
             if (Cults.getCultName(i).equalsIgnoreCase(cultName)) {
@@ -975,6 +976,10 @@ public class Game extends JPanel {
             final Iterator<GameData.Pair> it = actionFeed.iterator();
             while (it.hasNext()) {
                 final GameData.Pair pair = it.next();
+                if (pair.action.equalsIgnoreCase("done")) {
+                    it.remove();
+                    break;
+                }
                 if (pair.faction == player.getFaction()) {
                     actions.addLast(pair.action);
                     it.remove();
@@ -1186,6 +1191,7 @@ public class Game extends JPanel {
                             break;
                         }
                     }
+                    int workersToPriests = 0;
                     int priestsToWorkers = 0;
                     int workersToCoins = 0;
                     int pointsToCoins = 0;
@@ -1206,7 +1212,11 @@ public class Game extends JPanel {
                         }
                     }
                     else if (from.equalsIgnoreCase("w")) {
-                        workersToCoins = fromCount;
+                        if (to.equalsIgnoreCase("p")) {
+                            workersToPriests = fromCount;
+                        } else {
+                            workersToCoins = fromCount;
+                        }
                     }
                     else if (from.equalsIgnoreCase("vp")) {
                         pointsToCoins = fromCount;
@@ -1214,7 +1224,11 @@ public class Game extends JPanel {
                     if (to.equalsIgnoreCase("vp")) {
                         pointsFromCoins = toCount;
                     }
-                    replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins, pointsFromCoins));
+                    if (workersToPriests > 0) {
+                        replayAction(new DarklingsConvertAction(workersToPriests));
+                    } else {
+                        replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins, pointsFromCoins));
+                    }
                     pendingDigging = 0;
                 } else if (advancePattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");

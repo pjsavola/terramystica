@@ -304,11 +304,13 @@ public class Player extends JPanel {
             points += 7;
         } else if (faction instanceof Darklings) {
             pendingWorkerToPriestConversions = 3;
-            final int workers = game.getCurrentPlayer().getWorkers();
-            final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().sorted((a, b) -> b - a).map(Object::toString).toArray(String[]::new);
-            final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
-            if (response >= 0 && response < choices.length) {
-                game.resolveAction(new DarklingsConvertAction(response));
+            if (!game.rewinding && !game.importing) {
+                final int workers = game.getCurrentPlayer().getWorkers();
+                final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().sorted((a, b) -> b - a).map(Object::toString).toArray(String[]::new);
+                final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                if (response >= 0 && response < choices.length) {
+                    game.resolveAction(new DarklingsConvertAction(response));
+                }
             }
         } else if (faction instanceof Dwarves) {
             jumpCost = Resources.w1;
