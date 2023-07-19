@@ -26,7 +26,7 @@ public class Halflings extends Faction {
 
     @Override
     public Resources getSanctuaryCost() {
-        return Resources.c8w4;
+        return Resources.c6w4;
     }
 
     @Override
