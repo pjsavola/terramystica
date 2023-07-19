@@ -523,7 +523,7 @@ public class Grid extends JPanel {
                                 if (!otherDistances.containsKey(n)) {
                                     otherDistances.put(n, distance);
                                     if (range > distance) {
-                                        other.add(hex);
+                                        other.add(n);
                                     }
                                 }
                             }
