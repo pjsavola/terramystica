@@ -2,6 +2,7 @@ package tm.action;
 
 import tm.Game;
 import tm.Resources;
+import tm.faction.Alchemists;
 
 public class ConvertAction extends Action {
 
@@ -56,6 +57,7 @@ public class ConvertAction extends Action {
         if (priestsToWorkers > 0) result += (result.isEmpty() ? "" : ". ") + "Convert " + priestsToWorkers + "p to " + priestsToWorkers + "w";
         if (workersToCoins > 0) result += (result.isEmpty() ? "" : ". ") + "Convert " + workersToCoins + "w to " + workersToCoins + "c";
         if (pointsToCoins > 0) result += (result.isEmpty() ? "" : ". " ) + "Convert " + pointsToCoins + "vp to " + pointsToCoins + "c";
+        if (coinsToPoints > 0) result += (result.isEmpty() ? "" : ". " ) + "Convert " + ((player.getFaction() instanceof Alchemists ? 2 : 3) * coinsToPoints) + "c to " + coinsToPoints + "vp";
         return result;
     }
 

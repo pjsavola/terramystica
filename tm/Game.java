@@ -922,7 +922,7 @@ public class Game extends JPanel {
     private Deque<GameData.Pair> leechFeed;
     private Deque<GameData.Pair> actionFeed;
     private Deque<String> actions;
-    boolean pendingDigging = false;
+    int pendingDigging;
     CultStepAction.Source pendingCultSource = null;
     int counter = 0;
 
@@ -947,7 +947,7 @@ public class Game extends JPanel {
             if (!actions.isEmpty()) {
                 throw new RuntimeException("Action stack not cleared");
             }
-            pendingDigging = false;
+            pendingDigging = 0;
             pendingCultSource = null;
             if (player != getCurrentPlayer()) {
                 throw new RuntimeException("Player changed " + action);
@@ -989,7 +989,7 @@ public class Game extends JPanel {
                         replayAction(new PlaceInitialDwellingAction(p.x, p.y));
                     } else {
                         final Hex hex = mapPanel.getHex(p.x, p.y);
-                        if (pendingDigging && !player.hasPendingBuild(hex)) {
+                        if (pendingDigging > 0 && !player.hasPendingBuild(hex)) {
                             replayAction(new DigAction(hex, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
                         } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                             replayAction(new SandstormAction(hex));
@@ -1000,7 +1000,28 @@ public class Game extends JPanel {
                     final String[] s = action.split(" ");
                     final Point p = mapPanel.getPoint(s[1]);
                     final Hex hex = mapPanel.getHex(p.x, p.y);
-                    final String type = s.length > 3 ? s[3] : player.getHomeType().name();
+                    final String type;
+                    if (s.length <= 3) {
+                        final Hex.Type hexType = hex.getType();
+                        final Hex.Type home = player.getHomeType();
+                        int delta = 0;
+                        for (int i = 1; i <= 3; ++i) {
+                            if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
+                                delta = Math.min(i, pendingDigging + player.getPendingSpades());
+                                break;
+                            }
+                        }
+                        for (int i = 1; i <= 3; ++i) {
+                            if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
+                                delta = -Math.min(i, pendingDigging + player.getPendingSpades());
+                                break;
+                            }
+                        }
+                        final int ordinal = (hexType.ordinal() + delta) % 7;
+                        type = Hex.Type.values()[ordinal].name();
+                    } else {
+                        type = s[3];
+                    }
                     Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> replayAction(new DigAction(hex, t, mapPanel.getJumpableTiles(player).contains(hex))));
                 } else if (passPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
@@ -1020,7 +1041,7 @@ public class Game extends JPanel {
                         if (!found) throw new RuntimeException("Bon not available " + bon);
                     }
                 } else if (digPattern.matcher(action).matches()) {
-                    pendingDigging = true;
+                    pendingDigging += Integer.parseInt(action.split(" ")[1]);
                 } else if (upgradePattern.matcher(action).matches()) {
                     final Point p = mapPanel.getPoint(action.split(" ")[1]);
                     final String type = action.split(" ")[3];
@@ -1042,7 +1063,7 @@ public class Game extends JPanel {
                             case '5':
                             case '6':
                                 if (str.charAt(3) == '5' || str.charAt(3) == '6') {
-                                    pendingDigging = true;
+                                    pendingDigging = str.charAt(3) - '4';
                                 }
                                 replayAction(new SelectPowerActionAction(str.charAt(3) - '0'));
                                 break;
@@ -1056,7 +1077,7 @@ public class Game extends JPanel {
                                 replayAction(new EngineersBridgeAction());
                                 break;
                             case 'g':
-                                pendingDigging = true;
+                                pendingDigging = 2;
                                 replayAction(new SpadeAction(SpadeAction.Source.ACTG));
                                 break;
                             case 'n':
@@ -1072,7 +1093,7 @@ public class Game extends JPanel {
                     } else if (str.startsWith("bon")) {
                         switch (str.charAt(3)) {
                             case '1' -> {
-                                pendingDigging = true;
+                                pendingDigging = 1;
                                 replayAction(new SpadeAction(SpadeAction.Source.BON1));
                             }
                             case '2' -> pendingCultSource = CultStepAction.Source.BON2;
@@ -1177,7 +1198,7 @@ public class Game extends JPanel {
                         pointsFromCoins = toCount;
                     }
                     replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins, pointsFromCoins));
-                    pendingDigging = false;
+                    pendingDigging = 0;
                 } else if (advancePattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     replayAction(new AdvanceAction(s[1].equalsIgnoreCase("dig")));
@@ -1187,7 +1208,7 @@ public class Game extends JPanel {
                     System.err.println("Unhandled action: " + action);
                     break;
                 }
-                if (player.getPendingActions().isEmpty() && pendingCultSource == null && !pendingDigging) {
+                if (player.getPendingActions().isEmpty() && pendingCultSource == null && pendingDigging == 0) {
                     postponeActions();
                 }
             }
@@ -1200,13 +1221,13 @@ public class Game extends JPanel {
             // R4: 128
             // R5: 170
             // R6: 240
-            /*if (counter >= 10) {
+            if (counter >= 500) {
                 break;
-            }*/
+            }
             if (!actions.isEmpty()) {
                 throw new RuntimeException("Action stack not cleared");
             }
-            pendingDigging = false;
+            pendingDigging = 0;
             pendingCultSource = null;
             if (phase == Phase.END) {
                 break;
