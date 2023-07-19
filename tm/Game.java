@@ -911,6 +911,12 @@ public class Game extends JPanel {
                             throw new RuntimeException("Faction not found " + s[3]);
                         }
                         if (faction == from) {
+                            if (getCurrentPlayer().getPendingLeech() != Integer.parseInt(s[1])) {
+                                // Silent decline
+                                resolveAction(new LeechAction(false));
+                                found = true;
+                                break;
+                            }
                             System.err.println(pair.faction.getName() + ": " + pair.action);
                             resolveAction(new LeechAction(accept));
                             it.remove();
@@ -992,9 +998,9 @@ public class Game extends JPanel {
                     break;
                 }
             }
+            //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
             while (!actions.isEmpty()) {
                 final String action = actions.removeFirst();
-                //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
                 if (buildPattern.matcher(action).matches()) {
                     final Point p = mapPanel.getPoint(action.split(" ")[1]);
                     if (setupCompleteCount == 0) {
@@ -1277,7 +1283,7 @@ public class Game extends JPanel {
                 }
                 if (player.getPendingActions().isEmpty() && pendingCultSource == null && pendingDigging == 0) {
                     if (!actions.isEmpty()) {
-                        if (!convertPattern.matcher(actions.getFirst()).matches() && !burnPattern.matcher(actions.getFirst()).matches()) {
+                        if (!convertPattern.matcher(actions.getFirst()).matches() && !burnPattern.matcher(actions.getFirst()).matches() && !connectPattern.matcher(actions.getFirst()).matches()) {
                             postponeActions();
                         }
                     }
