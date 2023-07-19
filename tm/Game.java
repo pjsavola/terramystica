@@ -954,7 +954,7 @@ public class Game extends JPanel {
             }
             if (!resolveAction(action)) {
                 System.err.println("Failure " + action);
-                counter = 2000;
+                counter = Main.maxReplayActionCount;
                 return;
             }
         }
@@ -981,7 +981,6 @@ public class Game extends JPanel {
                     break;
                 }
             }
-            //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
             while (!actions.isEmpty()) {
                 final String action = actions.removeFirst();
                 //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
@@ -1002,29 +1001,34 @@ public class Game extends JPanel {
                     final String[] s = action.split(" ");
                     final Point p = mapPanel.getPoint(s[1]);
                     final Hex hex = mapPanel.getHex(p.x, p.y);
-                    final String type;
-                    if (s.length <= 3) {
-                        final Hex.Type hexType = hex.getType();
-                        final Hex.Type home = player.getHomeType();
-                        int delta = 0;
-                        for (int i = 1; i <= 3; ++i) {
-                            if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
-                                delta = Math.min(i, pendingDigging + player.getPendingSpades());
-                                break;
-                            }
-                        }
-                        for (int i = 1; i <= 3; ++i) {
-                            if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
-                                delta = -Math.min(i, pendingDigging + player.getPendingSpades());
-                                break;
-                            }
-                        }
-                        final int ordinal = (hexType.ordinal() + delta) % 7;
-                        type = Hex.Type.values()[ordinal].name();
+                    if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
+                        replayAction(new SandstormAction(hex));
                     } else {
-                        type = s[3];
+                        final String type;
+                        if (s.length <= 3) {
+                            final Hex.Type home = player.getHomeType();
+                            final Hex.Type hexType = hex.getType();
+
+                            int delta = 0;
+                            for (int i = 1; i <= 3; ++i) {
+                                if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
+                                    delta = Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
+                                    break;
+                                }
+                            }
+                            for (int i = 1; i <= 3; ++i) {
+                                if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
+                                    delta = -Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
+                                    break;
+                                }
+                            }
+                            final int ordinal = (hexType.ordinal() + delta + 7) % 7;
+                            type = Hex.Type.values()[ordinal].name();
+                        } else {
+                            type = s[3];
+                        }
+                        Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> replayAction(new DigAction(hex, t, mapPanel.getJumpableTiles(player).contains(hex))));
                     }
-                    Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> replayAction(new DigAction(hex, t, mapPanel.getJumpableTiles(player).contains(hex))));
                 } else if (passPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     if (s.length == 1) {
@@ -1053,6 +1057,9 @@ public class Game extends JPanel {
                     if (type.equalsIgnoreCase("SH")) structure = Hex.Structure.STRONGHOLD;
                     if (type.equalsIgnoreCase("SA")) structure = Hex.Structure.SANCTUARY;
                     replayAction(new BuildAction(p.x, p.y, structure));
+                    if (structure == Hex.Structure.STRONGHOLD && player.getFaction() instanceof Halflings) {
+                        pendingDigging = 3;
+                    }
                 } else if (actionPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
                     final String str = s[1].toLowerCase();
@@ -1223,7 +1230,7 @@ public class Game extends JPanel {
                 confirmTurn();
                 replayLeech(faction);
             }
-            if (counter >= 2000) {
+            if (counter >= Main.maxReplayActionCount) {
                 break;
             }
             if (!actions.isEmpty()) {
