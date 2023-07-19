@@ -881,8 +881,9 @@ public class Game extends JPanel {
     private static final Pattern bridgePattern = Pattern.compile("[Bb][Rr][Ii][Dd][Gg][Ee] " + hexRegex + ":" + hexRegex);
     private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]* ?" + resourceRegex + " to [1-9][0-9]* ?" + resourceRegex);
     private static final Pattern advancePattern = Pattern.compile("[Aa][Dd][Vv][Aa][Nn][Cc][Ee] ([Dd][Ii][Gg].*|[Ss][Hh][Ii][Pp].*)");
-    private static final Pattern forfeitAction = Pattern.compile("\\-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
+    private static final Pattern forfeitAction = Pattern.compile("-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
     private static final Pattern connectPattern = Pattern.compile("[Cc][Oo][Nn][Nn][Ee][Cc][Tt] [Rr][0-9]*");
+    private static final Pattern darklingPattern = Pattern.compile("\\+[1-9]? ?[Pp]");
 
     private int findCult(String cultName) {
         for (int i = 0; i < 4; ++i) {
@@ -1277,6 +1278,15 @@ public class Game extends JPanel {
                     final String id = action.split(" ")[1];
                     final Hex hex = mapPanel.getAllHexes().stream().filter(h -> h.getId().equals(id)).findAny().orElse(null);
                     replayAction(new MermaidsTownAction(hex));
+                } else if (darklingPattern.matcher(action).matches()) {
+                    int count = 1;
+                    for (int i = 0; i < action.length(); ++i) {
+                        if (Character.isDigit(action.charAt(i))) {
+                            count = action.charAt(i) - '0';
+                            break;
+                        }
+                    }
+                    replayAction(new DarklingsConvertAction(count));
                 } else {
                     System.err.println("Unhandled action: " + action);
                     break;
