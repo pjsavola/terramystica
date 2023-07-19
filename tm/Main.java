@@ -37,8 +37,8 @@ public class Main {
         //tests.put("tests/Petri04", new int[] {151, 168, 109});
         //tests.put("tests/Petri05", new int[] {150, 145, 126});
         //tests.put("tests/Petri06", new int[] {152, 164, 166});
-        //tests.put("tests/Petri07", new int[] {127, 164, 119});
-        //tests.put("tests/Petri08", new int[] {161, 120, 109});
+        tests.put("tests/Petri07", new int[] {127, 164, 119});
+        tests.put("tests/Petri08", new int[] {161, 109, 120});
         tests.put("tests/Petri09", new int[] {126, 152, 145});
         tests.put("tests/Petri10", new int[] {110, 153, 146});
         //tests.put("tests/Petri11", new int[] {121, 110, 159}); -- Has illegal moves!
@@ -84,7 +84,7 @@ public class Main {
         };
         final Menu actionMenu = new Menu("Actions");
         final GameData solo = new GameData(1, new Random().nextInt());
-        final GameData test = new GameData("tests/Petri10");
+        final GameData test = new GameData("tests/Petri06");
 
         final JFrame frame = new JFrame();
         final Game game = new Game(frame, baseMapData, test, actionMenu);

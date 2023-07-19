@@ -876,10 +876,10 @@ public class Game extends JPanel {
     private static final Pattern actionPattern = Pattern.compile("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6)");
     private static final Pattern priestPattern = Pattern.compile("[Ss][Ee][Nn][Dd] [Pp] to " + cultRegex + "( for [1-3])*");
     private static final Pattern favorPattern = Pattern.compile("\\+[Ff][Aa][Vv][1-9][0-9]*");
-    private static final Pattern townPattern = Pattern.compile("\\+[Tt][Ww][1-9]");
+    private static final Pattern townPattern = Pattern.compile("\\+[1-9]?[Tt][Ww][1-9]");
     private static final Pattern burnPattern = Pattern.compile("[Bb][Uu][Rr][Nn] [1-9][0-9]*");
     private static final Pattern bridgePattern = Pattern.compile("[Bb][Rr][Ii][Dd][Gg][Ee] " + hexRegex + ":" + hexRegex);
-    private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]*" + resourceRegex + " to [1-9][0-9]*" + resourceRegex);
+    private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]* ?" + resourceRegex + " to [1-9][0-9]* ?" + resourceRegex);
     private static final Pattern advancePattern = Pattern.compile("[Aa][Dd][Vv][Aa][Nn][Cc][Ee] ([Dd][Ii][Gg]|[Ss][Hh][Ii][Pp])");
     private static final Pattern forfeitAction = Pattern.compile("\\-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
     private static final Pattern connectPattern = Pattern.compile("[Cc][Oo][Nn][Nn][Ee][Cc][Tt] [Rr][0-9]*");
@@ -1173,7 +1173,15 @@ public class Game extends JPanel {
                 } else if (favorPattern.matcher(action).matches()) {
                     replayAction(new SelectFavAction(Integer.parseInt(action.substring(4))));
                 } else if (townPattern.matcher(action).matches()) {
-                    replayAction(new SelectTownAction(Integer.parseInt(action.substring(3))));
+                    int amount = 1;
+                    int idx = 3;
+                    if (Character.isDigit(action.charAt(1))) {
+                        amount = action.charAt(1) - '0';
+                        ++idx;
+                    }
+                    while (amount-- > 0) {
+                        replayAction(new SelectTownAction(Integer.parseInt(action.substring(idx))));
+                    }
                 } else if (burnPattern.matcher(action).matches()) {
                     replayAction(new BurnAction(Integer.parseInt(action.split(" ")[1])));
                 } else if (bridgePattern.matcher(action).matches()) {
@@ -1182,25 +1190,32 @@ public class Game extends JPanel {
                     final Point p2 = mapPanel.getPoint(s[1].split(":")[1]);
                     replayAction(new PlaceBridgeAction(mapPanel.getHex(p1.x, p1.y), mapPanel.getHex(p2.x, p2.y)));
                 } else if (convertPattern.matcher(action).matches()) {
-                    final String[] s = action.split(" ");
-                    String from = s[1];
-                    String to = s[3];
+                    String s = action.substring("convert".length()).trim();
+                    int idx = 0;
                     int fromCount = 0;
+                    while (Character.isDigit(s.charAt(idx))) {
+                        fromCount = fromCount * 10 + s.charAt(idx) - '0';
+                        ++idx;
+                    }
+                    while (Character.isWhitespace(s.charAt(idx))) {
+                        ++idx;
+                    }
+                    s = s.substring(idx);
+                    idx = s.indexOf(' ');
+                    String from = s.substring(0, idx);
+                    s = s.substring(idx + 4); // skip " to "
+
+                    idx = 0;
                     int toCount = 0;
-                    for (int i = 0; i < from.length(); ++i) {
-                        if (from.charAt(i) < '0' || from.charAt(i) > '9') {
-                            fromCount = Integer.parseInt(from.substring(0, i));
-                            from = from.substring(i);
-                            break;
-                        }
+                    while (Character.isDigit(s.charAt(idx))) {
+                        toCount = toCount * 10 + s.charAt(idx) - '0';
+                        ++idx;
                     }
-                    for (int i = 0; i < to.length(); ++i) {
-                        if (to.charAt(i) < '0' || to.charAt(i) > '9') {
-                            toCount = Integer.parseInt(to.substring(0, i));
-                            to = to.substring(i);
-                            break;
-                        }
+                    while (Character.isWhitespace(s.charAt(idx))) {
+                        ++idx;
                     }
+
+                    String to = s.substring(idx);
                     int workersToPriests = 0;
                     int priestsToWorkers = 0;
                     int workersToCoins = 0;
