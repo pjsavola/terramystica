@@ -31,6 +31,11 @@ public class Nomads extends Faction {
     }
 
     @Override
+    public Resources getStrongholdCost() {
+        return Resources.c8w4;
+    }
+
+    @Override
     public String getPowerAction(boolean stronghold) {
         return stronghold ? "actn" : null;
     }
