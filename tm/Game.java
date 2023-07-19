@@ -997,6 +997,11 @@ public class Game extends JPanel {
                     } else {
                         final Hex hex = mapPanel.getHex(p.x, p.y);
                         if (pendingDigging > 0 && !player.hasPendingBuild(hex)) {
+                            final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, player.getHomeType());
+                            if (pendingDigging < cost) {
+                                throw new RuntimeException("Not enough spades");
+                            }
+                            pendingDigging -= cost;
                             replayAction(new DigAction(hex, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
                         } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                             replayAction(new SandstormAction(hex));
