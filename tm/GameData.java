@@ -83,10 +83,15 @@ public class GameData {
                     if (faction != null) {
                         final String actionLine = s[s.length - 1];
                         boolean skip = false;
-                        for (String str : s) {
+                        for (int i = 0; i < s.length; ++i) {
+                            final String str = s[i];
                             if (str.matches("0/0/[1-9][0-9]* PW")) {
                                 if (actionLine.matches("[Dd][Ee][Cc][Ll][Ii][Nn][Ee].*")) {
                                     // Skip redundant decline
+                                    skip = true;
+                                    break;
+                                } else if (actionLine.matches("[Ll][Ee][Ee][Cc][Hh].*") && s[i - 1].isEmpty()) {
+                                    // Skip redundant leech
                                     skip = true;
                                     break;
                                 }

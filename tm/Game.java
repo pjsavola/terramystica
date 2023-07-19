@@ -1223,10 +1223,6 @@ public class Game extends JPanel {
                 confirmTurn();
                 replayLeech(faction);
             }
-            // R3: 89
-            // R4: 128
-            // R5: 170
-            // R6: 240
             if (counter >= 2000) {
                 break;
             }
