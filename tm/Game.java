@@ -1005,7 +1005,7 @@ public class Game extends JPanel {
                     if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                         replayAction(new SandstormAction(hex));
                     } else {
-                        final String type;
+                        final Hex.Type type;
                         if (s.length <= 3) {
                             final Hex.Type home = player.getHomeType();
                             final Hex.Type hexType = hex.getType();
@@ -1024,11 +1024,18 @@ public class Game extends JPanel {
                                 }
                             }
                             final int ordinal = (hexType.ordinal() + delta + 7) % 7;
-                            type = Hex.Type.values()[ordinal].name();
+                            type = Hex.Type.values()[ordinal];
                         } else {
-                            type = s[3];
+                            type = Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(s[3])).findAny().orElse(null);
                         }
-                        Arrays.stream(Hex.Type.values()).filter(h -> h.name().equalsIgnoreCase(type)).findAny().ifPresent(t -> replayAction(new DigAction(hex, t, mapPanel.getJumpableTiles(player).contains(hex))));
+                        final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
+                        if (!resolvingCultSpades()) {
+                            if (pendingDigging < cost) {
+                                throw new RuntimeException("Not enough spades");
+                            }
+                            pendingDigging -= cost;
+                        }
+                        replayAction(new DigAction(hex, type, mapPanel.getJumpableTiles(player).contains(hex)));
                     }
                 } else if (passPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");

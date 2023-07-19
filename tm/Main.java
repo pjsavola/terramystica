@@ -31,7 +31,8 @@ public class Main {
     public static void main(String[] args) {
 
         final Map<String, int[]> tests = new HashMap<>();
-        //tests.put("tests/Petri16", new int[] {116, 149, 98});
+        tests.put("tests/Petri15", new int[] {162, 127, 111});
+        tests.put("tests/Petri16", new int[] {116, 149, 98});
         tests.put("tests/Petri17", new int[] {82, 169, 104});
         tests.put("tests/Petri18", new int[] {120, 128, 116, 152});
         tests.put("tests/Petri19", new int[] {93, 126, 150, 140});
