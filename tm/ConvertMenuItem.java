@@ -19,9 +19,7 @@ public class ConvertMenuItem extends ActionMenuItem {
     }
 
     @Override
-    protected void addListener(Game game) {
-        addActionListener(l -> {
-            game.resolveAction(new ConvertAction(resources, 0, 0, 0, 0));
-        });
+    protected void execute(Game game) {
+        game.resolveAction(new ConvertAction(resources, 0, 0, 0, 0));
     }
 }
