@@ -19,7 +19,8 @@ public abstract class Menus {
         final JMenu leechMenu = new JMenu("Leech");
         final JMenu convertMenu = new JMenu("Convert");
         final JMenu advanceMenu = new JMenu("Advance");
-        game.menus = new JMenu[] { actionMenu, leechMenu, convertMenu, advanceMenu };
+        final JMenu miscMenu = new JMenu("Misc");
+        game.menus = new JMenu[] { actionMenu, leechMenu, convertMenu, advanceMenu, miscMenu };
 
         // === ACTION MENU ===
         new ActionMenuItem(game, actionMenu, "Confirm turn", KeyEvent.VK_ENTER) {
@@ -48,33 +49,6 @@ public abstract class Menus {
             @Override
             protected void execute(Game game) {
                 game.rewind();
-            }
-        };
-        new ActionMenuItem(game, actionMenu, "Final Pass") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.phase == Game.Phase.ACTIONS && game.getRound() == 6;
-            }
-
-            @Override
-            protected void execute(Game game) {
-                game.resolveAction(new PassAction());
-            }
-        };
-        new ActionMenuItem(game, actionMenu, "Darklings SH Conversion") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.getCurrentPlayer().getPendingActions().contains(Player.PendingType.CONVERT_W2P);
-            }
-
-            @Override
-            protected void execute(Game game) {
-                final int workers = game.getCurrentPlayer().getWorkers();
-                final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().map(Object::toString).toArray(String[]::new);
-                final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
-                if (response >= 0 && response < choices.length) {
-                    game.resolveAction(new DarklingsConvertAction(response));
-                }
             }
         };
 
@@ -214,6 +188,35 @@ public abstract class Menus {
             @Override
             protected void execute(Game game) {
                 game.resolveAction(new AdvanceAction(true));
+            }
+        };
+
+        // === MISC MENU ===
+        new ActionMenuItem(game, miscMenu, "Final Pass") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.phase == Game.Phase.ACTIONS && game.getRound() == 6;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.resolveAction(new PassAction());
+            }
+        };
+        new ActionMenuItem(game, miscMenu, "Darklings SH Conversion") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.getCurrentPlayer().getPendingActions().contains(Player.PendingType.CONVERT_W2P);
+            }
+
+            @Override
+            protected void execute(Game game) {
+                final int workers = game.getCurrentPlayer().getWorkers();
+                final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().map(Object::toString).toArray(String[]::new);
+                final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                if (response >= 0 && response < choices.length) {
+                    game.resolveAction(new DarklingsConvertAction(response));
+                }
             }
         };
     }
