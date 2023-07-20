@@ -83,8 +83,8 @@ public class Main {
                 "R,K,S,B,R,G,Y,U,S,I,B,G,R",
         };
         final Menu actionMenu = new Menu("Actions");
-        final GameData solo = new GameData(1, new Random().nextInt());
-        final GameData test = new GameData("tests/Petri01");
+        final GameData test = new GameData(1, new Random().nextInt());
+        //final GameData test = new GameData("tests/Petri01");
 
         final JFrame frame = new JFrame();
         final Game game = new Game(frame, baseMapData, test, actionMenu);

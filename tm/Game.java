@@ -977,6 +977,8 @@ public class Game extends JPanel {
     }
 
     public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
+        if (actionFeed.isEmpty()) return;
+
         this.actionFeed = actionFeed;
         this.leechFeed = leechFeed;
 
