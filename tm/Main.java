@@ -83,11 +83,13 @@ public class Main {
                 "R,K,S,B,R,G,Y,U,S,I,B,G,R",
         };
         final Menu actionMenu = new Menu("Actions");
+        final Menu convertMenu = new Menu("Convert");
+
         final GameData test = new GameData(1, new Random().nextInt());
         //final GameData test = new GameData("tests/Petri01");
 
         final JFrame frame = new JFrame();
-        final Game game = new Game(frame, baseMapData, test, actionMenu);
+        final Game game = new Game(frame, baseMapData, test, new Menu[] { actionMenu, convertMenu });
 
         final MenuItem convertAction = new ActionMenuItem("Convert ...") {
             @Override
@@ -187,6 +189,7 @@ public class Main {
 
         final MenuBar menuBar = new MenuBar();
         menuBar.add(actionMenu);
+        menuBar.add(convertMenu);
 
         final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
         final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
@@ -259,10 +262,9 @@ public class Main {
                     "Y,B,U,I,I,I,B,K,I,S,U,S",
                     "R,K,S,B,R,G,Y,U,S,I,B,G,R",
             };
-            final Menu actionMenu = new Menu("Actions");
             final GameData test = new GameData(file);
             final JFrame frame = new JFrame();
-            final Game game = new Game(frame, baseMapData, test, actionMenu);
+            final Game game = new Game(frame, baseMapData, test, null);
             final int[] vps = game.getVictoryPoints();
             if (Arrays.equals(vpTargets, vps)) {
                 return true;

@@ -17,7 +17,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Game extends JPanel {
-    public enum Phase { PICK_FACTIONS, AUCTION_FACTIONS, INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, CONFIRM_ACTION, LEECH, END };
+    public enum Phase {PICK_FACTIONS, AUCTION_FACTIONS, INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, CONFIRM_ACTION, LEECH, END}
+
+    ;
 
     private final GameData gameData;
     private final List<Player> players = new ArrayList<>();
@@ -55,15 +57,15 @@ public class Game extends JPanel {
     boolean rewinding;
     boolean importing;
 
-    private final Menu actionMenu;
+    private final Menu[] menus;
 
     private final JFrame frame;
 
-    public Game(JFrame frame, String[] mapData, GameData gameData, Menu actionMenu) {
+    public Game(JFrame frame, String[] mapData, GameData gameData, Menu[] menus) {
         this.frame = frame;
         this.mapData = mapData;
         this.gameData = gameData;
-        this.actionMenu = actionMenu;
+        this.menus = menus;
 
         mapPanel = new Grid(this, mapData);
         cultPanel = new Cults(this, players);
@@ -379,7 +381,8 @@ public class Game extends JPanel {
                             }
                         }
                         case SANDSTORM -> result.addAll(getSandstormTiles(player));
-                        case PLACE_BRIDGE -> {}
+                        case PLACE_BRIDGE -> {
+                        }
                     }
                 });
                 return result;
@@ -503,7 +506,8 @@ public class Game extends JPanel {
             final int requiredDigging = Math.max(0, requiredSpades - player.getPendingSpades());
             if (!player.canDig(requiredDigging, jump)) continue;
             if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) continue;
-            if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades()) continue;
+            if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades())
+                continue;
 
             terraformPanel.add(new TerrainButton(popup, hex.getId(), type, requiredDigging, result));
             ++options;
@@ -702,16 +706,20 @@ public class Game extends JPanel {
     }
 
     public void refresh() {
-        final int count = actionMenu.getItemCount();
-        for (int i = 0; i < count; ++i) {
-            final MenuItem item = actionMenu.getItem(i);
-            final boolean enable;
-            if (item instanceof ActionMenuItem) {
-                enable = getCurrentPlayer() != null && ((ActionMenuItem) item).canExecute(this);
-            } else {
-                enable = true;
+        if (menus != null) {
+            for (Menu menu : menus) {
+                final int count = menu.getItemCount();
+                for (int i = 0; i < count; ++i) {
+                    final MenuItem item = menu.getItem(i);
+                    final boolean enable;
+                    if (item instanceof ActionMenuItem) {
+                        enable = getCurrentPlayer() != null && ((ActionMenuItem) item).canExecute(this);
+                    } else {
+                        enable = true;
+                    }
+                    item.setEnabled(enable);
+                }
             }
-            item.setEnabled(enable);
         }
         final Set<Hex> clickables = getClickableHexes();
         mapPanel.getAllHexes().forEach(h -> h.highlight = clickables.contains(h));
