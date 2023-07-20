@@ -125,6 +125,10 @@ public class Grid extends JPanel {
             public void mouseExited(MouseEvent e) {
             }
         });
+
+        new Thread(() -> {
+            
+        });
     }
 
     public void reset(String[] mapData) {

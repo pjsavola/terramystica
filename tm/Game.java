@@ -727,7 +727,7 @@ public class Game extends JPanel {
             }
         }
         final Set<Hex> clickables = getClickableHexes();
-        mapPanel.getAllHexes().forEach(h -> h.highlight = clickables.contains(h));
+        mapPanel.getAllHexes().forEach(h -> h.setHighlight(clickables.contains(h)));
         repaint();
     }
 
@@ -767,14 +767,14 @@ public class Game extends JPanel {
             final List<Hex> options = mapPanel.getAllHexes().stream().filter(h -> canPlaceMermaidTown(h, getCurrentPlayer())).toList();
             if (!options.isEmpty()) {
                 pendingTownPlacement = true;
-                options.forEach(h -> h.highlight = true);
+                options.forEach(h -> h.setHighlight(true));
             }
         }
         repaint();
     }
 
     public void clearHighlights() {
-        mapPanel.getAllHexes().forEach(h -> h.highlight = false);
+        mapPanel.getAllHexes().forEach(h -> h.setHighlight(false));
     }
 
     public void activateDoubleTurn() {

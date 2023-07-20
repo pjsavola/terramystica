@@ -93,6 +93,7 @@ public class Hex {
     private List<Hex> neighbors;
     boolean town;
     boolean highlight;
+    int highlightAlpha;
 
     public Hex(String id, Type type) {
         this.id = id;
@@ -145,7 +146,12 @@ public class Hex {
         this.type = type;
         structure = null;
         town = false;
-        highlight = false;
+        setHighlight(false);
+    }
+
+    public void setHighlight(boolean highlight) {
+        this.highlight = highlight;
+        highlightAlpha = highlight ? 0x44 : 0;
     }
 
     public void draw(Graphics2D g, int x, int y, int radius) {
@@ -186,9 +192,11 @@ public class Hex {
             ypoints[i] = (int) (y + Math.sin(angle) * radius + 0.5);
         }
 
-        g.setColor(highlight ? type.highlightColor : type.color);
         g.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+        g.setColor(type.color);
+        g.fillPolygon(xpoints, ypoints, 6);
 
+        g.setColor(new Color(0xFF, 0xFF, 0xFF, highlightAlpha));
         g.fillPolygon(xpoints, ypoints, 6);
 
         g.setColor(Color.BLACK);
