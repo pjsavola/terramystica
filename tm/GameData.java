@@ -66,9 +66,18 @@ public class GameData {
         final Map<String, Faction> factionMap = new HashMap<>();
         try {
             final Scanner scanner = new Scanner(new File(inputFile));
+            boolean start = false;
             while (scanner.hasNextLine()) {
-                final String line = scanner.nextLine();
-                if (line.matches("Round \\d scoring: SCORE\\d, .*")) {
+                final String line = scanner.nextLine().trim();
+                if (line.startsWith("Default game options")) {
+                    start = true;
+                    continue;
+                } else if (!start) {
+                    continue;
+                }
+                if (line.startsWith("option temple-scoring-tile")) {
+
+                } else if (line.matches("Round \\d scoring: SCORE\\d, .*")) {
                     final int scoring = line.split(" ")[3].charAt(5) - '0' - 1;
                     rounds.add(Round.snellmanMapping[scoring]);
                 } else if (line.matches("Removing tile BON\\d.*")) {

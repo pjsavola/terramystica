@@ -134,7 +134,6 @@ public class Main {
         final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
         final JScrollPane jsp = new JScrollPane(game, v, h);
 
-        frame.setTitle("Terra Mystica");
         frame.setContentPane(jsp);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
