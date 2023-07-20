@@ -31,6 +31,8 @@ public class Main {
 
     public static void main(String[] args) {
 
+        MapData.init();
+
         final Map<String, int[]> tests = new HashMap<>();
         tests.put("tests/Petri01", new int[] {145, 120, 94, 142});
         //tests.put("tests/Petri02", new int[] {177, 162, 76}); -- Dodgy resource manipulation!
@@ -59,31 +61,6 @@ public class Main {
                     throw new RuntimeException("Test " + file + " failed!");
             });
         }
-
-
-        final String[] arrowMapData = {
-                "G,B,Y,U,G,Y,R,B,S,G,S,G,K",
-                "R,K,B,I,I,I,I,I,I,Y,R,B",
-                "S,U,I,I,S,R,Y,U,R,I,I,K,Y",
-                "B,R,I,G,B,K,I,S,B,I,G,U",
-                "G,S,G,I,U,I,I,I,G,I,I,I,I",
-                "U,I,I,Y,K,R,I,K,Y,R,I,K",
-                "R,K,Y,I,I,S,Y,B,U,I,I,U,B",
-                "B,S,U,I,I,I,I,I,I,B,G,S",
-                "K,R,G,S,K,S,G,K,R,Y,U,R,Y",
-        };
-        final String[] baseMapData = {
-                "U,S,G,B,Y,R,U,K,R,G,B,R,K",
-                "Y,I,I,U,K,I,I,Y,K,I,I,Y",
-                "I,I,K,I,S,I,G,I,G,I,S,I,I",
-                "G,B,Y,I,I,R,B,I,R,I,R,U",
-                "K,U,R,B,K,U,S,Y,I,I,G,K,B",
-                "S,G,I,I,Y,G,I,I,I,U,S,U",
-                "I,I,I,S,I,R,I,G,I,Y,K,B,Y",
-                "Y,B,U,I,I,I,B,K,I,S,U,S",
-                "R,K,S,B,R,G,Y,U,S,I,B,G,R",
-        };
-
 
         if (false) {
             final JFrame frame = new JFrame();
@@ -128,7 +105,7 @@ public class Main {
         //final GameData test = new GameData("tests/Petri01");
 
         final JFrame frame = new JFrame();
-        final Game game = new Game(frame, baseMapData, test);
+        final Game game = new Game(frame, test);
 
         final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
         final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
@@ -144,20 +121,9 @@ public class Main {
 
     public static boolean test(String file, int[] vpTargets) {
         try {
-            final String[] baseMapData = {
-                    "U,S,G,B,Y,R,U,K,R,G,B,R,K",
-                    "Y,I,I,U,K,I,I,Y,K,I,I,Y",
-                    "I,I,K,I,S,I,G,I,G,I,S,I,I",
-                    "G,B,Y,I,I,R,B,I,R,I,R,U",
-                    "K,U,R,B,K,U,S,Y,I,I,G,K,B",
-                    "S,G,I,I,Y,G,I,I,I,U,S,U",
-                    "I,I,I,S,I,R,I,G,I,Y,K,B,Y",
-                    "Y,B,U,I,I,I,B,K,I,S,U,S",
-                    "R,K,S,B,R,G,Y,U,S,I,B,G,R",
-            };
             final GameData test = new GameData(file);
             final JFrame frame = new JFrame();
-            final Game game = new Game(frame, baseMapData, test);
+            final Game game = new Game(frame, test);
             final int[] vps = game.getVictoryPoints();
             if (Arrays.equals(vpTargets, vps)) {
                 return true;

@@ -61,9 +61,9 @@ public class Game extends JPanel {
 
     private final JFrame frame;
 
-    public Game(JFrame frame, String[] mapData, GameData gameData) {
+    public Game(JFrame frame, GameData gameData) {
         this.frame = frame;
-        this.mapData = mapData;
+        this.mapData = gameData.mapData;
         this.gameData = gameData;
         final JMenuBar menuBar = new JMenuBar();
         Menus.initializeMenus(this);
@@ -108,12 +108,7 @@ public class Game extends JPanel {
         }
 
         towns.clear();
-        for (int i = 1; i < 9; ++i) {
-            towns.add(i);
-            if (i != 6 && i != 8) {
-                towns.add(i);
-            }
-        }
+        towns.addAll(gameData.towns);
         Arrays.fill(bonusCoins, 0);
         bons.clear();
         bons.addAll(gameData.bons);

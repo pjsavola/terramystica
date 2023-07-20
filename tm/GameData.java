@@ -18,16 +18,19 @@ public class GameData {
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
 
+    String[] mapData;
     final int playerCount;
     final List<Faction> factions;
     final List<Integer> bons;
+    final List<Integer> towns;
     final List<Round> rounds;
     final Deque<Pair> actionFeed = new ArrayDeque<>();
     final Deque<Pair> leechFeed = new ArrayDeque<>();
-    final boolean turnOrderVariant;
+    boolean turnOrderVariant;
 
     public GameData(int playerCount, int seed) {
         this.playerCount = playerCount;
+        mapData = MapData.mapsByName.get("Base").getData();
         final Random random = new Random(seed);
 
         final List<Round> allRounds = new ArrayList<>(List.of(Round.fireW, Round.firePw, Round.waterP, Round.waterS, Round.earthC, Round.earthS, Round.airW, Round.airS, Round.priestC));
@@ -37,6 +40,14 @@ public class GameData {
             spadeRound = allRounds.indexOf(Round.earthC) + 1;
         } while (spadeRound == 5 || spadeRound == 6);
         rounds = allRounds.stream().limit(6).toList();
+
+        towns = new ArrayList<>();
+        for (int i = 1; i < 9; ++i) {
+            towns.add(i);
+            if (i != 6 && i != 8) {
+                towns.add(i);
+            }
+        }
 
         bons = new ArrayList<>(playerCount + 3);
         final List<Integer> allBons = new ArrayList<>(IntStream.range(1, 11).boxed().toList());
@@ -60,9 +71,17 @@ public class GameData {
 
     public GameData(String inputFile) {
         int players = 0;
+        mapData = MapData.mapsByName.get("Base").getData();
+
         factions = new ArrayList<>();
         rounds = new ArrayList<>(6);
-        bons = new ArrayList<>(IntStream.range(1, 11).boxed().toList());
+
+        towns = new ArrayList<>();
+        for (int i = 1; i < 6; ++i) {
+            towns.add(i);
+            towns.add(i);
+        }
+        bons = new ArrayList<>(IntStream.range(1, 10).boxed().toList());
         final Map<String, Faction> factionMap = new HashMap<>();
         try {
             final Scanner scanner = new Scanner(new File(inputFile));
@@ -75,8 +94,17 @@ public class GameData {
                 } else if (!start) {
                     continue;
                 }
-                if (line.startsWith("option temple-scoring-tile")) {
-
+                if (line.startsWith("option variable-turn-order")) {
+                    turnOrderVariant = true;
+                } else if (line.startsWith("option shipping-bonus")) {
+                    bons.add(10);
+                } else if (line.startsWith("map ")) {
+                    mapData = MapData.mapsById.get(line.split("\\t")[0].substring(4)).getData();
+                } else if (line.startsWith("option mini-expansion-1")) {
+                    towns.add(6);
+                    towns.add(7);
+                    towns.add(7);
+                    towns.add(8);
                 } else if (line.matches("Round \\d scoring: SCORE\\d, .*")) {
                     final int scoring = line.split(" ")[3].charAt(5) - '0' - 1;
                     rounds.add(Round.snellmanMapping[scoring]);
