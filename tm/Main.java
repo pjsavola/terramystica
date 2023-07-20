@@ -117,7 +117,7 @@ public class Main {
                             "5 PW -> P", powerToPriests,
                             "3 PW -> W", powerToWorkers,
                             "1 PW -> C", powerToCoins,
-                            "3 C -> VP", coinsToPoints,
+                            (alchemists ? "2" : "3") + " C -> VP", coinsToPoints,
                             "1 VP -> C", pointsToCoins
                     };
                     message = Arrays.stream(message).limit(alchemists ? 14 : 12).toArray();
