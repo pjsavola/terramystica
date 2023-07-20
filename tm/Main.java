@@ -92,14 +92,14 @@ public class Main {
         final JFrame frame = new JFrame();
         final Game game = new Game(frame, baseMapData, test, new Menu[] { actionMenu, convertMenu, advanceMenu });
 
-        new ActionMenuItem(convertMenu, "Convert ...") {
+        new ActionMenuItem(game, convertMenu, "Convert ...") {
             @Override
             public boolean canExecute(Game game) {
                 return game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION;
             }
 
             @Override
-            protected void addListener() {
+            protected void addListener(Game game) {
                 addActionListener(l -> {
                     if (game.phase != Game.Phase.ACTIONS && game.phase != Game.Phase.CONFIRM_ACTION) return;
 
@@ -148,50 +148,65 @@ public class Main {
             }
         };
 
-        new ActionMenuItem(advanceMenu,"Advance ship") {
+        new ConvertMenuItem(game, convertMenu, "PW -> C", KeyEvent.VK_C, Resources.c1);
+        new ConvertMenuItem(game, convertMenu, "3PW -> W", KeyEvent.VK_W, Resources.w1);
+        new ConvertMenuItem(game, convertMenu, "5PW -> P", KeyEvent.VK_P, Resources.p1);
+        new ActionMenuItem(game, convertMenu, "VP -> C", KeyEvent.VK_A) {
+            @Override
+            public boolean canExecute(Game game) {
+                return (game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION) && game.getCurrentPlayer().canConvert(0, 0, 1, 0);
+            }
+
+            @Override
+            protected void addListener(Game game) {
+                game.resolveAction(new ConvertAction(Resources.zero, 0, 0, 1, 0));
+            }
+        };
+
+        new ActionMenuItem(game, advanceMenu,"Advance ship") {
             @Override
             public boolean canExecute(Game game) {
                 return game.phase == Game.Phase.ACTIONS && game.getCurrentPlayer().canAdvanceShipping();
             }
 
             @Override
-            protected void addListener() {
+            protected void addListener(Game game) {
                 addActionListener(l -> game.resolveAction(new AdvanceAction(false)));
             }
         };
 
-        new ActionMenuItem(advanceMenu, "Advance dig") {
+        new ActionMenuItem(game, advanceMenu, "Advance dig") {
             @Override
             public boolean canExecute(Game game) {
                 return game.phase == Game.Phase.ACTIONS && game.getCurrentPlayer().canAdvanceDigging();
             }
 
             @Override
-            protected void addListener() {
+            protected void addListener(Game game) {
                 addActionListener(l -> game.resolveAction(new AdvanceAction(true)));
             }
         };
 
-        new ActionMenuItem(actionMenu, "Final Pass") {
+        new ActionMenuItem(game, actionMenu, "Final Pass") {
             @Override
             public boolean canExecute(Game game) {
                 return game.phase == Game.Phase.ACTIONS && game.getRound() == 6;
             }
 
             @Override
-            protected void addListener() {
+            protected void addListener(Game game) {
                 addActionListener(l -> game.resolveAction(new PassAction()));
             }
         };
 
-        new ActionMenuItem(actionMenu, "Darklings SH Conversion") {
+        new ActionMenuItem(game, actionMenu, "Darklings SH Conversion") {
             @Override
             public boolean canExecute(Game game) {
                 return game.getCurrentPlayer().getPendingActions().contains(Player.PendingType.CONVERT_W2P);
             }
 
             @Override
-            protected void addListener() {
+            protected void addListener(Game game) {
                 addActionListener(l -> {
                     final int workers = game.getCurrentPlayer().getWorkers();
                     final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().map(Object::toString).toArray(String[]::new);
@@ -246,10 +261,6 @@ public class Main {
                                     }
                                 }
                             }
-                            case KeyEvent.VK_C -> game.resolveAction(new ConvertAction(Resources.c1, 0, 0, 0, 0));
-                            case KeyEvent.VK_W -> game.resolveAction(new ConvertAction(Resources.w1, 0, 0, 0, 0));
-                            case KeyEvent.VK_P -> game.resolveAction(new ConvertAction(Resources.p1, 0, 0, 0, 0));
-                            case KeyEvent.VK_A -> game.resolveAction(new ConvertAction(Resources.zero, 0, 0, 1, 0));
                             case KeyEvent.VK_ESCAPE -> game.rewind();
                         }
                         break;
