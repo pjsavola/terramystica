@@ -5,9 +5,13 @@ import tm.faction.Alchemists;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -62,7 +66,7 @@ public class Main {
             });
         }
 
-        if (false) {
+        if (true) {
             final JFrame frame = new JFrame();
             frame.setTitle("JMystica");
             final ImageIcon icon = new ImageIcon("tm.png");
@@ -88,7 +92,34 @@ public class Main {
             buttonPanel.add(importButton);
             buttonPanel.add(quitButton);
             importButton.addActionListener(l -> {
-                
+                final int choice = JOptionPane.showOptionDialog(null, "Import from ...", "Choose import method", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Help!", "File", "Clipboard"}, "Clipboard");
+                switch (choice) {
+                    case 0:
+                        JOptionPane.showMessageDialog(null, "To import an existing game from terra.snellman.net,\nopen any game from http://terra.snellman.net in your browser.\nClick 'Load Full Log' button, select everything (Ctrl-A)\nand copy it to the clipboard (Ctrl-C).", "Import Instructions", JOptionPane.PLAIN_MESSAGE, null);
+                        break;
+                    case 1:
+                        // TODO: Choose file etc
+                        break;
+                    case 2:
+                        try {
+                            final String data = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+                            final GameData gameData = new GameData(data);
+                            final Game game = new Game(frame, gameData);
+
+                            final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
+                            final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+                            final JScrollPane jsp = new JScrollPane(game, v, h);
+
+                            frame.setContentPane(jsp);
+                            frame.pack();
+                            game.refresh();
+                        } catch (Exception e) {
+                            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE, null);
+                        }
+                        break;
+                    default:
+                        break;
+                }
             });
             quitButton.addActionListener(l -> frame.setVisible(false));
             buttonPanel.setBackground(Color.BLACK);
@@ -124,7 +155,7 @@ public class Main {
 
     public static boolean test(String file, int[] vpTargets) {
         try {
-            final GameData test = new GameData(file);
+            final GameData test = new GameData(new File(file));
             final JFrame frame = new JFrame();
             final Game game = new Game(frame, test);
             final int[] vps = game.getVictoryPoints();
