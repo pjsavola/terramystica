@@ -15,10 +15,92 @@ import java.util.stream.IntStream;
 public abstract class Menus {
 
     public static void initializeMenus(Game game) {
+        final JMenu actionMenu = new JMenu("Actions");
+        final JMenu leechMenu = new JMenu("Leech");
         final JMenu convertMenu = new JMenu("Convert");
         final JMenu advanceMenu = new JMenu("Advance");
-        final JMenu actionMenu = new JMenu("Actions");
-        game.menus = new JMenu[] { actionMenu, convertMenu, advanceMenu };
+        game.menus = new JMenu[] { actionMenu, leechMenu, convertMenu, advanceMenu };
+
+        // === ACTION MENU ===
+        new ActionMenuItem(game, actionMenu, "Confirm turn", KeyEvent.VK_ENTER) {
+            public boolean canExecute(Game game) {
+                return game.phase == Game.Phase.CONFIRM_ACTION && (game.getCurrentPlayer().getPendingActions().isEmpty() || !game.getCurrentPlayer().getSkippablePendingActions().isEmpty());
+            }
+
+            @Override
+            protected void execute(Game game) {
+                final Set<Player.PendingType> skippableActions = game.getCurrentPlayer().getSkippablePendingActions();
+                int option = JOptionPane.OK_OPTION;
+                if (!skippableActions.isEmpty()) {
+                    final String pending = "Are you sure you want to skip: " + skippableActions.stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / ")) + "?";
+                    option = JOptionPane.showConfirmDialog(null, pending, "Skip Action?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                }
+                if (option == JOptionPane.OK_OPTION) {
+                    game.confirmTurn();
+                }
+            }
+        };
+        new ActionMenuItem(game, actionMenu, "Undo", KeyEvent.VK_ESCAPE) {
+            public boolean canExecute(Game game) {
+                return game.canRewind();
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.rewind();
+            }
+        };
+        new ActionMenuItem(game, actionMenu, "Final Pass") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.phase == Game.Phase.ACTIONS && game.getRound() == 6;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.resolveAction(new PassAction());
+            }
+        };
+        new ActionMenuItem(game, actionMenu, "Darklings SH Conversion") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.getCurrentPlayer().getPendingActions().contains(Player.PendingType.CONVERT_W2P);
+            }
+
+            @Override
+            protected void execute(Game game) {
+                final int workers = game.getCurrentPlayer().getWorkers();
+                final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().map(Object::toString).toArray(String[]::new);
+                final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                if (response >= 0 && response < choices.length) {
+                    game.resolveAction(new DarklingsConvertAction(response));
+                }
+            }
+        };
+
+        // === LEECH MENU ===
+        new ActionMenuItem(game, leechMenu, "Accept", KeyEvent.VK_ENTER) {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.phase == Game.Phase.LEECH && game.getCurrentPlayer().getPendingLeech() > 0;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.resolveAction(new LeechAction(true));
+            }
+        };
+        new ActionMenuItem(game, leechMenu, "Decline", KeyEvent.VK_ESCAPE) {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.phase == Game.Phase.LEECH && game.getCurrentPlayer().getPendingLeech() > 0;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.resolveAction(new LeechAction(false));
+            }
+        };
 
         // === CONVERT MENU ===
         new ActionMenuItem(game, convertMenu, "Convert ...") {
@@ -132,63 +214,6 @@ public abstract class Menus {
             @Override
             protected void execute(Game game) {
                 game.resolveAction(new AdvanceAction(true));
-            }
-        };
-
-        // === ACTION MENU ===
-        new ActionMenuItem(game, actionMenu, "Confirm turn", KeyEvent.VK_ENTER) {
-            public boolean canExecute(Game game) {
-                return game.phase == Game.Phase.CONFIRM_ACTION && (game.getCurrentPlayer().getPendingActions().isEmpty() || !game.getCurrentPlayer().getSkippablePendingActions().isEmpty());
-            }
-
-            @Override
-            protected void execute(Game game) {
-                final Set<Player.PendingType> skippableActions = game.getCurrentPlayer().getSkippablePendingActions();
-                int option = JOptionPane.OK_OPTION;
-                if (!skippableActions.isEmpty()) {
-                    final String pending = "Are you sure you want to skip: " + skippableActions.stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / ")) + "?";
-                    option = JOptionPane.showConfirmDialog(null, pending, "Skip Action?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
-                }
-                if (option == JOptionPane.OK_OPTION) {
-                    game.confirmTurn();
-                }
-            }
-        };
-        new ActionMenuItem(game, actionMenu, "Undo", KeyEvent.VK_ESCAPE) {
-            public boolean canExecute(Game game) {
-                return game.canRewind();
-            }
-
-            @Override
-            protected void execute(Game game) {
-                game.rewind();
-            }
-        };
-        new ActionMenuItem(game, actionMenu, "Final Pass") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.phase == Game.Phase.ACTIONS && game.getRound() == 6;
-            }
-
-            @Override
-            protected void execute(Game game) {
-                game.resolveAction(new PassAction());
-            }
-        };
-        new ActionMenuItem(game, actionMenu, "Darklings SH Conversion") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.getCurrentPlayer().getPendingActions().contains(Player.PendingType.CONVERT_W2P);
-            }
-
-            @Override
-            protected void execute(Game game) {
-                final int workers = game.getCurrentPlayer().getWorkers();
-                final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().map(Object::toString).toArray(String[]::new);
-                final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
-                if (response >= 0 && response < choices.length) {
-                    game.resolveAction(new DarklingsConvertAction(response));
-                }
             }
         };
     }

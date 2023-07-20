@@ -83,7 +83,7 @@ public class Main {
                 "R,K,S,B,R,G,Y,U,S,I,B,G,R",
         };
 
-        final GameData test = new GameData(1, new Random().nextInt());
+        final GameData test = new GameData(2, new Random().nextInt());
         //final GameData test = new GameData("tests/Petri01");
 
         final JFrame frame = new JFrame();
@@ -98,33 +98,6 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.pack();
-        frame.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                switch (game.phase) {
-                    case ACTIONS:
-                    case CONFIRM_ACTION:
-                        switch (e.getKeyCode()) {
-                            case KeyEvent.VK_ESCAPE -> game.rewind();
-                        }
-                        break;
-                    case LEECH:
-                        switch (e.getKeyCode()) {
-                            case KeyEvent.VK_ENTER -> game.resolveAction(new LeechAction(true));
-                            case KeyEvent.VK_ESCAPE -> game.resolveAction(new LeechAction(false));
-                        }
-                        break;
-                }
-            }
-        });
         game.refresh();
         frame.setVisible(true);
     }
