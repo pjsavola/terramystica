@@ -57,7 +57,7 @@ public class Game extends JPanel {
     boolean rewinding;
     boolean importing;
 
-    Menu[] menus;
+    JMenu[] menus;
 
     private final JFrame frame;
 
@@ -65,10 +65,10 @@ public class Game extends JPanel {
         this.frame = frame;
         this.mapData = mapData;
         this.gameData = gameData;
-        final MenuBar menuBar = new MenuBar();
+        final JMenuBar menuBar = new JMenuBar();
         Menus.initializeMenus(this);
-        for (Menu menu : menus) menuBar.add(menu);
-        frame.setMenuBar(menuBar);
+        for (JMenu menu : menus) menuBar.add(menu);
+        frame.setJMenuBar(menuBar);
 
         mapPanel = new Grid(this, mapData);
         cultPanel = new Cults(this, players);
@@ -213,6 +213,10 @@ public class Game extends JPanel {
         }
         add(pool);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    }
+
+    public boolean canRewind() {
+        return !newActions.isEmpty();
     }
 
     public void rewind() {
@@ -709,10 +713,10 @@ public class Game extends JPanel {
     }
 
     public void refresh() {
-        for (Menu menu : menus) {
+        for (JMenu menu : menus) {
             final int count = menu.getItemCount();
             for (int i = 0; i < count; ++i) {
-                final MenuItem item = menu.getItem(i);
+                final JMenuItem item = menu.getItem(i);
                 final boolean enable;
                 if (item instanceof ActionMenuItem) {
                     enable = getCurrentPlayer() != null && ((ActionMenuItem) item).canExecute(this);

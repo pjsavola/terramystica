@@ -1,17 +1,20 @@
 package tm;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
-public abstract class ActionMenuItem extends MenuItem {
+public abstract class ActionMenuItem extends JMenuItem {
 
-    ActionMenuItem(Game game, Menu menu, String name) {
+    ActionMenuItem(Game game, JMenu menu, String name) {
         super(name);
         menu.add(this);
         addActionListener(l -> execute(game));
     }
 
-    ActionMenuItem(Game game, Menu menu, String name, int shortcut) {
-        super(name, new MenuShortcut(shortcut));
+    ActionMenuItem(Game game, JMenu menu, String name, int shortcut) {
+        super(name, shortcut);
+        setAccelerator(KeyStroke.getKeyStroke(shortcut, 0));
         menu.add(this);
         addActionListener(l -> execute(game));
     }

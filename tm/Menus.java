@@ -15,10 +15,10 @@ import java.util.stream.IntStream;
 public abstract class Menus {
 
     public static void initializeMenus(Game game) {
-        final Menu convertMenu = new Menu("Convert");
-        final Menu advanceMenu = new Menu("Advance");
-        final Menu actionMenu = new Menu("Actions");
-        game.menus = new Menu[] { actionMenu, convertMenu, advanceMenu };
+        final JMenu convertMenu = new JMenu("Convert");
+        final JMenu advanceMenu = new JMenu("Advance");
+        final JMenu actionMenu = new JMenu("Actions");
+        game.menus = new JMenu[] { actionMenu, convertMenu, advanceMenu };
 
         // === CONVERT MENU ===
         new ActionMenuItem(game, convertMenu, "Convert ...") {
@@ -138,7 +138,7 @@ public abstract class Menus {
         // === ACTION MENU ===
         new ActionMenuItem(game, actionMenu, "Confirm turn", KeyEvent.VK_ENTER) {
             public boolean canExecute(Game game) {
-                return game.getCurrentPlayer().getPendingActions().isEmpty() || !game.getCurrentPlayer().getSkippablePendingActions().isEmpty();
+                return game.phase == Game.Phase.CONFIRM_ACTION && (game.getCurrentPlayer().getPendingActions().isEmpty() || !game.getCurrentPlayer().getSkippablePendingActions().isEmpty());
             }
 
             @Override
@@ -152,6 +152,16 @@ public abstract class Menus {
                 if (option == JOptionPane.OK_OPTION) {
                     game.confirmTurn();
                 }
+            }
+        };
+        new ActionMenuItem(game, actionMenu, "Undo", KeyEvent.VK_ESCAPE) {
+            public boolean canExecute(Game game) {
+                return game.canRewind();
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.rewind();
             }
         };
         new ActionMenuItem(game, actionMenu, "Final Pass") {

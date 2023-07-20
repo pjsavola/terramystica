@@ -2,13 +2,13 @@ package tm;
 
 import tm.action.ConvertAction;
 
-import java.awt.*;
+import javax.swing.*;
 
 public class ConvertMenuItem extends ActionMenuItem {
 
     private final Resources resources;
 
-    ConvertMenuItem(Game game, Menu menu, String name, int shortcut, Resources resources) {
+    ConvertMenuItem(Game game, JMenu menu, String name, int shortcut, Resources resources) {
         super(game, menu, name, shortcut);
         this.resources = resources;
     }

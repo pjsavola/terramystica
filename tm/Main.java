@@ -113,19 +113,6 @@ public class Main {
                     case ACTIONS:
                     case CONFIRM_ACTION:
                         switch (e.getKeyCode()) {
-                            case KeyEvent.VK_ENTER -> {
-                                final Set<Player.PendingType> skippableActions = game.getCurrentPlayer().getSkippablePendingActions();
-                                if (game.getCurrentPlayer().getPendingActions().isEmpty() || !skippableActions.isEmpty()) {
-                                    int option = JOptionPane.OK_OPTION;
-                                    if (!skippableActions.isEmpty()) {
-                                        final String pending = "Are you sure you want to skip: " + skippableActions.stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / ")) + "?";
-                                        option = JOptionPane.showConfirmDialog(null, pending, "Skip Action?", JOptionPane.OK_CANCEL_OPTION);
-                                    }
-                                    if (option == JOptionPane.OK_OPTION) {
-                                        game.confirmTurn();
-                                    }
-                                }
-                            }
                             case KeyEvent.VK_ESCAPE -> game.rewind();
                         }
                         break;
