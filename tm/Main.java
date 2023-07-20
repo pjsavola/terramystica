@@ -82,146 +82,12 @@ public class Main {
                 "Y,B,U,I,I,I,B,K,I,S,U,S",
                 "R,K,S,B,R,G,Y,U,S,I,B,G,R",
         };
-        final Menu actionMenu = new Menu("Actions");
-        final Menu convertMenu = new Menu("Convert");
-        final Menu advanceMenu = new Menu("Advance");
 
         final GameData test = new GameData(1, new Random().nextInt());
         //final GameData test = new GameData("tests/Petri01");
 
         final JFrame frame = new JFrame();
-        final Game game = new Game(frame, baseMapData, test, new Menu[] { actionMenu, convertMenu, advanceMenu });
-
-        new ActionMenuItem(game, convertMenu, "Convert ...") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION;
-            }
-
-            @Override
-            protected void addListener(Game game) {
-                addActionListener(l -> {
-                    if (game.phase != Game.Phase.ACTIONS && game.phase != Game.Phase.CONFIRM_ACTION) return;
-
-                    final boolean alchemists = game.getCurrentPlayer().getFaction() instanceof Alchemists;
-                    final JTextField priestsToWorkers = new JTextField();
-                    final JTextField workersToCoins = new JTextField();
-                    final JTextField powerToPriests = new JTextField();
-                    final JTextField powerToWorkers = new JTextField();
-                    final JTextField powerToCoins = new JTextField();
-                    final JTextField coinsToPoints = new JTextField();
-                    final JTextField pointsToCoins = new JTextField();
-                    Object[] message = {
-                            "P -> W:", priestsToWorkers,
-                            "W -> C:", workersToCoins,
-                            "5 PW -> P", powerToPriests,
-                            "3 PW -> W", powerToWorkers,
-                            "1 PW -> C", powerToCoins,
-                            (alchemists ? "2" : "3") + " C -> VP", coinsToPoints,
-                            "1 VP -> C", pointsToCoins
-                    };
-                    message = Arrays.stream(message).limit(alchemists ? 14 : 12).toArray();
-
-                    int option = JOptionPane.showConfirmDialog(null, message, "Convert ...", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
-                    if (option == JOptionPane.OK_OPTION) {
-                        try {
-                            final int p2w = priestsToWorkers.getText().isEmpty() ? 0 : Integer.parseInt(priestsToWorkers.getText());
-                            final int w2c = workersToCoins.getText().isEmpty() ? 0 : Integer.parseInt(workersToCoins.getText());
-                            final int vp2c = pointsToCoins.getText().isEmpty() ? 0 : Integer.parseInt(pointsToCoins.getText());
-                            final int pw2p = powerToPriests.getText().isEmpty() ? 0 : Integer.parseInt(powerToPriests.getText());
-                            final int pw2w = powerToWorkers.getText().isEmpty() ? 0 : Integer.parseInt(powerToWorkers.getText());
-                            final int pw2c = powerToCoins.getText().isEmpty() ? 0 : Integer.parseInt(powerToCoins.getText());
-                            final int c2vp = coinsToPoints.getText().isEmpty() ? 0 : Integer.parseInt(coinsToPoints.getText());
-                            Resources powerConversions = Resources.zero;
-                            if (pw2p > 0) powerConversions = powerConversions.combine(Resources.fromPriests(pw2p));
-                            if (pw2w > 0) powerConversions = powerConversions.combine(Resources.fromWorkers(pw2w));
-                            if (pw2c > 0) powerConversions = powerConversions.combine(Resources.fromCoins(pw2c));
-                            if (powerConversions != Resources.zero || p2w > 0 || w2c > 0 || vp2c > 0 || c2vp > 0) {
-                                game.resolveAction(new ConvertAction(powerConversions, p2w, w2c, vp2c, c2vp));
-                            }
-                        } catch (NumberFormatException ex) {
-                            final String input = ex.getMessage().substring(ex.getMessage().indexOf('"'));
-                            JOptionPane.showConfirmDialog(null, "Invalid number: " + input, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null);
-                        }
-                    }
-                });
-            }
-        };
-
-        new ConvertMenuItem(game, convertMenu, "PW -> C", KeyEvent.VK_C, Resources.c1);
-        new ConvertMenuItem(game, convertMenu, "3PW -> W", KeyEvent.VK_W, Resources.w1);
-        new ConvertMenuItem(game, convertMenu, "5PW -> P", KeyEvent.VK_P, Resources.p1);
-        new ActionMenuItem(game, convertMenu, "VP -> C", KeyEvent.VK_A) {
-            @Override
-            public boolean canExecute(Game game) {
-                return (game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION) && game.getCurrentPlayer().canConvert(0, 0, 1, 0);
-            }
-
-            @Override
-            protected void addListener(Game game) {
-                game.resolveAction(new ConvertAction(Resources.zero, 0, 0, 1, 0));
-            }
-        };
-
-        new ActionMenuItem(game, advanceMenu,"Advance ship") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.phase == Game.Phase.ACTIONS && game.getCurrentPlayer().canAdvanceShipping();
-            }
-
-            @Override
-            protected void addListener(Game game) {
-                addActionListener(l -> game.resolveAction(new AdvanceAction(false)));
-            }
-        };
-
-        new ActionMenuItem(game, advanceMenu, "Advance dig") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.phase == Game.Phase.ACTIONS && game.getCurrentPlayer().canAdvanceDigging();
-            }
-
-            @Override
-            protected void addListener(Game game) {
-                addActionListener(l -> game.resolveAction(new AdvanceAction(true)));
-            }
-        };
-
-        new ActionMenuItem(game, actionMenu, "Final Pass") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.phase == Game.Phase.ACTIONS && game.getRound() == 6;
-            }
-
-            @Override
-            protected void addListener(Game game) {
-                addActionListener(l -> game.resolveAction(new PassAction()));
-            }
-        };
-
-        new ActionMenuItem(game, actionMenu, "Darklings SH Conversion") {
-            @Override
-            public boolean canExecute(Game game) {
-                return game.getCurrentPlayer().getPendingActions().contains(Player.PendingType.CONVERT_W2P);
-            }
-
-            @Override
-            protected void addListener(Game game) {
-                addActionListener(l -> {
-                    final int workers = game.getCurrentPlayer().getWorkers();
-                    final String[] choices = IntStream.range(0, Math.min(3, workers) + 1).boxed().map(Object::toString).toArray(String[]::new);
-                    final int response = JOptionPane.showOptionDialog(game, "Convert W to P...", "Darklings SH Conversion", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
-                    if (response >= 0 && response < choices.length) {
-                        game.resolveAction(new DarklingsConvertAction(response));
-                    }
-                });
-            }
-        };
-
-        final MenuBar menuBar = new MenuBar();
-        menuBar.add(convertMenu);
-        menuBar.add(advanceMenu);
-        menuBar.add(actionMenu);
+        final Game game = new Game(frame, baseMapData, test);
 
         final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
         final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
@@ -229,7 +95,6 @@ public class Main {
 
         frame.setTitle("Terra Mystica");
         frame.setContentPane(jsp);
-        frame.setMenuBar(menuBar);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.pack();
@@ -292,7 +157,7 @@ public class Main {
             };
             final GameData test = new GameData(file);
             final JFrame frame = new JFrame();
-            final Game game = new Game(frame, baseMapData, test, null);
+            final Game game = new Game(frame, baseMapData, test);
             final int[] vps = game.getVictoryPoints();
             if (Arrays.equals(vpTargets, vps)) {
                 return true;

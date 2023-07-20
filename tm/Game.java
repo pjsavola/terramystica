@@ -57,15 +57,18 @@ public class Game extends JPanel {
     boolean rewinding;
     boolean importing;
 
-    private final Menu[] menus;
+    Menu[] menus;
 
     private final JFrame frame;
 
-    public Game(JFrame frame, String[] mapData, GameData gameData, Menu[] menus) {
+    public Game(JFrame frame, String[] mapData, GameData gameData) {
         this.frame = frame;
         this.mapData = mapData;
         this.gameData = gameData;
-        this.menus = menus;
+        final MenuBar menuBar = new MenuBar();
+        Menus.initializeMenus(this);
+        for (Menu menu : menus) menuBar.add(menu);
+        frame.setMenuBar(menuBar);
 
         mapPanel = new Grid(this, mapData);
         cultPanel = new Cults(this, players);
@@ -706,19 +709,17 @@ public class Game extends JPanel {
     }
 
     public void refresh() {
-        if (menus != null) {
-            for (Menu menu : menus) {
-                final int count = menu.getItemCount();
-                for (int i = 0; i < count; ++i) {
-                    final MenuItem item = menu.getItem(i);
-                    final boolean enable;
-                    if (item instanceof ActionMenuItem) {
-                        enable = getCurrentPlayer() != null && ((ActionMenuItem) item).canExecute(this);
-                    } else {
-                        enable = true;
-                    }
-                    item.setEnabled(enable);
+        for (Menu menu : menus) {
+            final int count = menu.getItemCount();
+            for (int i = 0; i < count; ++i) {
+                final MenuItem item = menu.getItem(i);
+                final boolean enable;
+                if (item instanceof ActionMenuItem) {
+                    enable = getCurrentPlayer() != null && ((ActionMenuItem) item).canExecute(this);
+                } else {
+                    enable = true;
                 }
+                item.setEnabled(enable);
             }
         }
         final Set<Hex> clickables = getClickableHexes();
