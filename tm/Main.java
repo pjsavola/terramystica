@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -82,6 +83,46 @@ public class Main {
                 "Y,B,U,I,I,I,B,K,I,S,U,S",
                 "R,K,S,B,R,G,Y,U,S,I,B,G,R",
         };
+
+
+        if (false) {
+            final JFrame frame = new JFrame();
+            frame.setTitle("JMystica");
+            final ImageIcon icon = new ImageIcon("tm.png");
+            final Image image = icon.getImage();
+            final JPanel imagePanel = new JPanel() {
+                @Override
+                public void paintComponent(Graphics g) {
+                    g.drawImage(image, 0, 0, null);
+                }
+
+                @Override
+                public Dimension getPreferredSize() {
+                    return new Dimension(icon.getIconWidth(), icon.getIconHeight());
+                }
+            };
+            final JPanel buttonPanel = new JPanel();
+            final JButton startButton = new JButton("Start");
+            final JButton loadButton = new JButton("Load");
+            final JButton importButton = new JButton("Import");
+            final JButton quitButton = new JButton("Quit");
+            buttonPanel.add(startButton);
+            buttonPanel.add(loadButton);
+            buttonPanel.add(importButton);
+            buttonPanel.add(quitButton);
+            quitButton.addActionListener(l -> frame.setVisible(false));
+            buttonPanel.setBackground(Color.BLACK);
+            final JPanel mainPanel = new JPanel();
+            mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+            mainPanel.add(imagePanel);
+            mainPanel.add(buttonPanel);
+            frame.setContentPane(mainPanel);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setLocationRelativeTo(null);
+            frame.pack();
+            frame.setVisible(true);
+            return;
+        }
 
         final GameData test = new GameData(7, new Random().nextInt());
         //final GameData test = new GameData("tests/Petri01");
