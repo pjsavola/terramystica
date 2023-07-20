@@ -127,8 +127,29 @@ public class Grid extends JPanel {
         });
 
         new Thread(() -> {
-            
-        });
+            while (true) {
+                try {
+                    boolean changes = false;
+                    Thread.sleep(50);
+                    for (Hex hex : allHexes) {
+                        final int maxAlpha = hex.getType().getMaxHighlightAlpha();
+                        int alpha = hex.highlightAlpha;
+                        if (hex.highlight) {
+                            alpha = Math.min(maxAlpha, alpha + maxAlpha / 16);
+                        } else {
+                            alpha = Math.max(0, alpha - maxAlpha / 8);
+                        }
+                        if (alpha != hex.highlightAlpha || hex.highlight) changes = true;
+                        hex.highlightAlpha = alpha;
+                    }
+                    if (changes) {
+                        repaint();
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
     }
 
     public void reset(String[] mapData) {

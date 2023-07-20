@@ -83,7 +83,7 @@ public class Main {
                 "R,K,S,B,R,G,Y,U,S,I,B,G,R",
         };
 
-        final GameData test = new GameData(2, new Random().nextInt());
+        final GameData test = new GameData(7, new Random().nextInt());
         //final GameData test = new GameData("tests/Petri01");
 
         final JFrame frame = new JFrame();

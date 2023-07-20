@@ -6,32 +6,32 @@ import java.awt.*;
 public class Hex {
 
     public enum Type {
-        BLACK(new Color(0x444444), Color.BLACK, new Color(0x555555), Color.LIGHT_GRAY),
-        BROWN(new Color(0xBB9977), new Color(0x997755), new Color(0xCCAA88)),
-        YELLOW(new Color(0xFFFF55), new Color(0xDDDD33), new Color(0xFFFF88)),
-        RED(new Color(0xFF8888), new Color(0xDD6666), new Color(0xFF9999)),
-        GRAY(new Color(0xCCCCCC), new Color(0xAAAAAA), new Color(0xDDDDDD)),
-        GREEN(new Color(0x44EE44), new Color(0x22CC22), new Color(0x55FF55)),
-        BLUE(new Color(0x66BBFF), new Color(0x4499DD), new Color(0x77CCFF)),
+        BLACK(new Color(0x444444), Color.BLACK, 96, Color.LIGHT_GRAY),
+        BROWN(new Color(0xBB9977), new Color(0x997755), 48),
+        YELLOW(new Color(0xFFFF55), new Color(0xDDDD33), 32),
+        RED(new Color(0xFF8888), new Color(0xDD6666), 40),
+        GRAY(new Color(0xCCCCCC), new Color(0xAAAAAA), 40),
+        GREEN(new Color(0x44EE44), new Color(0x22CC22), 48),
+        BLUE(new Color(0x66BBFF), new Color(0x4499DD), 32),
         WATER(Color.WHITE);
 
         private final Color color;
         private final Color buildingColor;
         private final Color fontColor;
-        private final Color highlightColor;
-        Type(Color color, Color buildingColor, Color highlightColor, Color fontColor) {
+        private final int maxHighlightAlpha;
+        Type(Color color, Color buildingColor, int maxHighlightAlpha, Color fontColor) {
             this.color = color;
             this.buildingColor = buildingColor;
             this.fontColor = fontColor;
-            this.highlightColor = highlightColor;
+            this.maxHighlightAlpha = maxHighlightAlpha;
         }
 
-        Type(Color color, Color buildingColor, Color highlightColor) {
-            this(color, buildingColor, highlightColor, Color.BLACK);
+        Type(Color color, Color buildingColor, int maxHighlightAlpha) {
+            this(color, buildingColor, maxHighlightAlpha, Color.BLACK);
         }
 
         Type(Color color) {
-            this(color, color, color);
+            this(color, color, 0);
         }
 
         public Color getHexColor() {
@@ -44,6 +44,10 @@ public class Hex {
 
         public Color getFontColor() {
             return fontColor;
+        }
+
+        public int getMaxHighlightAlpha() {
+            return maxHighlightAlpha;
         }
     };
 
@@ -85,6 +89,7 @@ public class Hex {
         }
     };
 
+    final static long startTime = System.currentTimeMillis();
     final static Font font = new Font("Arial", Font.PLAIN, 13);
     final static Font townFont = new Font("Arial", Font.BOLD, 13);
     private Type type;
@@ -151,7 +156,6 @@ public class Hex {
 
     public void setHighlight(boolean highlight) {
         this.highlight = highlight;
-        highlightAlpha = highlight ? 0x44 : 0;
     }
 
     public void draw(Graphics2D g, int x, int y, int radius) {
@@ -196,7 +200,11 @@ public class Hex {
         g.setColor(type.color);
         g.fillPolygon(xpoints, ypoints, 6);
 
-        g.setColor(new Color(0xFF, 0xFF, 0xFF, highlightAlpha));
+        int alpha = highlightAlpha;
+        if (highlightAlpha > 0) {
+            alpha = (int) (alpha * (1 + Math.sin((double) (System.currentTimeMillis() - startTime) / 200)) * 0.5);
+        }
+        g.setColor(new Color(type.getFontColor().getRed(), type.getFontColor().getGreen(), type.getFontColor().getBlue(), alpha));
         g.fillPolygon(xpoints, ypoints, 6);
 
         g.setColor(Color.BLACK);
