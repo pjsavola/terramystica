@@ -43,9 +43,18 @@ public class GameData {
         Collections.shuffle(allBons, random);
         allBons.stream().limit(playerCount + 3).sorted().forEach(bons::add);
 
-        factions = new ArrayList<>(allFactions);
-        Collections.shuffle(factions, random);
-        while (factions.size() > playerCount) factions.remove(factions.size() - 1);
+        final Set<Hex.Type> selectedColors = new HashSet<>();
+        final List<Faction> shuffledFactions = new ArrayList<>(allFactions);
+        Collections.shuffle(shuffledFactions);
+        factions = new ArrayList<>(playerCount);
+        for (Faction faction : shuffledFactions) {
+            if (selectedColors.add(faction.getHomeType())) {
+                factions.add(faction);
+            }
+            if (factions.size() == playerCount) {
+                break;
+            }
+        }
         turnOrderVariant = true;
     }
 
