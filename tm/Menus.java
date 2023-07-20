@@ -123,7 +123,7 @@ public abstract class Menus {
                         }
                     } catch (NumberFormatException ex) {
                         final String input = ex.getMessage().substring(ex.getMessage().indexOf('"'));
-                        JOptionPane.showConfirmDialog(null, "Invalid number: " + input, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null);
+                        JOptionPane.showMessageDialog(null, "Invalid number: " + input, "Error", JOptionPane.ERROR_MESSAGE, null);
                     }
                 }
             }
@@ -160,8 +160,8 @@ public abstract class Menus {
                             game.resolveAction(new BurnAction(burn));
                         }
                     } catch (NumberFormatException ex) {
-                        final String input = ex.getMessage().substring(ex.getMessage().indexOf('"'));
-                        JOptionPane.showConfirmDialog(null, "Invalid number: " + input, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null);
+                        final String input = "\"" + burnField.getText() + "\"";
+                        JOptionPane.showMessageDialog(null, "Invalid number: " + input, "Error", JOptionPane.ERROR_MESSAGE, null);
                     }
                 }
             }

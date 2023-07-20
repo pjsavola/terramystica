@@ -87,6 +87,9 @@ public class Main {
             buttonPanel.add(loadButton);
             buttonPanel.add(importButton);
             buttonPanel.add(quitButton);
+            importButton.addActionListener(l -> {
+                
+            });
             quitButton.addActionListener(l -> frame.setVisible(false));
             buttonPanel.setBackground(Color.BLACK);
             final JPanel mainPanel = new JPanel();
@@ -101,7 +104,7 @@ public class Main {
             return;
         }
 
-        final GameData test = new GameData(7, new Random().nextInt());
+        final GameData test = new GameData(1, new Random().nextInt());
         //final GameData test = new GameData("tests/Petri01");
 
         final JFrame frame = new JFrame();
