@@ -89,7 +89,7 @@ public class Main {
         final JFrame frame = new JFrame();
         final Game game = new Game(frame, baseMapData, test, actionMenu);
 
-        final MenuItem convertAction = new ActionMenuItem("Convert") {
+        final MenuItem convertAction = new ActionMenuItem("Convert ...") {
             @Override
             public boolean canExecute(Game game) {
                 return game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION;
@@ -104,6 +104,7 @@ public class Main {
             final JTextField powerToPriests = new JTextField();
             final JTextField powerToWorkers = new JTextField();
             final JTextField powerToCoins = new JTextField();
+            final JTextField coinsToPoints = new JTextField();
             final JTextField pointsToCoins = new JTextField();
             Object[] message = {
                     "P -> W:", priestsToWorkers,
@@ -111,11 +112,12 @@ public class Main {
                     "5 PW -> P", powerToPriests,
                     "3 PW -> W", powerToWorkers,
                     "1 PW -> C", powerToCoins,
+                    "3 C -> VP", coinsToPoints,
                     "1 VP -> C", pointsToCoins
             };
-            message = Arrays.stream(message).limit(alchemists ? 12 : 10).toArray();
+            message = Arrays.stream(message).limit(alchemists ? 14 : 12).toArray();
 
-            int option = JOptionPane.showConfirmDialog(null, message, "Convert", JOptionPane.OK_CANCEL_OPTION);
+            int option = JOptionPane.showConfirmDialog(null, message, "Convert ...", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
             if (option == JOptionPane.OK_OPTION) {
                 try {
                     final int p2w = priestsToWorkers.getText().isEmpty() ? 0 : Integer.parseInt(priestsToWorkers.getText());
@@ -124,15 +126,17 @@ public class Main {
                     final int pw2p = powerToPriests.getText().isEmpty() ? 0 : Integer.parseInt(powerToPriests.getText());
                     final int pw2w = powerToWorkers.getText().isEmpty() ? 0 : Integer.parseInt(powerToWorkers.getText());
                     final int pw2c = powerToCoins.getText().isEmpty() ? 0 : Integer.parseInt(powerToCoins.getText());
+                    final int c2vp = coinsToPoints.getText().isEmpty() ? 0 : Integer.parseInt(coinsToPoints.getText());
                     Resources powerConversions = Resources.zero;
                     if (pw2p > 0) powerConversions = powerConversions.combine(Resources.fromPriests(pw2p));
                     if (pw2w > 0) powerConversions = powerConversions.combine(Resources.fromWorkers(pw2w));
                     if (pw2c > 0) powerConversions = powerConversions.combine(Resources.fromCoins(pw2c));
-                    if (powerConversions != Resources.zero || p2w > 0 || w2c > 0 || vp2c > 0) {
-                        game.resolveAction(new ConvertAction(powerConversions, p2w, w2c, vp2c, 0));
+                    if (powerConversions != Resources.zero || p2w > 0 || w2c > 0 || vp2c > 0 || c2vp > 0) {
+                        game.resolveAction(new ConvertAction(powerConversions, p2w, w2c, vp2c, c2vp));
                     }
                 } catch (NumberFormatException ex) {
-                    System.err.println("Invalid number: " + ex.getMessage());
+                    final String input = ex.getMessage().substring(ex.getMessage().indexOf('"'));
+                    JOptionPane.showConfirmDialog(null, "Invalid number: " + input, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null);
                 }
             }
         });
