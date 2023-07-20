@@ -1,9 +1,6 @@
 package tm;
 
-import tm.action.AdvanceAction;
-import tm.action.ConvertAction;
-import tm.action.DarklingsConvertAction;
-import tm.action.PassAction;
+import tm.action.*;
 import tm.faction.Alchemists;
 
 import javax.swing.*;
@@ -15,11 +12,12 @@ import java.util.stream.IntStream;
 public abstract class Menus {
 
     public static void initializeMenus(Game game) {
-        final Menu actionMenu = new Menu("Actions");
         final Menu convertMenu = new Menu("Convert");
         final Menu advanceMenu = new Menu("Advance");
-
+        final Menu actionMenu = new Menu("Actions");
         game.menus = new Menu[] { actionMenu, convertMenu, advanceMenu };
+
+        // === CONVERT MENU ===
         new ActionMenuItem(game, convertMenu, "Convert ...") {
             @Override
             public boolean canExecute(Game game) {
@@ -29,8 +27,6 @@ public abstract class Menus {
             @Override
             protected void addListener(Game game) {
                 addActionListener(l -> {
-                    if (game.phase != Game.Phase.ACTIONS && game.phase != Game.Phase.CONFIRM_ACTION) return;
-
                     final boolean alchemists = game.getCurrentPlayer().getFaction() instanceof Alchemists;
                     final JTextField priestsToWorkers = new JTextField();
                     final JTextField workersToCoins = new JTextField();
@@ -75,7 +71,6 @@ public abstract class Menus {
                 });
             }
         };
-
         new ConvertMenuItem(game, convertMenu, "PW -> C", KeyEvent.VK_C, Resources.c1);
         new ConvertMenuItem(game, convertMenu, "3PW -> W", KeyEvent.VK_W, Resources.w1);
         new ConvertMenuItem(game, convertMenu, "5PW -> P", KeyEvent.VK_P, Resources.p1);
@@ -90,7 +85,34 @@ public abstract class Menus {
                 addActionListener(l -> game.resolveAction(new ConvertAction(Resources.zero, 0, 0, 1, 0)));
             }
         };
+        new ActionMenuItem(game, convertMenu, "Burn ...") {
+            @Override
+            public boolean canExecute(Game game) {
+                return (game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION) && game.getCurrentPlayer().getMaxBurn() > 0;
+            }
 
+            @Override
+            protected void addListener(Game game) {
+                addActionListener(l -> {
+                    final JTextField burnField = new JTextField();
+                    final Object[] message = { "Burn:", burnField };
+                    int option = JOptionPane.showConfirmDialog(null, message, "Burn ...", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                    if (option == JOptionPane.OK_OPTION) {
+                        try {
+                            final int burn = burnField.getText().isEmpty() ? 0 : Integer.parseInt(burnField.getText());
+                            if (burn > 0) {
+                                game.resolveAction(new BurnAction(burn));
+                            }
+                        } catch (NumberFormatException ex) {
+                            final String input = ex.getMessage().substring(ex.getMessage().indexOf('"'));
+                            JOptionPane.showConfirmDialog(null, "Invalid number: " + input, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null);
+                        }
+                    }
+                });
+            }
+        };
+
+        //=== ADVANCE MENU ===
         new ActionMenuItem(game, advanceMenu,"Advance ship") {
             @Override
             public boolean canExecute(Game game) {
@@ -102,7 +124,6 @@ public abstract class Menus {
                 addActionListener(l -> game.resolveAction(new AdvanceAction(false)));
             }
         };
-
         new ActionMenuItem(game, advanceMenu, "Advance dig") {
             @Override
             public boolean canExecute(Game game) {
@@ -115,6 +136,7 @@ public abstract class Menus {
             }
         };
 
+        // === ACTION MENU ===
         new ActionMenuItem(game, actionMenu, "Final Pass") {
             @Override
             public boolean canExecute(Game game) {
@@ -126,7 +148,6 @@ public abstract class Menus {
                 addActionListener(l -> game.resolveAction(new PassAction()));
             }
         };
-
         new ActionMenuItem(game, actionMenu, "Darklings SH Conversion") {
             @Override
             public boolean canExecute(Game game) {
