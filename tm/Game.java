@@ -8,8 +8,6 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -976,7 +974,7 @@ public class Game extends JPanel {
             }
             if (!resolveAction(action)) {
                 System.err.println("Failure " + action);
-                counter = Main.maxReplayActionCount;
+                counter = JMystica.maxReplayActionCount;
                 return;
             }
         }
@@ -1316,7 +1314,7 @@ public class Game extends JPanel {
                 confirmTurn();
                 replayLeech(faction);
             }
-            if (counter >= Main.maxReplayActionCount) {
+            if (counter >= JMystica.maxReplayActionCount) {
                 break;
             }
             if (!actions.isEmpty()) {

@@ -1,22 +1,15 @@
 package tm;
 
-import tm.action.*;
-import tm.faction.Alchemists;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-public class Main {
+public class JMystica {
     public static final int maxReplayActionCount = 2000;
 
     public static Hex.Type getType(String type) {
@@ -68,6 +61,8 @@ public class Main {
 
         if (true) {
             final JFrame frame = new JFrame();
+            final JPanel mainPanel = new JPanel();
+            final WindowChanger windowChanger = new WindowChanger(frame, mainPanel);
             frame.setTitle("JMystica");
             final ImageIcon icon = new ImageIcon("tm.png");
             final Image image = icon.getImage();
@@ -109,7 +104,6 @@ public class Main {
                             final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
                             final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
                             final JScrollPane jsp = new JScrollPane(game, v, h);
-
                             frame.setContentPane(jsp);
                             frame.pack();
                             game.refresh();
@@ -123,13 +117,11 @@ public class Main {
             });
             quitButton.addActionListener(l -> frame.setVisible(false));
             buttonPanel.setBackground(Color.BLACK);
-            final JPanel mainPanel = new JPanel();
             mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
             mainPanel.add(imagePanel);
             mainPanel.add(buttonPanel);
             frame.setContentPane(mainPanel);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLocationRelativeTo(null);
+            frame.addWindowListener(windowChanger);
             frame.pack();
             frame.setVisible(true);
             return;

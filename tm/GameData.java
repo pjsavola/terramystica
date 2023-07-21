@@ -71,12 +71,9 @@ public class GameData {
     }
 
     public GameData(File inputFile) {
-        int players = 0;
         mapData = MapData.mapsByName.get("Base").getData();
-
         factions = new ArrayList<>();
         rounds = new ArrayList<>(6);
-
         towns = new ArrayList<>();
         for (int i = 1; i < 6; ++i) {
             towns.add(i);
@@ -104,7 +101,6 @@ public class GameData {
     }
 
     public GameData(String input) {
-        int players = 0;
         mapData = MapData.mapsByName.get("Base").getData();
 
         factions = new ArrayList<>();
@@ -121,6 +117,9 @@ public class GameData {
         final Scanner scanner = new Scanner(input);
         playerCount = readInput(scanner);
 
+        if (playerCount == 0) {
+            throw new RuntimeException("Invalid input");
+        }
         if (playerCount != factions.size()) {
             throw new RuntimeException("Invalid number of factions");
         }
