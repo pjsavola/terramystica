@@ -6,6 +6,8 @@ import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -92,12 +94,32 @@ public class JMystica {
         buttonPanel.add(importButton);
         buttonPanel.add(quitButton);
         startButton.addActionListener(l -> {
+            final List<String> customMap = new ArrayList<>();
             final JDialog dialog = new JDialog(frame, "Game Settings");
             final JPanel panel = new JPanel();
             panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             panel.add(new JLabel("Map"));
             final JComboBox mapChooser = new JComboBox(new Object[] {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base", "Custom ..."});
             panel.add(mapChooser);
+            mapChooser.addItemListener(e -> {
+                if (e.getStateChange() == ItemEvent.SELECTED && "Custom ...".equals(e.getItem())) {
+                    final JTextArea textArea = new JTextArea();
+                    textArea.setFont(new Font("Courier New", Font.PLAIN, 12));
+                    textArea.setRows(9);
+                    final Object[] message = { "Map data:", textArea };
+                    final int option = JOptionPane.showConfirmDialog(panel, message, "Insert map data", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                    if (option == JOptionPane.OK_OPTION) {
+                        final String text = textArea.getText();
+                        final String[] rows = text.split("\\n");
+                        customMap.clear();
+                        for (String row : rows) {
+                            customMap.add(row.trim());
+                        }
+                    } else {
+                        mapChooser.setSelectedIndex(-1);
+                    }
+                }
+            });
             panel.add(new JLabel("Faction Picks"));
             final JComboBox factionPickChooser = new JComboBox(new Object[] {"Manual", "Random"});
             panel.add(factionPickChooser);
@@ -151,7 +173,14 @@ public class JMystica {
             panel.add(cancel);
             start.addActionListener(el -> {
                 dialog.setVisible(false);
-                Game.open(frame, new GameData(playerLabelList.size(), seed));
+                final String[] mapData;
+                if (mapChooser.getSelectedIndex() == 5 && !customMap.isEmpty()) {
+                    System.err.println("JEE");
+                    mapData = customMap.toArray(new String[0]);
+                } else {
+                    mapData = MapData.mapsByName.get("Base").getData();
+                }
+                Game.open(frame, new GameData(playerLabelList.size(), mapData, seed));
             });
             cancel.addActionListener(el -> dialog.setVisible(false));
             panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));

@@ -29,9 +29,9 @@ public class GameData {
     boolean turnOrderVariant;
     final Map<String, Faction> factionMap = new HashMap<>();
 
-    public GameData(int playerCount, int seed) {
+    public GameData(int playerCount, String[] mapData, int seed) {
         this.playerCount = playerCount;
-        mapData = MapData.mapsByName.get("Base").getData();
+        this.mapData = mapData;
         final Random random = new Random(seed);
 
         final List<Round> allRounds = new ArrayList<>(List.of(Round.fireW, Round.firePw, Round.waterP, Round.waterS, Round.earthC, Round.earthS, Round.airW, Round.airS, Round.priestC));
