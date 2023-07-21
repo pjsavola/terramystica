@@ -65,6 +65,7 @@ public class JMystica {
         }
 
         if (true) {
+            int seed = new Random().nextInt();
             final JFrame frame = new JFrame();
             final JPanel mainPanel = new JPanel();
             final WindowChanger windowChanger = new WindowChanger(frame, mainPanel);
@@ -83,7 +84,7 @@ public class JMystica {
                 }
             };
             final JPanel buttonPanel = new JPanel();
-            final JButton startButton = new JButton("Start");
+            final JButton startButton = new JButton("New");
             final JButton loadButton = new JButton("Load");
             final JButton importButton = new JButton("Import");
             final JButton quitButton = new JButton("Quit");
@@ -95,7 +96,6 @@ public class JMystica {
                 final JDialog dialog = new JDialog(frame, "Game Settings");
                 final JPanel panel = new JPanel();
                 panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-                panel.setLayout(new GridLayout(4 + 4, 2));
                 panel.add(new JLabel("Map"));
                 final JComboBox mapChooser = new JComboBox(new Object[] {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base", "Custom ..."});
                 panel.add(mapChooser);
@@ -115,9 +115,9 @@ public class JMystica {
                         final JTextField field = new JTextField();
                         playerLabelList.add(label);
                         playerFieldList.add(field);
-                        panel.add(label);
-                        panel.add(field);
-                        panel.setLayout(new GridLayout(4 + playerLabelList.size(), 2));
+                        panel.add(label, panel.getComponentCount() - 1);
+                        panel.add(field, panel.getComponentCount() - 1);
+                        panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
                         dialog.pack();
                     }
                 });
@@ -125,7 +125,7 @@ public class JMystica {
                     if (playerLabelList.size() > 1) {
                         panel.remove(playerLabelList.remove(playerLabelList.size() - 1));
                         panel.remove(playerFieldList.remove(playerFieldList.size() - 1));
-                        panel.setLayout(new GridLayout(4 + playerLabelList.size(), 2));
+                        panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
                         dialog.pack();
                     }
                 });
@@ -139,10 +139,21 @@ public class JMystica {
                     panel.add(label);
                     panel.add(field);
                 }
-
+                final JButton start = new JButton("Start!");
+                start.setForeground(Color.RED);
+                final JButton cancel = new JButton("Cancel");
+                panel.add(start);
+                panel.add(cancel);
+                start.addActionListener(el -> {
+                    dialog.setVisible(false);
+                    Game.open(frame, new GameData(playerLabelList.size(), seed));
+                });
+                cancel.addActionListener(el -> dialog.setVisible(false));
+                panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
                 dialog.setContentPane(panel);
                 dialog.pack();
                 dialog.setLocationRelativeTo(mainPanel);
+                dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                 dialog.setVisible(true);
             });
             importButton.addActionListener(l -> {

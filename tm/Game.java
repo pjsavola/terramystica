@@ -60,9 +60,11 @@ public class Game extends JPanel {
     private final JFrame frame;
 
     public static void open(JFrame frame, Scanner inputScanner) {
-        final GameData gameData = new GameData(inputScanner);
-        final Game game = new Game(frame, gameData);
+        open(frame, new GameData(inputScanner));
+    }
 
+    public static void open(JFrame frame, GameData gameData) {
+        final Game game = new Game(frame, gameData);
         final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
         final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
         final JScrollPane jsp = new JScrollPane(game, v, h);
