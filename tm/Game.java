@@ -172,7 +172,7 @@ public class Game extends JPanel {
             while (players.size() < gameData.playerCount) {
                 final Player player = new Player(this);
                 final Faction faction = factions.remove(factions.size() - 1);
-                player.selectFaction(faction, 20);
+                player.selectFaction(faction, gameData.useRevisedStartingVPs ? GameData.revisedStartingVPs.get(faction.getClass().getSimpleName()) : 20);
                 factions.removeIf(f -> f.getHomeType() == faction.getHomeType());
                 players.add(player);
                 nextTurnOrder.add(0, player);

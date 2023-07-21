@@ -189,9 +189,13 @@ public class JMystica {
                 if (mapChooser.getSelectedIndex() == 5 && !customMap.isEmpty()) {
                     mapData = customMap.toArray(new String[0]);
                 } else {
-                    mapData = MapData.mapsByName.get("Base").getData();
+                    final String mapName = (String) mapOptions[mapChooser.getSelectedIndex()];
+                    mapData = MapData.mapsByName.get(mapName).getData();
                 }
-                Game.open(frame, new GameData(playerLabelList.size(), mapData, seed));
+                final GameData gameData = new GameData(playerLabelList.size(), seed);
+                gameData.mapData = mapData;
+                gameData.useRevisedStartingVPs = startingVPsChooser.getSelectedIndex() == 1;
+                Game.open(frame, gameData);
             });
             cancel.addActionListener(el -> dialog.setVisible(false));
             panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));

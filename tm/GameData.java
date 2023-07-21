@@ -17,8 +17,27 @@ public class GameData {
     }
 
     private static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
+    public static final Map<String, Integer> revisedStartingVPs = new HashMap<>();
+
+    static {
+        revisedStartingVPs.put("Darklings", 15);
+        revisedStartingVPs.put("Cultists", 16);
+        revisedStartingVPs.put("Engineers", 16);
+        revisedStartingVPs.put("ChaosMagicians", 19);
+        revisedStartingVPs.put("Mermaids", 19);
+        revisedStartingVPs.put("Nomads", 19);
+        revisedStartingVPs.put("Witches", 19);
+        revisedStartingVPs.put("Dwarves", 20);
+        revisedStartingVPs.put("Halflings", 20);
+        revisedStartingVPs.put("Swarmlings", 22);
+        revisedStartingVPs.put("Giants", 25);
+        revisedStartingVPs.put("Alchemists", 27);
+        revisedStartingVPs.put("Auren", 27);
+        revisedStartingVPs.put("Fakirs", 33);
+    }
 
     String[] mapData;
+    boolean useRevisedStartingVPs;
     final int playerCount;
     final List<Faction> factions;
     final List<Integer> bons;
@@ -29,9 +48,8 @@ public class GameData {
     boolean turnOrderVariant;
     final Map<String, Faction> factionMap = new HashMap<>();
 
-    public GameData(int playerCount, String[] mapData, int seed) {
+    public GameData(int playerCount, int seed) {
         this.playerCount = playerCount;
-        this.mapData = mapData;
         final Random random = new Random(seed);
 
         final List<Round> allRounds = new ArrayList<>(List.of(Round.fireW, Round.firePw, Round.waterP, Round.waterS, Round.earthC, Round.earthS, Round.airW, Round.airS, Round.priestC));
