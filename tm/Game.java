@@ -189,9 +189,9 @@ public class Game extends JPanel {
             GameData.allFactions.stream().filter(f -> !selected.contains(f)).sorted(Comparator.comparingInt(f -> f.getHomeType().ordinal())).toList().forEach(f -> {
                 final int count = terraformPanel.getComponentCount();
                 if (count % 2 == 0) {
-                    terraformPanel.add(new FactionButton(popup, f), count / 2);
+                    terraformPanel.add(new FactionButton(popup, this, f), count / 2);
                 } else {
-                    terraformPanel.add(new FactionButton(popup, f));
+                    terraformPanel.add(new FactionButton(popup, this, f));
                 }
             });
             terraformPanel.setLayout(new GridLayout(2, 7 - selected.size()));

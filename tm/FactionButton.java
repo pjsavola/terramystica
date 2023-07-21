@@ -8,12 +8,15 @@ import java.awt.*;
 public class FactionButton extends JButton {
 
     private final Faction faction;
+    private final Game game;
     private final Hex hex;
 
-    public FactionButton(JDialog dialog, Faction faction) {
+    public FactionButton(JDialog dialog, Game game, Faction faction) {
+        this.game = game;
         this.faction = faction;
         hex = new Hex("", faction.getHomeType());
         addActionListener(e -> {
+            game.getCurrentPlayer().selectFaction(faction, 20);
             dialog.setVisible(false);
         });
     }
