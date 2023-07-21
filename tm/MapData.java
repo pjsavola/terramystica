@@ -105,6 +105,4 @@ public class MapData {
     public String[] getData() {
         return data;
     }
-
-
 }

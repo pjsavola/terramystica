@@ -25,12 +25,13 @@ public class Grid extends JPanel {
         points = new Point[mapData.length][];
         int waterCount = 0;
         for (int row = 0; row < mapData.length; ++row) {
-            String[] cols = mapData[row].split(",");
+            String usedRow = mapData[row];
+            if (usedRow.endsWith(",N")) usedRow = usedRow.substring(0, usedRow.length() - 2);
+            String[] cols = usedRow.split(",");
             map[row] = new Hex[cols.length];
             points[row] = new Point[cols.length];
             int number = 0;
             for (int col = 0; col < cols.length; ++col) {
-                if ("N".equals(cols[col])) continue;
                 final Hex.Type type = JMystica.getType(cols[col]);
                 final String id;
                 if (type == Hex.Type.WATER) {
@@ -154,9 +155,10 @@ public class Grid extends JPanel {
 
     public void reset(String[] mapData) {
         for (int row = 0; row < mapData.length; ++row) {
-            String[] cols = mapData[row].split(",");
+            String usedRow = mapData[row];
+            if (usedRow.endsWith(",N")) usedRow = usedRow.substring(0, usedRow.length() - 2);
+            String[] cols = usedRow.split(",");
             for (int col = 0; col < cols.length; ++col) {
-                if ("N".equals(cols[col])) continue;
                 final Hex.Type type = JMystica.getType(cols[col]);
                 map[row][col].reset(type);
             }
