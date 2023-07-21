@@ -38,6 +38,8 @@ public class GameData {
 
     String[] mapData;
     boolean useRevisedStartingVPs;
+    boolean useAuction;
+    boolean chooseFactions;
     final int playerCount;
     List<String> playerNames;
     final List<Faction> factions;

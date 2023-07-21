@@ -210,6 +210,8 @@ public class JMystica {
                 final GameData gameData = new GameData(playerNames, seed);
                 gameData.mapData = mapData;
                 gameData.useRevisedStartingVPs = startingVPsChooser.getSelectedIndex() == 1;
+                gameData.useAuction = startingVPsChooser.getSelectedIndex() == 2;
+                gameData.chooseFactions = factionPickChooser.getSelectedIndex() == 0;
                 Game.open(frame, gameData);
                 dialog.setVisible(false);
             });
