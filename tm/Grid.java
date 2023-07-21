@@ -24,6 +24,9 @@ public class Grid extends JPanel {
         map = new Hex[mapData.length][];
         points = new Point[mapData.length][];
         int waterCount = 0;
+        final int firstRowLength = mapData[0].length() - (mapData[0].endsWith(",N") ? 2 : 0);
+        final int secondRowLength = mapData[1].length() - (mapData[1].endsWith(",N") ? 2 : 0);
+        final int rowDelta = firstRowLength > secondRowLength ? 0 : 1;
         for (int row = 0; row < mapData.length; ++row) {
             String usedRow = mapData[row];
             if (usedRow.endsWith(",N")) usedRow = usedRow.substring(0, usedRow.length() - 2);
@@ -37,10 +40,10 @@ public class Grid extends JPanel {
                 if (type == Hex.Type.WATER) {
                     id = "r" + (waterCount++);
                 } else {
-                    id = "" + (char) ('A' + row) + (number + 1);
+                    id = "" + (char) ('A' + row + rowDelta) + (number + 1);
                     ++number;
                 }
-                final int x = 2 + (int) (((row % 2 == 0 ? 1 : 2) + col * 2) * halfWidth);
+                final int x = 2 + (int) ((((row + rowDelta) % 2 == 0 ? 1 : 2) + col * 2) * halfWidth);
                 final int y = 2 + (int) ((1 + row * 1.5) * radius);
                 points[row][col] = new Point(x, y);
                 map[row][col] = new Hex(id, type);
@@ -82,7 +85,7 @@ public class Grid extends JPanel {
             Collections.addAll(allHexes, hexes);
         }
 
-        final int width = (int) (map[0].length * halfWidth * 2 + 4);
+        final int width = (int) (map[rowDelta].length * halfWidth * 2 + 4);
         final int height = (int) (((map.length - 1) * 1.5 + 2) * radius + 4);
         size = new Dimension(width, height);
 
