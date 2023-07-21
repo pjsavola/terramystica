@@ -104,6 +104,12 @@ public class JMystica {
             panel.add(new JLabel("Starting VPs"));
             final JComboBox startingVPsChooser = new JComboBox(new Object[] {"20", "Revised", "Auction"});
             panel.add(startingVPsChooser);
+            panel.add(new JLabel("Setup random seed"));
+            final JTextField seedChooser = new JTextField();
+            panel.add(seedChooser);
+            panel.add(new JLabel("Randomize order"));
+            final JCheckBox randomizeOrderChooser = new JCheckBox();
+            panel.add(randomizeOrderChooser);
             final List<JLabel> playerLabelList = new ArrayList<>();
             final List<JTextField> playerFieldList = new ArrayList<>();
             final JButton addButton = new JButton("Add player");
