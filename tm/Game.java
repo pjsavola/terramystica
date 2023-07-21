@@ -688,6 +688,14 @@ public class Game extends JPanel {
 
         if (!leechTurnOrder.isEmpty()) {
             phase = Phase.LEECH;
+
+            // Automatically leech 1
+            if (!importing && !rewinding && leechTrigger == null) {
+                final Player player = leechTurnOrder.get(0);
+                if (Math.min(player.getPendingLeech(), player.getMaxLeech()) == 1) {
+                    resolveAction(new LeechAction(true));
+                }
+            }
         }
     }
 

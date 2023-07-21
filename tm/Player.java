@@ -448,6 +448,10 @@ public class Player extends JPanel {
         return power[0] > 0 || power[1] > 0;
     }
 
+    public int getMaxLeech() {
+        return Math.min(points + 1, power[0] * 2 + power[1]);
+    }
+
     public void acceptLeech() {
         if (pendingLeech > 0) {
             final int unused = addPower(pendingLeech);
