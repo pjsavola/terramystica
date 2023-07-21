@@ -4,6 +4,7 @@ import tm.faction.Giants;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ItemEvent;
@@ -202,7 +203,8 @@ public class JMystica {
                     final String mapName = (String) mapOptions[mapChooser.getSelectedIndex()];
                     mapData = MapData.mapsByName.get(mapName).getData();
                 }
-                final GameData gameData = new GameData(playerLabelList.size(), seed);
+                final List<String> playerNames = playerFieldList.stream().map(JTextComponent::getText).toList();
+                final GameData gameData = new GameData(playerNames, seed);
                 gameData.mapData = mapData;
                 gameData.useRevisedStartingVPs = startingVPsChooser.getSelectedIndex() == 1;
                 Game.open(frame, gameData);

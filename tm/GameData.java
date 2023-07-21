@@ -39,6 +39,7 @@ public class GameData {
     String[] mapData;
     boolean useRevisedStartingVPs;
     final int playerCount;
+    List<String> playerNames;
     final List<Faction> factions;
     final List<Integer> bons;
     final List<Integer> towns;
@@ -48,8 +49,9 @@ public class GameData {
     boolean turnOrderVariant;
     final Map<String, Faction> factionMap = new HashMap<>();
 
-    public GameData(int playerCount, int seed) {
-        this.playerCount = playerCount;
+    public GameData(List<String> playerNames, int seed) {
+        this.playerNames = playerNames;
+        this.playerCount = playerNames.size();
         final Random random = new Random(seed);
 
         final List<Round> allRounds = new ArrayList<>(List.of(Round.fireW, Round.firePw, Round.waterP, Round.waterS, Round.earthC, Round.earthS, Round.airW, Round.airS, Round.priestC));
@@ -117,6 +119,7 @@ public class GameData {
     }
 
     private int readInput(Scanner scanner) {
+        playerNames = new ArrayList<>();
         int players = 0;
         boolean start = false;
         while (scanner.hasNextLine()) {
@@ -146,6 +149,7 @@ public class GameData {
                 bons.remove((Integer) bon);
             } else if (line.matches("Player \\d: .*")) {
                 ++players;
+                playerNames.add(line.split(" ")[2]);
             } else if (line.matches("[a-z]*\\t.*") && line.endsWith("setup")) {
                 final String factionName = line.split("\\t")[0];
                 final Faction faction = allFactions.stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(factionName)).findFirst().orElse(null);

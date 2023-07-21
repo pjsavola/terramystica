@@ -92,10 +92,12 @@ public class Player extends JPanel {
     private final List<Integer> towns = new ArrayList<>();
     private final PlayerInfo data;
     private final Pool pool;
+    private final String name;
 
-    public Player(Game game) {
+    public Player(Game game, String name) {
         super(new FlowLayout(FlowLayout.LEFT));
         this.game = game;
+        this.name = name;
         data = new PlayerInfo();
         pool = new Pool(game, this, bons, null, favs, towns, game.bonUsed, usedFav6);
         add(data);
@@ -875,6 +877,9 @@ public class Player extends JPanel {
             g.fillRect(dx, dy, 300, 16);
             g.setColor(faction.getHomeType().getFontColor());
             String factionName = faction.getName();
+            if (!name.isEmpty()) {
+                factionName += " (" + name + ")";
+            }
             if (myTurn && game.phase != Game.Phase.END) {
                 if (game.phase == Game.Phase.CONFIRM_ACTION) {
                     final String pending = game.getCurrentPlayer().getPendingActions().stream().map(PendingType::getDescription).collect(Collectors.joining(" / ")).toUpperCase();
