@@ -177,6 +177,30 @@ public class Game extends JPanel {
                 players.add(player);
                 turnOrder.add(player);
             }
+
+            final JDialog popup = new JDialog(frame);
+            final JPanel terraformPanel = new JPanel();
+            final Set<Faction> selected = new HashSet<>();
+            for (Player p : players) {
+                if (p.getFaction() != null) {
+                    selected.add(p.getFaction());
+                }
+            }
+            GameData.allFactions.stream().filter(f -> !selected.contains(f)).sorted(Comparator.comparingInt(f -> f.getHomeType().ordinal())).toList().forEach(f -> {
+                final int count = terraformPanel.getComponentCount();
+                if (count % 2 == 0) {
+                    terraformPanel.add(new FactionButton(popup, f), count / 2);
+                } else {
+                    terraformPanel.add(new FactionButton(popup, f));
+                }
+            });
+            terraformPanel.setLayout(new GridLayout(2, 7 - selected.size()));
+            popup.setTitle("Select Faction, " + getCurrentPlayer());
+            popup.setContentPane(terraformPanel);
+            popup.setLocationRelativeTo(frame);
+            popup.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            popup.pack();
+            popup.setVisible(true);
         } else {
             Player chaosMagiciansPlayer = null;
             Player nomadsPlayer = null;
