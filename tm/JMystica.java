@@ -203,6 +203,9 @@ public class JMystica {
                     final String mapName = (String) mapOptions[mapChooser.getSelectedIndex()];
                     mapData = MapData.mapsByName.get(mapName).getData();
                 }
+                if (randomizeOrderChooser.isSelected()) {
+                    Collections.shuffle(playerFieldList);
+                }
                 final List<String> playerNames = playerFieldList.stream().map(JTextComponent::getText).toList();
                 final GameData gameData = new GameData(playerNames, seed);
                 gameData.mapData = mapData;
