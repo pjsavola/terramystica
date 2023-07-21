@@ -70,7 +70,7 @@ public class GameData {
         turnOrderVariant = true;
     }
 
-    public GameData(File inputFile) {
+    public GameData(Scanner scanner) {
         mapData = MapData.mapsByName.get("Base").getData();
         factions = new ArrayList<>();
         rounds = new ArrayList<>(6);
@@ -83,40 +83,7 @@ public class GameData {
         turnOrderVariant = false;
         bons = new ArrayList<>(IntStream.range(1, 10).boxed().toList());
         final Map<String, Faction> factionMap = new HashMap<>();
-        try {
-            final Scanner scanner = new Scanner(inputFile);
-            playerCount = readInput(scanner);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        if (playerCount != factions.size()) {
-            throw new RuntimeException("Invalid number of factions");
-        }
-        if (playerCount + 3 != bons.size()) {
-            throw new RuntimeException("Invalid number of bons");
-        }
-        if (rounds.size() != 6) {
-            throw new RuntimeException("Invalid number of rounds");
-        }
-    }
-
-    public GameData(String input) {
-        mapData = MapData.mapsByName.get("Base").getData();
-
-        factions = new ArrayList<>();
-        rounds = new ArrayList<>(6);
-
-        towns = new ArrayList<>();
-        for (int i = 1; i < 6; ++i) {
-            towns.add(i);
-            towns.add(i);
-        }
-
-        turnOrderVariant = false;
-        bons = new ArrayList<>(IntStream.range(1, 10).boxed().toList());
-        final Scanner scanner = new Scanner(input);
         playerCount = readInput(scanner);
-
         if (playerCount == 0) {
             throw new RuntimeException("Invalid input");
         }

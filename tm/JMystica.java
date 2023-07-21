@@ -1,11 +1,13 @@
 package tm;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,32 +89,28 @@ public class JMystica {
             buttonPanel.add(importButton);
             buttonPanel.add(quitButton);
             importButton.addActionListener(l -> {
-                final int choice = JOptionPane.showOptionDialog(mainPanel, "Import from ...", "Choose import method", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Help!", "File", "Clipboard"}, "Clipboard");
-                switch (choice) {
-                    case 0:
-                        JOptionPane.showMessageDialog(mainPanel, "To import an existing game from terra.snellman.net,\nopen any game from http://terra.snellman.net in your browser.\nClick 'Load Full Log' button, select everything (Ctrl-A)\nand copy it to the clipboard (Ctrl-C).", "Import Instructions", JOptionPane.PLAIN_MESSAGE, null);
-                        break;
-                    case 1:
-                        // TODO: Choose file etc
-                        break;
-                    case 2:
-                        try {
-                            final String data = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
-                            final GameData gameData = new GameData(data);
-                            final Game game = new Game(frame, gameData);
-
-                            final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
-                            final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-                            final JScrollPane jsp = new JScrollPane(game, v, h);
-                            frame.setContentPane(jsp);
-                            frame.pack();
-                            game.refresh();
-                        } catch (Exception e) {
-                            JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE, null);
+                try {
+                    final int choice = JOptionPane.showOptionDialog(mainPanel, "Import from ...", "Choose import method", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Help!", "File", "Clipboard"}, "Clipboard");
+                    switch (choice) {
+                        case 0 ->
+                                JOptionPane.showMessageDialog(mainPanel, "To import an existing game from terra.snellman.net,\nopen any game from http://terra.snellman.net in your browser.\nClick 'Load Full Log' button, select everything (Ctrl-A)\nand copy it to the clipboard (Ctrl-C).", "Import Instructions", JOptionPane.PLAIN_MESSAGE, null);
+                        case 1 -> {
+                            final JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+                            final int returnValue = jfc.showOpenDialog(mainPanel);
+                            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                                final File selectedFile = jfc.getSelectedFile();
+                                Game.open(frame, new Scanner(selectedFile));
+                            }
                         }
-                        break;
-                    default:
-                        break;
+                        case 2 -> {
+                            final String data = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+                            Game.open(frame, new Scanner(data));
+                        }
+                        default -> {
+                        }
+                    }
+                } catch (Throwable e) {
+                    JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE, null);
                 }
             });
             quitButton.addActionListener(l -> frame.setVisible(false));
@@ -147,7 +145,7 @@ public class JMystica {
 
     public static boolean test(String file, int[] vpTargets) {
         try {
-            final GameData test = new GameData(new File(file));
+            final GameData test = new GameData(new Scanner(new File(file)));
             final JFrame frame = new JFrame();
             final Game game = new Game(frame, test);
             final int[] vps = game.getVictoryPoints();
