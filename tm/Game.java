@@ -166,6 +166,17 @@ public class Game extends JPanel {
             if (chaosMagiciansPlayer != null) {
                 turnOrder.add(chaosMagiciansPlayer);
             }
+        } else if (gameData.chooseFactions) {
+            phase = Phase.PICK_FACTIONS;
+            while (players.size() < gameData.playerCount) {
+                String name = gameData.playerNames.get(players.size());
+                if (name.isEmpty()) {
+                    name = "Player " + (players.size() + 1);
+                }
+                final Player player = new Player(this, name);
+                players.add(player);
+                turnOrder.add(player);
+            }
         } else {
             Player chaosMagiciansPlayer = null;
             Player nomadsPlayer = null;

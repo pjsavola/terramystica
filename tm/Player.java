@@ -871,84 +871,92 @@ public class Player extends JPanel {
             int dx = 5;
             int dy = 5;
             g.setFont(new Font("Arial", Font.PLAIN, 14));
-            Color factionColor = faction.getHomeType().getBuildingColor();
             final boolean myTurn = game.isMyTurn(Player.this);
             final boolean passed = Player.this.passed && game.phase != Game.Phase.END;
-            if (passed) {
-                factionColor = new Color(factionColor.getRed(), factionColor.getGreen(), factionColor.getBlue(), 50);
-            }
-            g.setColor(factionColor);
-            g.fillRect(dx, dy, 300, 16);
-            g.setColor(faction.getHomeType().getFontColor());
-            String factionName = faction.getName();
-            if (!name.isEmpty()) {
-                factionName += " (" + name + ")";
-            }
-            if (myTurn && game.phase != Game.Phase.END) {
-                if (game.phase == Game.Phase.CONFIRM_ACTION) {
-                    final String pending = game.getCurrentPlayer().getPendingActions().stream().map(PendingType::getDescription).collect(Collectors.joining(" / ")).toUpperCase();
-                    final String txt = pending.isEmpty() ? "CONFIRM TURN" : pending;
-                    factionName += " - " + txt;
-                } else {
-                    factionName = "> " + factionName;
+            if (faction != null) {
+                Color factionColor = faction.getHomeType().getBuildingColor();
+                if (passed) {
+                    factionColor = new Color(factionColor.getRed(), factionColor.getGreen(), factionColor.getBlue(), 50);
                 }
-            } else if (passed) {
-                factionName += ", passed";
-            }
-            g.drawString(factionName, dx + 3, dy + 12);
-            dy += 18;
-            g.setColor(Color.BLACK);
-            String data = coins + " c, " + workers + " w, ";
-            // TODO: Color priests red if maxed out
-            data += priests + "/" + maxPriests + " p";
-            data += ", " + points + " vp, ";
-            data += power[0] + "/" + power[1] + "/" + power[2] + " pw";
-            g.drawString(data, dx, dy + 12);
-            dy += 16;
-            data = "dig level " + (3 - digging) + "/" + (3 - faction.getMinDigging()) + ", ";
-            if (faction instanceof Fakirs) {
-                data += "range " + (range - 1) + "/4";
-            } else if (faction instanceof Dwarves) {
-                data += "range " + (range - 1) + "/1";
+                g.setColor(factionColor);
+                g.fillRect(dx, dy, 300, 16);
+                g.setColor(faction.getHomeType().getFontColor());
+                String factionName = faction.getName();
+                if (!name.isEmpty()) {
+                    factionName += " (" + name + ")";
+                }
+                if (myTurn && game.phase != Game.Phase.END) {
+                    if (game.phase == Game.Phase.CONFIRM_ACTION) {
+                        final String pending = game.getCurrentPlayer().getPendingActions().stream().map(PendingType::getDescription).collect(Collectors.joining(" / ")).toUpperCase();
+                        final String txt = pending.isEmpty() ? "CONFIRM TURN" : pending;
+                        factionName += " - " + txt;
+                    } else {
+                        factionName = "> " + factionName;
+                    }
+                } else if (passed) {
+                    factionName += ", passed";
+                }
+                g.drawString(factionName, dx + 3, dy + 12);
+
+                dy += 18;
+                g.setColor(Color.BLACK);
+                String data = coins + " c, " + workers + " w, ";
+                // TODO: Color priests red if maxed out
+                data += priests + "/" + maxPriests + " p";
+                data += ", " + points + " vp, ";
+                data += power[0] + "/" + power[1] + "/" + power[2] + " pw";
+                g.drawString(data, dx, dy + 12);
+                dy += 16;
+                data = "dig level " + (3 - digging) + "/" + (3 - faction.getMinDigging()) + ", ";
+                if (faction instanceof Fakirs) {
+                    data += "range " + (range - 1) + "/4";
+                } else if (faction instanceof Dwarves) {
+                    data += "range " + (range - 1) + "/1";
+                } else {
+                    data += "ship level " + shipping + "/" + faction.getMaxShipping();
+                }
+                g.drawString(data, dx, dy + 12);
+                dy += 20;
+
+                g.setColor(new Color(0xCCCCCC));
+                for (int i = 0; i < 3; ++i) {
+                    g.fillRect(dx + 72 * i, dy, 36, 36);
+                }
+                dy += 3;
+                g.setColor(Color.BLACK);
+                g.drawString("D", dx + 7, dy + 12);
+                g.drawString("TP", dx + 43, dy + 12);
+                g.drawString("TE", dx + 79, dy + 12);
+                g.drawString("SH", dx + 115, dy + 12);
+                g.drawString("SA", dx + 151, dy + 12);
+                dy += 16;
+                g.setColor(dwellings == 8 ? Color.RED : Color.BLACK);
+                g.drawString(dwellings + "/8", dx + 7, dy + 12);
+                g.setColor(tradingPosts == 4 ? Color.RED : Color.BLACK);
+                g.drawString(tradingPosts + "/4", dx + 43, dy + 12);
+                g.setColor(temples == 3 ? Color.RED : Color.BLACK);
+                g.drawString(temples + "/3", dx + 79, dy + 12);
+                g.setColor(Color.BLACK);
+                g.drawString(strongholds + "/1", dx + 115, dy + 12);
+                g.drawString(sanctuaries + "/1", dx + 151, dy + 12);
+                dy += 30;
+                Resources income = getIncome();
+                // TODO: Color overflowing priests and power in red
+                g.drawString("Income:   " + income.coins + " c   " + income.workers + " w   " + income.priests + " p   " + income.power + " pw", dx, dy + 12);
+
+                if (faction.getPowerAction(strongholds > 0) != null) {
+                    Graphics2D g2d = (Graphics2D) g;
+                    final Color oldColor = g.getColor();
+                    final Stroke oldStroke = g2d.getStroke();
+                    PowerActions.drawPowerAction(g2d, 250, 24, faction.getPowerAction(strongholds > 0), usedFactionAction);
+                    g.setColor(oldColor);
+                    g2d.setStroke(oldStroke);
+                }
             } else {
-                data += "ship level " + shipping + "/" + faction.getMaxShipping();
-            }
-            g.drawString(data, dx, dy + 12);
-            dy += 20;
-
-            g.setColor(new Color(0xCCCCCC));
-            for (int i = 0; i < 3; ++i) {
-                g.fillRect(dx + 72 * i, dy, 36, 36);
-            }
-            dy += 3;
-            g.setColor(Color.BLACK);
-            g.drawString("D", dx + 7, dy + 12);
-            g.drawString("TP", dx + 43, dy + 12);
-            g.drawString("TE", dx + 79, dy + 12);
-            g.drawString("SH", dx + 115, dy + 12);
-            g.drawString("SA", dx + 151, dy + 12);
-            dy += 16;
-            g.setColor(dwellings == 8 ? Color.RED : Color.BLACK);
-            g.drawString(dwellings + "/8", dx + 7, dy + 12);
-            g.setColor(tradingPosts == 4 ? Color.RED : Color.BLACK);
-            g.drawString(tradingPosts + "/4", dx + 43, dy + 12);
-            g.setColor(temples == 3 ? Color.RED : Color.BLACK);
-            g.drawString(temples + "/3", dx + 79, dy + 12);
-            g.setColor(Color.BLACK);
-            g.drawString(strongholds + "/1", dx + 115, dy + 12);
-            g.drawString(sanctuaries + "/1", dx + 151, dy + 12);
-            dy += 30;
-            Resources income = getIncome();
-            // TODO: Color overflowing priests and power in red
-            g.drawString("Income:   " + income.coins + " c   " + income.workers + " w   " + income.priests + " p   " + income.power + " pw", dx, dy + 12);
-
-            if (faction.getPowerAction(strongholds > 0) != null) {
-                Graphics2D g2d = (Graphics2D) g;
-                final Color oldColor = g.getColor();
-                final Stroke oldStroke = g2d.getStroke();
-                PowerActions.drawPowerAction(g2d, 250, 24, faction.getPowerAction(strongholds > 0), usedFactionAction);
-                g.setColor(oldColor);
-                g2d.setStroke(oldStroke);
+                String displayName = name;
+                if (myTurn) displayName = "> " + displayName;
+                g.setColor(Color.BLACK);
+                g.drawString(displayName, dx +4, dy + 12);
             }
         }
 
@@ -1028,6 +1036,6 @@ public class Player extends JPanel {
 
     @Override
     public String toString() {
-        return faction == null ? super.toString() : faction.getName();
+        return faction == null ? name : faction.getName();
     }
 }
