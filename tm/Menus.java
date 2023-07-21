@@ -34,7 +34,7 @@ public abstract class Menus {
                 int option = JOptionPane.OK_OPTION;
                 if (!skippableActions.isEmpty()) {
                     final String pending = "Are you sure you want to skip: " + skippableActions.stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / ")) + "?";
-                    option = JOptionPane.showConfirmDialog(null, pending, "Skip Action?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                    option = JOptionPane.showConfirmDialog(game, pending, "Skip Action?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
                 }
                 if (option == JOptionPane.OK_OPTION) {
                     game.confirmTurn();
@@ -104,7 +104,7 @@ public abstract class Menus {
                 };
                 message = Arrays.stream(message).limit(alchemists ? 14 : 12).toArray();
 
-                int option = JOptionPane.showConfirmDialog(null, message, "Convert ...", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                int option = JOptionPane.showConfirmDialog(game, message, "Convert ...", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
                 if (option == JOptionPane.OK_OPTION) {
                     try {
                         final int p2w = priestsToWorkers.getText().isEmpty() ? 0 : Integer.parseInt(priestsToWorkers.getText());
@@ -123,7 +123,7 @@ public abstract class Menus {
                         }
                     } catch (NumberFormatException ex) {
                         final String input = ex.getMessage().substring(ex.getMessage().indexOf('"'));
-                        JOptionPane.showMessageDialog(null, "Invalid number: " + input, "Error", JOptionPane.ERROR_MESSAGE, null);
+                        JOptionPane.showMessageDialog(game, "Invalid number: " + input, "Error", JOptionPane.ERROR_MESSAGE, null);
                     }
                 }
             }
@@ -152,7 +152,7 @@ public abstract class Menus {
             protected void execute(Game game) {
                 final JTextField burnField = new JTextField();
                 final Object[] message = { "Burn:", burnField };
-                int option = JOptionPane.showConfirmDialog(null, message, "Burn ...", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                int option = JOptionPane.showConfirmDialog(game, message, "Burn ...", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
                 if (option == JOptionPane.OK_OPTION) {
                     try {
                         final int burn = burnField.getText().isEmpty() ? 0 : Integer.parseInt(burnField.getText());
@@ -161,7 +161,7 @@ public abstract class Menus {
                         }
                     } catch (NumberFormatException ex) {
                         final String input = "\"" + burnField.getText() + "\"";
-                        JOptionPane.showMessageDialog(null, "Invalid number: " + input, "Error", JOptionPane.ERROR_MESSAGE, null);
+                        JOptionPane.showMessageDialog(game, "Invalid number: " + input, "Error", JOptionPane.ERROR_MESSAGE, null);
                     }
                 }
             }
