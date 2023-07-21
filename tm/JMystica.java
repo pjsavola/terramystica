@@ -88,6 +88,22 @@ public class JMystica {
             buttonPanel.add(loadButton);
             buttonPanel.add(importButton);
             buttonPanel.add(quitButton);
+            startButton.addActionListener(l -> {
+                final JDialog dialog = new JDialog(frame, "Game Settings");
+                dialog.setLayout(new GridLayout(4, 2));
+                dialog.add(new JLabel("Map"));
+                final JComboBox mapChooser = new JComboBox(new Object[] {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base"});
+                dialog.add(mapChooser);
+                dialog.add(new JLabel("Faction Picks"));
+                final JComboBox factionPickChooser = new JComboBox(new Object[] {"Manual", "Random"});
+                dialog.add(factionPickChooser);
+                dialog.add(new JLabel("Starting VPs"));
+                final JComboBox startingVPsChooser = new JComboBox(new Object[] {"20", "Adjusted"});
+                dialog.add(startingVPsChooser);
+                dialog.pack();
+                dialog.setLocationRelativeTo(mainPanel);
+                dialog.setVisible(true);
+            });
             importButton.addActionListener(l -> {
                 try {
                     final int choice = JOptionPane.showOptionDialog(mainPanel, "Import from ...", "Choose import method", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Help!", "File", "Clipboard"}, "Clipboard");
