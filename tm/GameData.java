@@ -149,7 +149,8 @@ public class GameData {
                 bons.remove((Integer) bon);
             } else if (line.matches("Player \\d: .*")) {
                 ++players;
-                playerNames.add(line.split(" ")[2]);
+                final String name = line.split(" ")[2].split("\\t")[0];
+                playerNames.add(name);
             } else if (line.matches("[a-z]*\\t.*") && line.endsWith("setup")) {
                 final String factionName = line.split("\\t")[0];
                 final Faction faction = allFactions.stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(factionName)).findFirst().orElse(null);
