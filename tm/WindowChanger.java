@@ -19,6 +19,7 @@ public class WindowChanger extends WindowAdapter {
         if (frame.getContentPane() == mainPanel) {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         } else {
+            frame.setJMenuBar(null);
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             frame.setContentPane(mainPanel);
             frame.pack();
