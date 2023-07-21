@@ -66,7 +66,6 @@ public class JMystica {
             });
         }
 
-        int seed = new Random().nextInt();
         final JFrame frame = new JFrame();
         final JPanel mainPanel = new JPanel();
         final WindowChanger windowChanger = new WindowChanger(frame, mainPanel);
@@ -184,7 +183,18 @@ public class JMystica {
             panel.add(start);
             panel.add(cancel);
             start.addActionListener(el -> {
-                dialog.setVisible(false);
+                final int seed;
+                if (!seedChooser.getText().isEmpty()) {
+                    try {
+                        seed = Integer.parseInt(seedChooser.getText().trim());
+                    } catch (NumberFormatException ex) {
+                        final String input = "\"" + seedChooser.getText() + "\"";
+                        JOptionPane.showMessageDialog(panel, "Invalid number: " + input, "Error", JOptionPane.ERROR_MESSAGE, null);
+                        return;
+                    }
+                } else {
+                    seed = new Random().nextInt();
+                }
                 final String[] mapData;
                 if (mapChooser.getSelectedIndex() == 5 && !customMap.isEmpty()) {
                     mapData = customMap.toArray(new String[0]);
@@ -196,6 +206,7 @@ public class JMystica {
                 gameData.mapData = mapData;
                 gameData.useRevisedStartingVPs = startingVPsChooser.getSelectedIndex() == 1;
                 Game.open(frame, gameData);
+                dialog.setVisible(false);
             });
             cancel.addActionListener(el -> dialog.setVisible(false));
             panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
