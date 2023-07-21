@@ -99,24 +99,36 @@ public class JMystica {
             final JPanel panel = new JPanel();
             panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             panel.add(new JLabel("Map"));
-            final JComboBox mapChooser = new JComboBox(new Object[] {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base", "Custom ..."});
+            final Object[] mapOptions = {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base", "Custom ..."};
+            final JComboBox mapChooser = new JComboBox(mapOptions);
             panel.add(mapChooser);
-            mapChooser.addItemListener(e -> {
-                if (e.getStateChange() == ItemEvent.SELECTED && "Custom ...".equals(e.getItem())) {
-                    final JTextArea textArea = new JTextArea();
-                    textArea.setFont(new Font("Courier New", Font.PLAIN, 12));
-                    textArea.setRows(9);
-                    final Object[] message = { "Map data:", textArea };
-                    final int option = JOptionPane.showConfirmDialog(panel, message, "Insert map data", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
-                    if (option == JOptionPane.OK_OPTION) {
-                        final String text = textArea.getText();
-                        final String[] rows = text.split("\\n");
-                        customMap.clear();
-                        for (String row : rows) {
-                            customMap.add(row.trim());
+            mapChooser.addItemListener(new ItemListener() {
+                private int previousIndex = -1;
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    if (e.getStateChange() == ItemEvent.DESELECTED) {
+                        for (int i = 0; i < mapOptions.length; ++i) {
+                            if (mapOptions[i] == e.getItem()) {
+                                previousIndex = i;
+                                break;
+                            }
                         }
-                    } else {
-                        mapChooser.setSelectedIndex(-1);
+                    } else if (e.getStateChange() == ItemEvent.SELECTED && "Custom ...".equals(e.getItem())) {
+                        final JTextArea textArea = new JTextArea();
+                        textArea.setFont(new Font("Courier New", Font.PLAIN, 12));
+                        textArea.setRows(9);
+                        final Object[] message = {"Map data:", textArea};
+                        final int option = JOptionPane.showConfirmDialog(panel, message, "Insert map data", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                        if (option == JOptionPane.OK_OPTION) {
+                            final String text = textArea.getText();
+                            final String[] rows = text.split("\\n");
+                            customMap.clear();
+                            for (String row : rows) {
+                                customMap.add(row.trim());
+                            }
+                        } else {
+                            mapChooser.setSelectedIndex(previousIndex);
+                        }
                     }
                 }
             });
@@ -175,7 +187,6 @@ public class JMystica {
                 dialog.setVisible(false);
                 final String[] mapData;
                 if (mapChooser.getSelectedIndex() == 5 && !customMap.isEmpty()) {
-                    System.err.println("JEE");
                     mapData = customMap.toArray(new String[0]);
                 } else {
                     mapData = MapData.mapsByName.get("Base").getData();
