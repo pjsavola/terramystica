@@ -1,6 +1,7 @@
 package tm;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -22,6 +23,9 @@ public class WindowChanger extends WindowAdapter {
             frame.setJMenuBar(null);
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             frame.setContentPane(mainPanel);
+            for (Window w : frame.getOwnedWindows()) {
+                w.setVisible(false);
+            }
             frame.pack();
         }
     }
