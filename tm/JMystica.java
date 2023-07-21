@@ -1,5 +1,7 @@
 package tm;
 
+import tm.faction.Giants;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
@@ -9,6 +11,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class JMystica {
@@ -90,16 +93,54 @@ public class JMystica {
             buttonPanel.add(quitButton);
             startButton.addActionListener(l -> {
                 final JDialog dialog = new JDialog(frame, "Game Settings");
-                dialog.setLayout(new GridLayout(4, 2));
-                dialog.add(new JLabel("Map"));
-                final JComboBox mapChooser = new JComboBox(new Object[] {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base"});
-                dialog.add(mapChooser);
-                dialog.add(new JLabel("Faction Picks"));
+                final JPanel panel = new JPanel();
+                panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+                panel.setLayout(new GridLayout(4 + 4, 2));
+                panel.add(new JLabel("Map"));
+                final JComboBox mapChooser = new JComboBox(new Object[] {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base", "Custom ..."});
+                panel.add(mapChooser);
+                panel.add(new JLabel("Faction Picks"));
                 final JComboBox factionPickChooser = new JComboBox(new Object[] {"Manual", "Random"});
-                dialog.add(factionPickChooser);
-                dialog.add(new JLabel("Starting VPs"));
-                final JComboBox startingVPsChooser = new JComboBox(new Object[] {"20", "Adjusted"});
-                dialog.add(startingVPsChooser);
+                panel.add(factionPickChooser);
+                panel.add(new JLabel("Starting VPs"));
+                final JComboBox startingVPsChooser = new JComboBox(new Object[] {"20", "Revised", "Auction"});
+                panel.add(startingVPsChooser);
+                final List<JLabel> playerLabelList = new ArrayList<>();
+                final List<JTextField> playerFieldList = new ArrayList<>();
+                final JButton addButton = new JButton("Add player");
+                final JButton removeButton = new JButton("Remove player");
+                addButton.addActionListener(al -> {
+                    if (playerLabelList.size() < 7) {
+                        final JLabel label = new JLabel("Player " + (playerLabelList.size() + 1));
+                        final JTextField field = new JTextField();
+                        playerLabelList.add(label);
+                        playerFieldList.add(field);
+                        panel.add(label);
+                        panel.add(field);
+                        panel.setLayout(new GridLayout(4 + playerLabelList.size(), 2));
+                        dialog.pack();
+                    }
+                });
+                removeButton.addActionListener(al -> {
+                    if (playerLabelList.size() > 1) {
+                        panel.remove(playerLabelList.remove(playerLabelList.size() - 1));
+                        panel.remove(playerFieldList.remove(playerFieldList.size() - 1));
+                        panel.setLayout(new GridLayout(4 + playerLabelList.size(), 2));
+                        dialog.pack();
+                    }
+                });
+                panel.add(addButton);
+                panel.add(removeButton);
+                for (int i = 0; i < 4; ++i) {
+                    final JLabel label = new JLabel("Player " + (i + 1));
+                    final JTextField field = new JTextField();
+                    playerLabelList.add(label);
+                    playerFieldList.add(field);
+                    panel.add(label);
+                    panel.add(field);
+                }
+
+                dialog.setContentPane(panel);
                 dialog.pack();
                 dialog.setLocationRelativeTo(mainPanel);
                 dialog.setVisible(true);
