@@ -64,150 +64,130 @@ public class JMystica {
             });
         }
 
-        if (true) {
-            int seed = new Random().nextInt();
-            final JFrame frame = new JFrame();
-            final JPanel mainPanel = new JPanel();
-            final WindowChanger windowChanger = new WindowChanger(frame, mainPanel);
-            frame.setTitle("JMystica");
-            final ImageIcon icon = new ImageIcon("tm.png");
-            final Image image = icon.getImage();
-            final JPanel imagePanel = new JPanel() {
-                @Override
-                public void paintComponent(Graphics g) {
-                    g.drawImage(image, 0, 0, null);
-                }
+        int seed = new Random().nextInt();
+        final JFrame frame = new JFrame();
+        final JPanel mainPanel = new JPanel();
+        final WindowChanger windowChanger = new WindowChanger(frame, mainPanel);
+        frame.setTitle("JMystica");
+        final ImageIcon icon = new ImageIcon("tm.png");
+        final Image image = icon.getImage();
+        final JPanel imagePanel = new JPanel() {
+            @Override
+            public void paintComponent(Graphics g) {
+                g.drawImage(image, 0, 0, null);
+            }
 
-                @Override
-                public Dimension getPreferredSize() {
-                    return new Dimension(icon.getIconWidth(), icon.getIconHeight());
-                }
-            };
-            final JPanel buttonPanel = new JPanel();
-            final JButton startButton = new JButton("New");
-            final JButton loadButton = new JButton("Load");
-            final JButton importButton = new JButton("Import");
-            final JButton quitButton = new JButton("Quit");
-            buttonPanel.add(startButton);
-            buttonPanel.add(loadButton);
-            buttonPanel.add(importButton);
-            buttonPanel.add(quitButton);
-            startButton.addActionListener(l -> {
-                final JDialog dialog = new JDialog(frame, "Game Settings");
-                final JPanel panel = new JPanel();
-                panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-                panel.add(new JLabel("Map"));
-                final JComboBox mapChooser = new JComboBox(new Object[] {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base", "Custom ..."});
-                panel.add(mapChooser);
-                panel.add(new JLabel("Faction Picks"));
-                final JComboBox factionPickChooser = new JComboBox(new Object[] {"Manual", "Random"});
-                panel.add(factionPickChooser);
-                panel.add(new JLabel("Starting VPs"));
-                final JComboBox startingVPsChooser = new JComboBox(new Object[] {"20", "Revised", "Auction"});
-                panel.add(startingVPsChooser);
-                final List<JLabel> playerLabelList = new ArrayList<>();
-                final List<JTextField> playerFieldList = new ArrayList<>();
-                final JButton addButton = new JButton("Add player");
-                final JButton removeButton = new JButton("Remove player");
-                addButton.addActionListener(al -> {
-                    if (playerLabelList.size() < 7) {
-                        final JLabel label = new JLabel("Player " + (playerLabelList.size() + 1));
-                        final JTextField field = new JTextField();
-                        playerLabelList.add(label);
-                        playerFieldList.add(field);
-                        panel.add(label, panel.getComponentCount() - 1);
-                        panel.add(field, panel.getComponentCount() - 1);
-                        panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
-                        dialog.pack();
-                    }
-                });
-                removeButton.addActionListener(al -> {
-                    if (playerLabelList.size() > 1) {
-                        panel.remove(playerLabelList.remove(playerLabelList.size() - 1));
-                        panel.remove(playerFieldList.remove(playerFieldList.size() - 1));
-                        panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
-                        dialog.pack();
-                    }
-                });
-                panel.add(addButton);
-                panel.add(removeButton);
-                for (int i = 0; i < 4; ++i) {
-                    final JLabel label = new JLabel("Player " + (i + 1));
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(icon.getIconWidth(), icon.getIconHeight());
+            }
+        };
+        final JPanel buttonPanel = new JPanel();
+        final JButton startButton = new JButton("New");
+        final JButton loadButton = new JButton("Load");
+        final JButton importButton = new JButton("Import");
+        final JButton quitButton = new JButton("Quit");
+        buttonPanel.add(startButton);
+        buttonPanel.add(loadButton);
+        buttonPanel.add(importButton);
+        buttonPanel.add(quitButton);
+        startButton.addActionListener(l -> {
+            final JDialog dialog = new JDialog(frame, "Game Settings");
+            final JPanel panel = new JPanel();
+            panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            panel.add(new JLabel("Map"));
+            final JComboBox mapChooser = new JComboBox(new Object[] {"Base", "F&I", "Fjords", "Loon Lakes", "Revised Base", "Custom ..."});
+            panel.add(mapChooser);
+            panel.add(new JLabel("Faction Picks"));
+            final JComboBox factionPickChooser = new JComboBox(new Object[] {"Manual", "Random"});
+            panel.add(factionPickChooser);
+            panel.add(new JLabel("Starting VPs"));
+            final JComboBox startingVPsChooser = new JComboBox(new Object[] {"20", "Revised", "Auction"});
+            panel.add(startingVPsChooser);
+            final List<JLabel> playerLabelList = new ArrayList<>();
+            final List<JTextField> playerFieldList = new ArrayList<>();
+            final JButton addButton = new JButton("Add player");
+            final JButton removeButton = new JButton("Remove player");
+            addButton.addActionListener(al -> {
+                if (playerLabelList.size() < 7) {
+                    final JLabel label = new JLabel("Player " + (playerLabelList.size() + 1));
                     final JTextField field = new JTextField();
                     playerLabelList.add(label);
                     playerFieldList.add(field);
-                    panel.add(label);
-                    panel.add(field);
+                    panel.add(label, panel.getComponentCount() - 1);
+                    panel.add(field, panel.getComponentCount() - 1);
+                    panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
+                    dialog.pack();
                 }
-                final JButton start = new JButton("Start!");
-                start.setForeground(Color.RED);
-                final JButton cancel = new JButton("Cancel");
-                panel.add(start);
-                panel.add(cancel);
-                start.addActionListener(el -> {
-                    dialog.setVisible(false);
-                    Game.open(frame, new GameData(playerLabelList.size(), seed));
-                });
-                cancel.addActionListener(el -> dialog.setVisible(false));
-                panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
-                dialog.setContentPane(panel);
-                dialog.pack();
-                dialog.setLocationRelativeTo(mainPanel);
-                dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                dialog.setVisible(true);
             });
-            importButton.addActionListener(l -> {
-                try {
-                    final int choice = JOptionPane.showOptionDialog(mainPanel, "Import from ...", "Choose import method", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Help!", "File", "Clipboard"}, "Clipboard");
-                    switch (choice) {
-                        case 0 ->
-                                JOptionPane.showMessageDialog(mainPanel, "To import an existing game from terra.snellman.net,\nopen any game from http://terra.snellman.net in your browser.\nClick 'Load Full Log' button, select everything (Ctrl-A)\nand copy it to the clipboard (Ctrl-C).", "Import Instructions", JOptionPane.PLAIN_MESSAGE, null);
-                        case 1 -> {
-                            final JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-                            final int returnValue = jfc.showOpenDialog(mainPanel);
-                            if (returnValue == JFileChooser.APPROVE_OPTION) {
-                                final File selectedFile = jfc.getSelectedFile();
-                                Game.open(frame, new Scanner(selectedFile));
-                            }
-                        }
-                        case 2 -> {
-                            final String data = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
-                            Game.open(frame, new Scanner(data));
-                        }
-                        default -> {
+            removeButton.addActionListener(al -> {
+                if (playerLabelList.size() > 1) {
+                    panel.remove(playerLabelList.remove(playerLabelList.size() - 1));
+                    panel.remove(playerFieldList.remove(playerFieldList.size() - 1));
+                    panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
+                    dialog.pack();
+                }
+            });
+            panel.add(addButton);
+            panel.add(removeButton);
+            for (int i = 0; i < 4; ++i) {
+                final JLabel label = new JLabel("Player " + (i + 1));
+                final JTextField field = new JTextField();
+                playerLabelList.add(label);
+                playerFieldList.add(field);
+                panel.add(label);
+                panel.add(field);
+            }
+            final JButton start = new JButton("Start!");
+            start.setForeground(Color.RED);
+            final JButton cancel = new JButton("Cancel");
+            panel.add(start);
+            panel.add(cancel);
+            start.addActionListener(el -> {
+                dialog.setVisible(false);
+                Game.open(frame, new GameData(playerLabelList.size(), seed));
+            });
+            cancel.addActionListener(el -> dialog.setVisible(false));
+            panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
+            dialog.setContentPane(panel);
+            dialog.pack();
+            dialog.setLocationRelativeTo(mainPanel);
+            dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            dialog.setVisible(true);
+        });
+        importButton.addActionListener(l -> {
+            try {
+                final int choice = JOptionPane.showOptionDialog(mainPanel, "Import from ...", "Choose import method", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Help!", "File", "Clipboard"}, "Clipboard");
+                switch (choice) {
+                    case 0 ->
+                            JOptionPane.showMessageDialog(mainPanel, "To import an existing game from terra.snellman.net,\nopen any game from http://terra.snellman.net in your browser.\nClick 'Load Full Log' button, select everything (Ctrl-A)\nand copy it to the clipboard (Ctrl-C).", "Import Instructions", JOptionPane.PLAIN_MESSAGE, null);
+                    case 1 -> {
+                        final JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+                        final int returnValue = jfc.showOpenDialog(mainPanel);
+                        if (returnValue == JFileChooser.APPROVE_OPTION) {
+                            final File selectedFile = jfc.getSelectedFile();
+                            Game.open(frame, new Scanner(selectedFile));
                         }
                     }
-                } catch (Throwable e) {
-                    JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE, null);
+                    case 2 -> {
+                        final String data = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+                        Game.open(frame, new Scanner(data));
+                    }
+                    default -> {
+                    }
                 }
-            });
-            quitButton.addActionListener(l -> frame.setVisible(false));
-            buttonPanel.setBackground(Color.BLACK);
-            mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-            mainPanel.add(imagePanel);
-            mainPanel.add(buttonPanel);
-            frame.setContentPane(mainPanel);
-            frame.addWindowListener(windowChanger);
-            frame.pack();
-            frame.setVisible(true);
-            return;
-        }
-
-        final GameData test = new GameData(1, new Random().nextInt());
-        //final GameData test = new GameData("tests/Petri01");
-
-        final JFrame frame = new JFrame();
-        final Game game = new Game(frame, test);
-
-        final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
-        final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-        final JScrollPane jsp = new JScrollPane(game, v, h);
-
-        frame.setContentPane(jsp);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
+            } catch (Throwable e) {
+                JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE, null);
+            }
+        });
+        quitButton.addActionListener(l -> frame.setVisible(false));
+        buttonPanel.setBackground(Color.BLACK);
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.add(imagePanel);
+        mainPanel.add(buttonPanel);
+        frame.setContentPane(mainPanel);
+        frame.addWindowListener(windowChanger);
         frame.pack();
-        game.refresh();
         frame.setVisible(true);
     }
 
