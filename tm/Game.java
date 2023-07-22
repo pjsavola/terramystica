@@ -613,7 +613,7 @@ public class Game extends JPanel {
                     resolveAction(new ForfeitAction());
                 }
                 getCurrentPlayer().pendingBuilds = null;
-                phase = Phase.ACTIONS;
+                phase = players.stream().anyMatch(p -> p.getFaction() == null) ? Phase.PICK_FACTIONS : Phase.ACTIONS;
                 endTurn();
                 refresh();
             }

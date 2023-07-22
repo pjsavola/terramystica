@@ -419,7 +419,7 @@ public class Player extends JPanel {
     }
 
     public boolean canAdvanceShipping() {
-        return faction != null && faction.getMaxShipping() > shipping && canAfford(faction.getAdvanceShippingCost());
+        return faction.getMaxShipping() > shipping && canAfford(faction.getAdvanceShippingCost());
     }
 
     public void advanceShipping() {
@@ -432,7 +432,7 @@ public class Player extends JPanel {
     }
 
     public boolean canAdvanceDigging() {
-        return faction != null && faction.getMinDigging() < digging && canAfford(faction.getAdvanceDiggingCost());
+        return faction.getMinDigging() < digging && canAfford(faction.getAdvanceDiggingCost());
     }
 
     public void advanceDigging() {
