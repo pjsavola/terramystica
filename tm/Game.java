@@ -125,7 +125,7 @@ public class Game extends JPanel {
         Arrays.fill(bonusCoins, 0);
         bons.clear();
         bons.addAll(gameData.bons);
-        final List<Faction> factions = new ArrayList<>(gameData.factions);
+        final List<Faction> factions = new ArrayList<>(gameData.getFactions());
 
         if (!players.isEmpty()) {
             // Reuse existing players but sort them back to the original order.
@@ -634,12 +634,13 @@ public class Game extends JPanel {
                         if (nextTurnOrder.isEmpty()) {
                             nextTurnOrder.add(player);
                         } else {
-                            final int myIdx = gameData.factions.indexOf(player.getFaction());
-                            final int startPlayerIdx = gameData.factions.indexOf(nextTurnOrder.get(0).getFaction());
+                            final List<Faction> factions = gameData.getFactions();
+                            final int myIdx = factions.indexOf(player.getFaction());
+                            final int startPlayerIdx = factions.indexOf(nextTurnOrder.get(0).getFaction());
                             final int delta = (startPlayerIdx - myIdx + gameData.playerCount) % gameData.playerCount;
                             boolean added = false;
                             for (int i = 0; i < nextTurnOrder.size(); ++i) {
-                                final int idx = gameData.factions.indexOf(nextTurnOrder.get(i).getFaction());
+                                final int idx = factions.indexOf(nextTurnOrder.get(i).getFaction());
                                 final int d = (startPlayerIdx - idx + gameData.playerCount) % gameData.playerCount;
                                 if (delta < d) {
                                     nextTurnOrder.add(i, player);
@@ -957,7 +958,7 @@ public class Game extends JPanel {
                         }
                         final String[] s = pair.action.split(" ");
                         final boolean accept = s[0].equalsIgnoreCase("Leech");
-                        final Faction faction = gameData.factions.stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(s[3])).findAny().orElse(null);
+                        final Faction faction = gameData.getFactions().stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(s[3])).findAny().orElse(null);
                         if (faction == null) {
                             throw new RuntimeException("Faction not found " + s[3]);
                         }
@@ -1374,7 +1375,8 @@ public class Game extends JPanel {
     }
 
     public int[] getVictoryPoints() {
-        return players.stream().sorted((p1, p2) -> gameData.factions.indexOf(p2.getFaction()) - gameData.factions.indexOf(p1.getFaction())).mapToInt(Player::getPoints).toArray();
+        final List<Faction> factions = gameData.getFactions();
+        return players.stream().sorted((p1, p2) -> factions.indexOf(p2.getFaction()) - factions.indexOf(p1.getFaction())).mapToInt(Player::getPoints).toArray();
     }
 
     public Stream<Faction> getSelectableFactions() {

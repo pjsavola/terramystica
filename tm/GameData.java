@@ -1,15 +1,12 @@
 package tm;
 
-import tm.action.Action;
-import tm.action.BuildAction;
 import tm.faction.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class GameData {
+public class GameData implements Serializable {
 
     public static class Pair {
         public Faction faction;
@@ -42,14 +39,15 @@ public class GameData {
     boolean chooseFactions;
     final int playerCount;
     List<String> playerNames;
-    final List<Faction> factions;
+
+    final List<Integer> factionsIndices;
     final List<Integer> bons;
     final List<Integer> towns;
-    final List<Round> rounds;
-    final Deque<Pair> actionFeed = new ArrayDeque<>();
-    final Deque<Pair> leechFeed = new ArrayDeque<>();
+    final transient List<Round> rounds;
+    final transient Deque<Pair> actionFeed = new ArrayDeque<>();
+    final transient Deque<Pair> leechFeed = new ArrayDeque<>();
     boolean turnOrderVariant;
-    final Map<String, Faction> factionMap = new HashMap<>();
+    final transient Map<String, Faction> factionMap = new HashMap<>();
 
     public GameData(List<String> playerNames, int seed) {
         this.playerNames = playerNames;
@@ -78,17 +76,17 @@ public class GameData {
         allBons.stream().limit(playerCount + 3).sorted().forEach(bons::add);
 
         if (chooseFactions) {
-            factions = Collections.emptyList();
+            factionsIndices = Collections.emptyList();
         } else {
             final Set<Hex.Type> selectedColors = new HashSet<>();
             final List<Faction> shuffledFactions = new ArrayList<>(allFactions);
             Collections.shuffle(shuffledFactions);
-            factions = new ArrayList<>(playerCount);
+            factionsIndices = new ArrayList<>(playerCount);
             for (Faction faction : shuffledFactions) {
                 if (selectedColors.add(faction.getHomeType())) {
-                    factions.add(faction);
+                    factionsIndices.add(allFactions.indexOf(faction));
                 }
-                if (factions.size() == playerCount) {
+                if (factionsIndices.size() == playerCount) {
                     break;
                 }
             }
@@ -98,7 +96,7 @@ public class GameData {
 
     public GameData(Scanner scanner) {
         mapData = MapData.mapsByName.get("Base").getData();
-        factions = new ArrayList<>();
+        factionsIndices = new ArrayList<>();
         rounds = new ArrayList<>(6);
         towns = new ArrayList<>();
         for (int i = 1; i < 6; ++i) {
@@ -113,7 +111,7 @@ public class GameData {
         if (playerCount == 0) {
             throw new RuntimeException("Invalid input");
         }
-        if (playerCount != factions.size()) {
+        if (playerCount != factionsIndices.size()) {
             throw new RuntimeException("Invalid number of factions");
         }
         if (playerCount + 3 != bons.size()) {
@@ -161,7 +159,7 @@ public class GameData {
                 final String factionName = line.split("\\t")[0];
                 final Faction faction = allFactions.stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(factionName)).findFirst().orElse(null);
                 if (faction != null) {
-                    factions.add(0, faction);
+                    factionsIndices.add(0, allFactions.indexOf(faction));
                     factionMap.put(factionName, faction);
                 } else {
                     System.err.println(factionName + " not found");
@@ -211,5 +209,9 @@ public class GameData {
             }
         }
         return players;
+    }
+
+    public List<Faction> getFactions() {
+        return factionsIndices.stream().map(allFactions::get).toList();
     }
 }
