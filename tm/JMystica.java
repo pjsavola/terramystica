@@ -206,6 +206,16 @@ public class JMystica {
                 if (randomizeOrderChooser.isSelected()) {
                     Collections.shuffle(playerFieldList);
                 }
+                final Set<String> names = new HashSet<>();
+                for (int i = 0; i < playerFieldList.size(); ++i) {
+                    if (playerFieldList.get(i).getText().isEmpty()) {
+                        playerFieldList.get(i).setText("Player " + (i + 1));
+                    }
+                    if (!names.add(playerFieldList.get(i).getText())) {
+                        JOptionPane.showMessageDialog(panel, "Please choose unique or empty names", "Error", JOptionPane.ERROR_MESSAGE, null);
+                        return;
+                    }
+                }
                 final List<String> playerNames = playerFieldList.stream().map(JTextComponent::getText).toList();
                 final GameData gameData = new GameData(playerNames, seed);
                 gameData.mapData = mapData;

@@ -156,10 +156,7 @@ public class Game extends JPanel {
             factionsPicked = false;
             phase = Phase.PICK_FACTIONS;
             while (players.size() < gameData.playerCount) {
-                String name = gameData.playerNames.get(players.size());
-                if (name.isEmpty()) {
-                    name = "Player " + (players.size() + 1);
-                }
+                final String name = gameData.playerNames.get(players.size());
                 final Player player = new Player(this, name);
                 players.add(player);
                 turnOrder.add(player);
