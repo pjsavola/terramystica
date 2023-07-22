@@ -140,7 +140,11 @@ public class Player extends JPanel {
         bons.clear();
         favs.clear();
         towns.clear();
-        selectFaction(faction);
+        if (game.phase == Game.Phase.INITIAL_DWELLINGS) {
+            selectFaction(faction);
+        } else {
+            faction = null;
+        }
     }
 
     public int getWorkers() {

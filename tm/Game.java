@@ -96,7 +96,6 @@ public class Game extends JPanel {
     }
 
     private void reset() {
-        phase = Phase.INITIAL_DWELLINGS;
         round = 0;
         cultIncome = 0;
         pendingPass = false;
@@ -130,44 +129,28 @@ public class Game extends JPanel {
 
         if (!players.isEmpty()) {
             // Reuse existing players but sort them back to the original order.
-            factionsPicked = true;
-            turnOrder.clear();
-            nextTurnOrder.clear();
-            for (int i = factions.size() - 1; i >= 0; --i) {
-                final Faction faction = factions.get(i);
-                for (int j = players.size() - 1; j >= 0; --j) {
-                    final Player player = players.get(j);
-                    if (player.getFaction() == faction) {
-                        nextTurnOrder.add(0, player);
-                        players.remove(j);
-                        break;
+            factionsPicked = !gameData.chooseFactions;
+            phase = factionsPicked ? Phase.INITIAL_DWELLINGS : Phase.PICK_FACTIONS;
+            if (factionsPicked) {
+                turnOrder.clear();
+                nextTurnOrder.clear();
+                players.sort((p1, p2) -> factions.indexOf(p2.getFaction()) - factions.indexOf(p1.getFaction()));
+                setupTurnOrder();
+            } else {
+                for (int i = 0; i < gameData.playerNames.size(); ++i) {
+                    final String name = gameData.playerNames.get(i);
+                    for (int j = i; j < players.size(); ++j) {
+                        if (players.get(j).toString().equals(name)) {
+                            if (i != j) {
+                                final Player tmp = players.get(j);
+                                players.set(j, players.get(i));
+                                players.set(i, tmp);
+                            }
+                            break;
+                        }
                     }
                 }
-                if (players.isEmpty()) {
-                    break;
-                }
-            }
-            Player chaosMagiciansPlayer = null;
-            Player nomadsPlayer = null;
-            for (Player player : nextTurnOrder) {
-                player.reset();
-                players.add(0, player);
-                final Faction faction = player.getFaction();
-                if (faction instanceof ChaosMagicians) {
-                    chaosMagiciansPlayer = player;
-                } else {
-                    turnOrder.add(0, player);
-                    turnOrder.add(player);
-                    if (faction instanceof Nomads) {
-                        nomadsPlayer = player;
-                    }
-                }
-            }
-            if (nomadsPlayer != null) {
-                turnOrder.add(nomadsPlayer);
-            }
-            if (chaosMagiciansPlayer != null) {
-                turnOrder.add(chaosMagiciansPlayer);
+                turnOrder.addAll(players);
             }
         } else if (gameData.chooseFactions) {
             factionsPicked = false;
@@ -184,6 +167,7 @@ public class Game extends JPanel {
             showFactionPopup();
         } else {
             factionsPicked = true;
+            phase = Phase.INITIAL_DWELLINGS;
             while (players.size() < gameData.playerCount) {
                 final String name = gameData.playerNames.get(players.size());
                 final Player player = new Player(this, name);
