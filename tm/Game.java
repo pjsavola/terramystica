@@ -131,6 +131,9 @@ public class Game extends JPanel {
             // Reuse existing players but sort them back to the original order.
             factionsPicked = !gameData.chooseFactions;
             phase = factionsPicked ? Phase.INITIAL_DWELLINGS : Phase.PICK_FACTIONS;
+            for (Player player : players) {
+                player.reset();
+            }
             if (factionsPicked) {
                 turnOrder.clear();
                 nextTurnOrder.clear();
@@ -266,6 +269,9 @@ public class Game extends JPanel {
         if (leechTrigger != null && leechTurnOrder.isEmpty()) {
             final int cult = Cults.selectCult(this, 1, true);
             resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+        }
+        if (!factionsPicked) {
+            showFactionPopup();
         }
         refresh();
     }
