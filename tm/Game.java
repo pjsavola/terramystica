@@ -178,25 +178,7 @@ public class Game extends JPanel {
                 players.add(player);
                 turnOrder.add(player);
             }
-
-            final JDialog popup = new JDialog(frame);
-            final JPanel factionPanel = new JPanel();
-            final List<Faction> selectableFactions = getSelectableFactions().sorted(Comparator.comparingInt(f -> f.getHomeType().ordinal())).toList();
-            selectableFactions.forEach(f -> {
-                final int count = factionPanel.getComponentCount();
-                if (count % 2 == 0) {
-                    factionPanel.add(new FactionButton(popup, this, f), count / 2);
-                } else {
-                    factionPanel.add(new FactionButton(popup, this, f));
-                }
-            });
-            factionPanel.setLayout(new GridLayout(2, selectableFactions.size() / 2));
-            popup.setTitle("Select Faction, " + getCurrentPlayer());
-            popup.setContentPane(factionPanel);
-            popup.setLocationRelativeTo(frame);
-            popup.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            popup.pack();
-            popup.setVisible(true);
+            showFactionPopup();
         } else {
             Player chaosMagiciansPlayer = null;
             Player nomadsPlayer = null;
@@ -689,6 +671,8 @@ public class Game extends JPanel {
                         phase = Phase.CONFIRM_ACTION;
                     }
                 }
+            } else if (phase == Phase.PICK_FACTIONS) {
+                showFactionPopup();
             } else {
                 if (doubleTurn) {
                     turnOrder.add(0, player);
@@ -1399,5 +1383,26 @@ public class Game extends JPanel {
 
     public int getStartingVictoryPoints(Faction faction) {
         return gameData.useRevisedStartingVPs ? GameData.revisedStartingVPs.get(faction.getClass().getSimpleName()) : 20;
+    }
+
+    private void showFactionPopup() {
+        final JDialog factionPopup = new JDialog(frame);
+        final JPanel factionPanel = new JPanel();
+        final List<Faction> selectableFactions = getSelectableFactions().sorted(Comparator.comparingInt(f -> f.getHomeType().ordinal())).toList();
+        selectableFactions.forEach(f -> {
+            final int count = factionPanel.getComponentCount();
+            if (count % 2 == 0) {
+                factionPanel.add(new FactionButton(factionPopup, this, f), count / 2);
+            } else {
+                factionPanel.add(new FactionButton(factionPopup, this, f));
+            }
+        });
+        factionPanel.setLayout(new GridLayout(2, selectableFactions.size() / 2));
+        factionPopup.setTitle("Select Faction, " + getCurrentPlayer());
+        factionPopup.setContentPane(factionPanel);
+        factionPopup.setLocationRelativeTo(frame);
+        factionPopup.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        factionPopup.pack();
+        factionPopup.setVisible(true);
     }
 }
