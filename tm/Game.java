@@ -88,7 +88,7 @@ public class Game extends JPanel {
         cultPanel = new Cults(this, players);
         powerActionPanel = new PowerActions(this, usedPowerActions);
         turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder, leechTurnOrder);
-        roundPanel = new Rounds(gameData.rounds);
+        roundPanel = new Rounds(gameData.getRounds());
         pool = new Pool(this, null, bons, bonusCoins, favs, towns, bonUsed, null);
         reset();
         replay(gameData.actionFeed, gameData.leechFeed);
@@ -366,7 +366,7 @@ public class Game extends JPanel {
             players.clear();
             players.addAll(turnOrder);
             for (Player player : players) {
-                player.startRound(gameData.rounds.get(round - 1));
+                player.startRound(gameData.getRounds().get(round - 1));
             }
         }
     }
@@ -666,7 +666,7 @@ public class Game extends JPanel {
                     if (cultIncome == round) {
                         if (cultIncome > 0 && cultIncome < 6) {
                             for (Player p : nextTurnOrder) {
-                                p.addCultIncome(gameData.rounds.get(cultIncome - 1));
+                                p.addCultIncome(gameData.getRounds().get(cultIncome - 1));
                                 if (p.getPendingSpades() > 0) {
                                     turnOrder.add(p);
                                 }

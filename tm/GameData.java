@@ -37,16 +37,17 @@ public class GameData implements Serializable {
     boolean useRevisedStartingVPs;
     boolean useAuction;
     boolean chooseFactions;
+    boolean turnOrderVariant;
+
     final int playerCount;
     List<String> playerNames;
 
     final List<Integer> factionsIndices;
     final List<Integer> bons;
     final List<Integer> towns;
-    final transient List<Round> rounds;
+    final List<Integer> roundIndices;
     final transient Deque<Pair> actionFeed = new ArrayDeque<>();
     final transient Deque<Pair> leechFeed = new ArrayDeque<>();
-    boolean turnOrderVariant;
     final transient Map<String, Faction> factionMap = new HashMap<>();
 
     public GameData(List<String> playerNames, int seed) {
@@ -54,13 +55,18 @@ public class GameData implements Serializable {
         this.playerCount = playerNames.size();
         final Random random = new Random(seed);
 
-        final List<Round> allRounds = new ArrayList<>(List.of(Round.fireW, Round.firePw, Round.waterP, Round.waterS, Round.earthC, Round.earthS, Round.airW, Round.airS, Round.priestC));
-        int spadeRound;
+        final List<Integer> allRounds = new ArrayList<>(Round.snellmanMapping.length);
+        int spadeRound = -1;
+        for (int i = 0; i < Round.snellmanMapping.length; ++i) {
+            allRounds.add(i);
+            if (Round.snellmanMapping[i] == Round.earthC) {
+                spadeRound = i;
+            }
+        }
         do {
             Collections.shuffle(allRounds, random);
-            spadeRound = allRounds.indexOf(Round.earthC) + 1;
-        } while (spadeRound == 5 || spadeRound == 6);
-        rounds = allRounds.stream().limit(6).toList();
+        } while (allRounds.get(4) == spadeRound || allRounds.get(5) == spadeRound);
+        roundIndices = allRounds.stream().limit(6).toList();
 
         towns = new ArrayList<>();
         for (int i = 1; i < 9; ++i) {
@@ -97,7 +103,7 @@ public class GameData implements Serializable {
     public GameData(Scanner scanner) {
         mapData = MapData.mapsByName.get("Base").getData();
         factionsIndices = new ArrayList<>();
-        rounds = new ArrayList<>(6);
+        roundIndices = new ArrayList<>(6);
         towns = new ArrayList<>();
         for (int i = 1; i < 6; ++i) {
             towns.add(i);
@@ -117,7 +123,7 @@ public class GameData implements Serializable {
         if (playerCount + 3 != bons.size()) {
             throw new RuntimeException("Invalid number of bons");
         }
-        if (rounds.size() != 6) {
+        if (roundIndices.size() != 6) {
             throw new RuntimeException("Invalid number of rounds");
         }
     }
@@ -147,7 +153,7 @@ public class GameData implements Serializable {
                 towns.add(8);
             } else if (line.matches("Round \\d scoring: SCORE\\d, .*")) {
                 final int scoring = line.split(" ")[3].charAt(5) - '0' - 1;
-                rounds.add(Round.snellmanMapping[scoring]);
+                roundIndices.add(scoring);
             } else if (line.matches("Removing tile BON\\d.*")) {
                 final int bon = Integer.parseInt(line.split("[ \\t]")[2].substring(3));
                 bons.remove((Integer) bon);
@@ -213,5 +219,9 @@ public class GameData implements Serializable {
 
     public List<Faction> getFactions() {
         return factionsIndices.stream().map(allFactions::get).toList();
+    }
+
+    public List<Round> getRounds() {
+        return roundIndices.stream().map(i -> Round.snellmanMapping[i]).toList();
     }
 }
