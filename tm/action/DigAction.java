@@ -7,16 +7,19 @@ import tm.faction.Giants;
 
 public class DigAction extends Action {
 
-    private final Hex target;
+    private final int row;
+    private final int col;
     private final Hex.Type type;
     private final boolean jump;
+    private transient Hex target;
     private transient int requiredSpades;
     private transient int requiredDigging;
     private transient int pendingSpades;
     private transient boolean resolvingCultSpades;
 
-    public DigAction(Hex target, Hex.Type type, boolean jump) {
-        this.target = target;
+    public DigAction(int row, int col, Hex.Type type, boolean jump) {
+        this.row = row;
+        this.col = col;
         this.type = type;
         this.jump = jump;
     }
@@ -24,6 +27,7 @@ public class DigAction extends Action {
     @Override
     public void setData(Game game, Player player) {
         super.setData(game, player);
+        target = game.getHex(row, col);
         requiredSpades = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
         pendingSpades = player.getPendingSpades();
         requiredDigging = Math.max(0, requiredSpades - pendingSpades);

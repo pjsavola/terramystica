@@ -425,7 +425,7 @@ public class Game extends JPanel {
         if (hex == null) return;
 
         if (pendingTownPlacement) {
-            resolveAction(new MermaidsTownAction(hex));
+            resolveAction(new MermaidsTownAction(row, col));
             return;
         }
 
@@ -434,7 +434,7 @@ public class Game extends JPanel {
             case ACTIONS -> {
                 final Hex.Type homeType = getCurrentPlayer().getHomeType();
                 if (hex.getType() != homeType || button == MouseEvent.BUTTON3) {
-                    handleDigging(hex);
+                    handleDigging(hex, row, col);
                     return;
                 }
                 final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
@@ -460,7 +460,7 @@ public class Game extends JPanel {
                 final boolean dig = pendingActions.contains(Player.PendingType.USE_SPADES);
                 final boolean sandstorm = pendingActions.contains(Player.PendingType.SANDSTORM);
                 if (sandstorm) {
-                    resolveAction(new SandstormAction(hex));
+                    resolveAction(new SandstormAction(row, col));
                 } else if (freeD || freeTP) {
                     resolveAction(new BuildAction(row, col, freeD ? Hex.Structure.DWELLING : Hex.Structure.TRADING_POST));
                 } else if (build || dig) {
@@ -470,7 +470,7 @@ public class Game extends JPanel {
                         }
                     }
                     if (dig) {
-                        handleDigging(hex);
+                        handleDigging(hex, row, col);
                     }
                 } else if (pendingActions.contains(Player.PendingType.PLACE_BRIDGE)) {
                     final Hex.Type homeType = getCurrentPlayer().getHomeType();
@@ -496,7 +496,8 @@ public class Game extends JPanel {
                                     }
                                 }
                                 if (requiredCommonWaterNeighbors <= 0) {
-                                    resolveAction(new PlaceBridgeAction(hex, bridgeEnd));
+                                    final Point p = mapPanel.getPoint(bridgeEnd.getId());
+                                    resolveAction(new PlaceBridgeAction(row, col, p.x, p.y));
                                     return;
                                 }
                             }
@@ -508,7 +509,7 @@ public class Game extends JPanel {
         }
     }
 
-    private void handleDigging(Hex hex) {
+    private void handleDigging(Hex hex, int row, int col) {
         if (hex.getStructure() != null || getCurrentPlayer().hasPendingBuild(hex)) {
             return;
         }
@@ -550,7 +551,7 @@ public class Game extends JPanel {
         if (result[0] == null) {
             return;
         }
-        resolveAction(new DigAction(hex, result[0], jump));
+        resolveAction(new DigAction(row, col, result[0], jump));
     }
 
     public Hex getHex(int row, int col) {
@@ -1065,9 +1066,9 @@ public class Game extends JPanel {
                                 throw new RuntimeException("Not enough spades");
                             }
                             pendingDigging -= cost;
-                            replayAction(new DigAction(hex, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
+                            replayAction(new DigAction(p.x, p.y, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
                         } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
-                            replayAction(new SandstormAction(hex));
+                            replayAction(new SandstormAction(p.x, p.y));
                         }
                         replayAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
                     }
@@ -1076,7 +1077,7 @@ public class Game extends JPanel {
                     final Point p = mapPanel.getPoint(s[1]);
                     final Hex hex = mapPanel.getHex(p.x, p.y);
                     if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
-                        replayAction(new SandstormAction(hex));
+                        replayAction(new SandstormAction(p.x, p.y));
                     } else {
                         final Hex.Type type;
                         if (s.length <= 3) {
@@ -1117,7 +1118,7 @@ public class Game extends JPanel {
                             }
                             pendingDigging -= cost;
                         }
-                        replayAction(new DigAction(hex, type, mapPanel.getJumpableTiles(player).contains(hex)));
+                        replayAction(new DigAction(p.x, p.y, type, mapPanel.getJumpableTiles(player).contains(hex)));
                     }
                 } else if (passPattern.matcher(action).matches()) {
                     final String[] s = action.split(" ");
@@ -1255,7 +1256,7 @@ public class Game extends JPanel {
                     final String[] s = action.split(" ");
                     final Point p1 = mapPanel.getPoint(s[1].split(":")[0]);
                     final Point p2 = mapPanel.getPoint(s[1].split(":")[1]);
-                    replayAction(new PlaceBridgeAction(mapPanel.getHex(p1.x, p1.y), mapPanel.getHex(p2.x, p2.y)));
+                    replayAction(new PlaceBridgeAction(p1.x, p1.y, p2.x, p2.y));
                 } else if (convertPattern.matcher(action).matches()) {
                     String s = action.substring("convert".length()).trim();
                     int idx = 0;
@@ -1329,8 +1330,8 @@ public class Game extends JPanel {
                     replayAction(new ForfeitAction());
                 } else if (connectPattern.matcher(action).matches()) {
                     final String id = action.split(" ")[1];
-                    final Hex hex = mapPanel.getAllHexes().stream().filter(h -> h.getId().equals(id)).findAny().orElse(null);
-                    replayAction(new MermaidsTownAction(hex));
+                    final Point p = mapPanel.getPoint(id);
+                    replayAction(new MermaidsTownAction(p.x, p.y));
                 } else if (darklingPattern.matcher(action).matches()) {
                     int count = 1;
                     for (int i = 0; i < action.length(); ++i) {

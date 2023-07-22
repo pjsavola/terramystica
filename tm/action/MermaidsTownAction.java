@@ -2,15 +2,25 @@ package tm.action;
 
 import tm.Game;
 import tm.Hex;
+import tm.Player;
 import tm.faction.Engineers;
 import tm.faction.Mermaids;
 
 public class MermaidsTownAction extends Action {
 
-    private final Hex hex;
+    private final int row;
+    private final int col;
+    private transient Hex hex;
 
-    public MermaidsTownAction(Hex hex) {
-        this.hex = hex;
+    public MermaidsTownAction(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    @Override
+    public void setData(Game game, Player player) {
+        super.setData(game, player);
+        this.hex = game.getHex(row, col);
     }
 
     @Override

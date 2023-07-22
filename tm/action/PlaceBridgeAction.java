@@ -1,16 +1,30 @@
 package tm.action;
 
+import tm.Game;
 import tm.Hex;
 import tm.Player;
 
 public class PlaceBridgeAction extends PendingAction {
 
-    private final Hex hex1;
-    private final Hex hex2;
+    private final int row1;
+    private final int col1;
+    private final int row2;
+    private final int col2;
+    private transient Hex hex1;
+    private transient Hex hex2;
 
-    public PlaceBridgeAction(Hex hex1, Hex hex2) {
-        this.hex1 = hex1;
-        this.hex2 = hex2;
+    public PlaceBridgeAction(int row1, int col1, int row2, int col2) {
+        this.row1 = row1;
+        this.col1 = col1;
+        this.row2 = row2;
+        this.col2 = col2;
+    }
+
+    @Override
+    public void setData(Game game, Player player) {
+        super.setData(game, player);
+        hex1 = game.getHex(row1, col1);
+        hex2 = game.getHex(row2, col2);
     }
 
     @Override

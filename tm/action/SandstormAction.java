@@ -8,10 +8,19 @@ import tm.faction.Nomads;
 
 public class SandstormAction extends Action {
 
-    private final Hex target;
+    private int row;
+    private int col;
+    private transient Hex target;
 
-    public SandstormAction(Hex target) {
-        this.target = target;
+    public SandstormAction(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    @Override
+    public void setData(Game game, Player player) {
+        super.setData(game, player);
+        target = game.getHex(row, col);
     }
 
     @Override
