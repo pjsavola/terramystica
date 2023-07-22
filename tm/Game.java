@@ -50,6 +50,7 @@ public class Game extends JPanel {
     private boolean doubleTurn;
 
     public Phase phase;
+    private boolean factionsPicked;
 
     private final String[] mapData;
 
@@ -129,6 +130,7 @@ public class Game extends JPanel {
 
         if (!players.isEmpty()) {
             // Reuse existing players but sort them back to the original order.
+            factionsPicked = true;
             turnOrder.clear();
             nextTurnOrder.clear();
             for (int i = factions.size() - 1; i >= 0; --i) {
@@ -168,6 +170,7 @@ public class Game extends JPanel {
                 turnOrder.add(chaosMagiciansPlayer);
             }
         } else if (gameData.chooseFactions) {
+            factionsPicked = false;
             phase = Phase.PICK_FACTIONS;
             while (players.size() < gameData.playerCount) {
                 String name = gameData.playerNames.get(players.size());
@@ -180,8 +183,7 @@ public class Game extends JPanel {
             }
             showFactionPopup();
         } else {
-            Player chaosMagiciansPlayer = null;
-            Player nomadsPlayer = null;
+            factionsPicked = true;
             while (players.size() < gameData.playerCount) {
                 final String name = gameData.playerNames.get(players.size());
                 final Player player = new Player(this, name);
@@ -189,25 +191,33 @@ public class Game extends JPanel {
                 player.selectFaction(faction);
                 factions.removeIf(f -> f.getHomeType() == faction.getHomeType());
                 players.add(player);
-                nextTurnOrder.add(0, player);
-                if (faction instanceof ChaosMagicians) {
-                    chaosMagiciansPlayer = player;
-                } else {
-                    turnOrder.add(player);
-                    if (faction instanceof Nomads) {
-                        nomadsPlayer = player;
-                    }
+            }
+            setupTurnOrder();
+        }
+    }
+
+    private void setupTurnOrder() {
+        Player chaosMagiciansPlayer = null;
+        Player nomadsPlayer = null;
+        for (Player player : players) {
+            nextTurnOrder.add(0, player);
+            if (player.getFaction() instanceof ChaosMagicians) {
+                chaosMagiciansPlayer = player;
+            } else {
+                turnOrder.add(player);
+                if (player.getFaction() instanceof Nomads) {
+                    nomadsPlayer = player;
                 }
             }
-            for (int i = turnOrder.size() - 1; i >= 0; --i) {
-                turnOrder.add(turnOrder.get(i));
-            }
-            if (nomadsPlayer != null) {
-                turnOrder.add(nomadsPlayer);
-            }
-            if (chaosMagiciansPlayer != null) {
-                turnOrder.add(chaosMagiciansPlayer);
-            }
+        }
+        for (int i = turnOrder.size() - 1; i >= 0; --i) {
+            turnOrder.add(turnOrder.get(i));
+        }
+        if (nomadsPlayer != null) {
+            turnOrder.add(nomadsPlayer);
+        }
+        if (chaosMagiciansPlayer != null) {
+            turnOrder.add(chaosMagiciansPlayer);
         }
     }
 
@@ -595,7 +605,7 @@ public class Game extends JPanel {
                     resolveAction(new ForfeitAction());
                 }
                 getCurrentPlayer().pendingBuilds = null;
-                phase = players.stream().anyMatch(p -> p.getFaction() == null) ? Phase.PICK_FACTIONS : Phase.ACTIONS;
+                phase = factionsPicked ? Phase.ACTIONS : Phase.PICK_FACTIONS;
                 endTurn();
                 refresh();
             }
@@ -653,7 +663,15 @@ public class Game extends JPanel {
                         }
                     }
                 }
-                if (turnOrder.isEmpty()) {
+                if (phase == Phase.PICK_FACTIONS) {
+                    if (turnOrder.isEmpty()) {
+                        factionsPicked = true;
+                        phase = Phase.INITIAL_DWELLINGS;
+                        setupTurnOrder();
+                    } else {
+                        showFactionPopup();
+                    }
+                } else if (turnOrder.isEmpty()) {
                     if (cultIncome == round) {
                         if (cultIncome > 0 && cultIncome < 6) {
                             for (Player p : nextTurnOrder) {
@@ -671,8 +689,6 @@ public class Game extends JPanel {
                         phase = Phase.CONFIRM_ACTION;
                     }
                 }
-            } else if (phase == Phase.PICK_FACTIONS) {
-                showFactionPopup();
             } else {
                 if (doubleTurn) {
                     turnOrder.add(0, player);

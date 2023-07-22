@@ -32,6 +32,11 @@ public class SelectFactionAction extends Action {
     }
 
     @Override
+    public boolean isPass() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "Select " + faction.getName();
     }
