@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -1412,5 +1413,25 @@ public class Game extends JPanel {
         factionPopup.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         factionPopup.pack();
         factionPopup.setVisible(true);
+    }
+
+    public void save() {
+        final JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Specify a file to save");
+        final int userSelection = fileChooser.showSaveDialog(frame);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            final File fileToSave = fileChooser.getSelectedFile();
+            try (ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(fileToSave))) {
+                stream.writeObject(gameData);
+                stream.writeInt(history.size());
+                for (Action action : history) {
+                    stream.writeObject(action);
+                }
+                stream.flush();
+                System.err.println("Saved game to " + fileToSave.getAbsolutePath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

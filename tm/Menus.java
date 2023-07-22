@@ -219,5 +219,16 @@ public abstract class Menus {
                 }
             }
         };
+        new ActionMenuItem(game, miscMenu, "Save As ...") {
+            @Override
+            public boolean canExecute(Game game) {
+                return game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.END;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.save();
+            }
+        };
     }
 }
