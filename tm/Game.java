@@ -140,6 +140,8 @@ public class Game extends JPanel {
                 players.sort((p1, p2) -> factions.indexOf(p2.getFaction()) - factions.indexOf(p1.getFaction()));
                 setupTurnOrder();
             } else {
+                turnOrder.clear();
+                nextTurnOrder.clear();
                 for (int i = 0; i < gameData.playerNames.size(); ++i) {
                     final String name = gameData.playerNames.get(i);
                     for (int j = i; j < players.size(); ++j) {
@@ -655,7 +657,7 @@ public class Game extends JPanel {
                         factionsPicked = true;
                         phase = Phase.INITIAL_DWELLINGS;
                         setupTurnOrder();
-                    } else {
+                    } else if (!rewinding) {
                         showFactionPopup();
                     }
                 } else if (turnOrder.isEmpty()) {
