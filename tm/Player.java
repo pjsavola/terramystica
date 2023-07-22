@@ -140,7 +140,7 @@ public class Player extends JPanel {
         bons.clear();
         favs.clear();
         towns.clear();
-        selectFaction(faction, 20);
+        selectFaction(faction);
     }
 
     public int getWorkers() {
@@ -172,9 +172,9 @@ public class Player extends JPanel {
         return points;
     }
 
-    public void selectFaction(Faction faction, int points) {
+    public void selectFaction(Faction faction) {
         this.faction = faction;
-        this.points = points;
+        this.points = game.getStartingVictoryPoints(faction);
         power[0] = 12;
         power[1] = 0;
         power[2] = 0;
@@ -419,7 +419,7 @@ public class Player extends JPanel {
     }
 
     public boolean canAdvanceShipping() {
-        return faction.getMaxShipping() > shipping && canAfford(faction.getAdvanceShippingCost());
+        return faction != null && faction.getMaxShipping() > shipping && canAfford(faction.getAdvanceShippingCost());
     }
 
     public void advanceShipping() {
@@ -432,7 +432,7 @@ public class Player extends JPanel {
     }
 
     public boolean canAdvanceDigging() {
-        return faction.getMinDigging() < digging && canAfford(faction.getAdvanceDiggingCost());
+        return faction != null && faction.getMinDigging() < digging && canAfford(faction.getAdvanceDiggingCost());
     }
 
     public void advanceDigging() {

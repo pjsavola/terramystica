@@ -14,17 +14,17 @@ public class SelectFactionAction extends Action {
 
     @Override
     public boolean validatePhase() {
-        return game.phase == Game.Phase.INITIAL_DWELLINGS;
+        return game.phase == Game.Phase.PICK_FACTIONS;
     }
 
     @Override
     public boolean canExecute() {
-        return player.getFaction() == null;
+        return player.getFaction() == null && game.getSelectableFactions().anyMatch(f -> f == faction);
     }
 
     @Override
     public void execute() {
-        player.selectFaction(faction, 20);
+        player.selectFaction(faction);
     }
 
     public boolean needsConfirm() {

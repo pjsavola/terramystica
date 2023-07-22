@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Game extends JPanel {
     public enum Phase {PICK_FACTIONS, AUCTION_FACTIONS, INITIAL_DWELLINGS, INITIAL_BONS, ACTIONS, CONFIRM_ACTION, LEECH, END}
@@ -179,24 +180,19 @@ public class Game extends JPanel {
             }
 
             final JDialog popup = new JDialog(frame);
-            final JPanel terraformPanel = new JPanel();
-            final Set<Faction> selected = new HashSet<>();
-            for (Player p : players) {
-                if (p.getFaction() != null) {
-                    selected.add(p.getFaction());
-                }
-            }
-            GameData.allFactions.stream().filter(f -> !selected.contains(f)).sorted(Comparator.comparingInt(f -> f.getHomeType().ordinal())).toList().forEach(f -> {
-                final int count = terraformPanel.getComponentCount();
+            final JPanel factionPanel = new JPanel();
+            final List<Faction> selectableFactions = getSelectableFactions().sorted(Comparator.comparingInt(f -> f.getHomeType().ordinal())).toList();
+            selectableFactions.forEach(f -> {
+                final int count = factionPanel.getComponentCount();
                 if (count % 2 == 0) {
-                    terraformPanel.add(new FactionButton(popup, this, f), count / 2);
+                    factionPanel.add(new FactionButton(popup, this, f), count / 2);
                 } else {
-                    terraformPanel.add(new FactionButton(popup, this, f));
+                    factionPanel.add(new FactionButton(popup, this, f));
                 }
             });
-            terraformPanel.setLayout(new GridLayout(2, 7 - selected.size()));
+            factionPanel.setLayout(new GridLayout(2, selectableFactions.size() / 2));
             popup.setTitle("Select Faction, " + getCurrentPlayer());
-            popup.setContentPane(terraformPanel);
+            popup.setContentPane(factionPanel);
             popup.setLocationRelativeTo(frame);
             popup.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             popup.pack();
@@ -208,7 +204,7 @@ public class Game extends JPanel {
                 final String name = gameData.playerNames.get(players.size());
                 final Player player = new Player(this, name);
                 final Faction faction = factions.remove(factions.size() - 1);
-                player.selectFaction(faction, gameData.useRevisedStartingVPs ? GameData.revisedStartingVPs.get(faction.getClass().getSimpleName()) : 20);
+                player.selectFaction(faction);
                 factions.removeIf(f -> f.getHomeType() == faction.getHomeType());
                 players.add(player);
                 nextTurnOrder.add(0, player);
@@ -1389,5 +1385,19 @@ public class Game extends JPanel {
 
     public int[] getVictoryPoints() {
         return players.stream().sorted((p1, p2) -> gameData.factions.indexOf(p2.getFaction()) - gameData.factions.indexOf(p1.getFaction())).mapToInt(Player::getPoints).toArray();
+    }
+
+    public Stream<Faction> getSelectableFactions() {
+        final Set<Hex.Type> selectedColors = new HashSet<>();
+        for (Player p : players) {
+            if (p.getFaction() != null) {
+                selectedColors.add(p.getFaction().getHomeType());
+            }
+        }
+        return GameData.allFactions.stream().filter(f -> !selectedColors.contains(f.getHomeType()));
+    }
+
+    public int getStartingVictoryPoints(Faction faction) {
+        return gameData.useRevisedStartingVPs ? GameData.revisedStartingVPs.get(faction.getClass().getSimpleName()) : 20;
     }
 }
