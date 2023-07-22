@@ -1,6 +1,8 @@
 package tm;
 
-public class Resources {
+import java.io.Serializable;
+
+public class Resources implements Serializable {
     public final int coins;
     public final int workers;
     public final int priests;

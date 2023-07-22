@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 public class ForfeitAction extends Action {
 
-    private Set<Player.PendingType> types;
-    private int spadeCount;
+    private transient Set<Player.PendingType> types;
+    private transient int spadeCount;
 
     @Override
     public void setData(Game game, Player player) {

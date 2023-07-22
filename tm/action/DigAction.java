@@ -10,10 +10,10 @@ public class DigAction extends Action {
     private final Hex target;
     private final Hex.Type type;
     private final boolean jump;
-    private int requiredSpades;
-    private int requiredDigging;
-    private int pendingSpades;
-    private boolean resolvingCultSpades;
+    private transient int requiredSpades;
+    private transient int requiredDigging;
+    private transient int pendingSpades;
+    private transient boolean resolvingCultSpades;
 
     public DigAction(Hex target, Hex.Type type, boolean jump) {
         this.target = target;

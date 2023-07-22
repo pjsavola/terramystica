@@ -3,9 +3,11 @@ package tm.action;
 import tm.Game;
 import tm.Player;
 
-public abstract class Action {
-    protected Game game;
-    protected Player player;
+import java.io.Serializable;
+
+public abstract class Action implements Serializable {
+    protected transient Game game;
+    protected transient Player player;
 
     public void setData(Game game, Player player) {
         if (this.game != null && this.game != game) {

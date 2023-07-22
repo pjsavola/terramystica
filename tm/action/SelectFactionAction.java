@@ -1,15 +1,23 @@
 package tm.action;
 
 import tm.Game;
+import tm.GameData;
 import tm.Player;
 import tm.faction.Faction;
 
 public class SelectFactionAction extends Action {
 
-    private final Faction faction;
+    private final int factionIdx;
+    private transient Faction faction;
 
-    public SelectFactionAction(Faction faction) {
-        this.faction = faction;
+    public SelectFactionAction(int factionIdx) {
+        this.factionIdx = factionIdx;
+    }
+
+    @Override
+    public void setData(Game game, Player player) {
+        super.setData(game, player);
+        faction = GameData.allFactions.get(factionIdx);
     }
 
     @Override

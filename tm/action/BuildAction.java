@@ -17,8 +17,8 @@ public class BuildAction extends Action {
     private final int row;
     private final int col;
     private final Hex.Structure structure;
-    private boolean expensive;
-    private boolean pendingBuild;
+    private transient boolean expensive;
+    private transient boolean pendingBuild;
 
     public BuildAction(int row, int col, Hex.Structure structure) {
         this.row = row;
