@@ -1,5 +1,6 @@
 package tm;
 
+import tm.action.Action;
 import tm.faction.Giants;
 
 import javax.swing.*;
@@ -11,8 +12,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -232,6 +232,27 @@ public class JMystica {
             dialog.setLocationRelativeTo(mainPanel);
             dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             dialog.setVisible(true);
+        });
+        loadButton.addActionListener(l -> {
+            final JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Specify a file to load");
+            final int userSelection = fileChooser.showOpenDialog(frame);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                final File fileToLoad = fileChooser.getSelectedFile();
+                try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(fileToLoad))) {
+                    final GameData gameData = (GameData) stream.readObject();
+                    int actionCount = stream.readInt();
+                    final List<Action> actions = new ArrayList<>(actionCount);
+                    while (actionCount-- > 0) {
+                        final Action action = (Action) stream.readObject();
+                        actions.add(action);
+                    }
+                    gameData.history = actions;
+                    Game.open(frame, gameData);
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         });
         importButton.addActionListener(l -> {
             try {

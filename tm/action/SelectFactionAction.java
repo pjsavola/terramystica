@@ -46,6 +46,6 @@ public class SelectFactionAction extends Action {
 
     @Override
     public String toString() {
-        return "Select " + faction.getName();
+        return "Select " + GameData.allFactions.get(factionIdx).getName();
     }
 }

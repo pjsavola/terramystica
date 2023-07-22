@@ -3,9 +3,13 @@ package tm.action;
 import tm.Game;
 import tm.Player;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public abstract class Action implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     protected transient Game game;
     protected transient Player player;
 

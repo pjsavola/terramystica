@@ -91,8 +91,13 @@ public class Game extends JPanel {
         turnOrderPanel = new TurnOrder(this, turnOrder, nextTurnOrder, leechTurnOrder);
         roundPanel = new Rounds(gameData.getRounds());
         pool = new Pool(this, null, bons, bonusCoins, favs, towns, bonUsed, null);
-        reset();
-        replay(gameData.actionFeed, gameData.leechFeed);
+        if (gameData.history != null) {
+            history.addAll(gameData.history);
+            rewind();
+        } else {
+            reset();
+            replay(gameData.actionFeed, gameData.leechFeed);
+        }
         addComponents();
     }
 
@@ -167,7 +172,9 @@ public class Game extends JPanel {
                 players.add(player);
                 turnOrder.add(player);
             }
-            showFactionPopup();
+            if (!rewinding) {
+                showFactionPopup();
+            }
         } else {
             factionsPicked = true;
             phase = Phase.INITIAL_DWELLINGS;
@@ -238,9 +245,9 @@ public class Game extends JPanel {
     }
 
     public void rewind() {
-        if (newActions.isEmpty()) return;
-
-        System.err.println("Undoing following moves: " + newActions);
+        if (!newActions.isEmpty()) {
+            System.err.println("Undoing following moves: " + newActions);
+        }
         rewinding = true;
         final List<Action> history = new ArrayList<>(this.history);
         reset();

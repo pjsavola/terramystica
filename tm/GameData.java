@@ -1,12 +1,16 @@
 package tm;
 
+import tm.action.Action;
 import tm.faction.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.IntStream;
 
 public class GameData implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public static class Pair {
         public Faction faction;
@@ -48,6 +52,7 @@ public class GameData implements Serializable {
     final List<Integer> roundIndices;
     final transient Deque<Pair> actionFeed = new ArrayDeque<>();
     final transient Deque<Pair> leechFeed = new ArrayDeque<>();
+    transient List<Action> history;
     final transient Map<String, Faction> factionMap = new HashMap<>();
 
     public GameData(List<String> playerNames, int seed) {
