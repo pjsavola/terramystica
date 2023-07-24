@@ -297,6 +297,7 @@ public class JMystica {
             final Game game = new Game(frame, test);
             final int[] vps = game.getVictoryPoints();
             if (Arrays.equals(vpTargets, vps)) {
+                game.rewind();
                 return true;
             }
             System.err.println("Wrong vps: " + Arrays.stream(vps).mapToObj(String::valueOf).collect(Collectors.joining(",")));
