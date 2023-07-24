@@ -138,8 +138,8 @@ public class GameData implements Serializable {
         int players = 0;
         boolean start = false;
         while (scanner.hasNextLine()) {
-            final String line = scanner.nextLine().trim();
-            if (line.startsWith("Default game options")) {
+            final String line = scanner.nextLine().trim().toLowerCase();
+            if (line.startsWith("default game options")) {
                 start = true;
                 continue;
             } else if (!start) {
@@ -156,13 +156,13 @@ public class GameData implements Serializable {
                 towns.add(7);
                 towns.add(7);
                 towns.add(8);
-            } else if (line.matches("Round \\d scoring: SCORE\\d, .*")) {
+            } else if (line.matches("round \\d scoring: score\\d, .*")) {
                 final int scoring = line.split(" ")[3].charAt(5) - '0' - 1;
                 roundIndices.add(scoring);
-            } else if (line.matches("Removing tile BON\\d.*")) {
+            } else if (line.matches("removing tile bon\\d.*")) {
                 final int bon = Integer.parseInt(line.split("[ \\t]")[2].substring(3));
                 bons.remove((Integer) bon);
-            } else if (line.matches("Player \\d: .*")) {
+            } else if (line.matches("player \\d: .*")) {
                 ++players;
                 final String name = line.split(" ")[2].split("\\t")[0];
                 playerNames.add(name);
@@ -184,12 +184,12 @@ public class GameData implements Serializable {
                     boolean skip = false;
                     for (int i = 0; i < s.length; ++i) {
                         final String str = s[i];
-                        if (str.matches("0/0/[1-9][0-9]* PW")) {
-                            if (actionLine.matches("[Dd][Ee][Cc][Ll][Ii][Nn][Ee].*")) {
+                        if (str.matches("0/0/[1-9][0-9]* pw")) {
+                            if (actionLine.matches("decline.*")) {
                                 // Skip redundant decline
                                 skip = true;
                                 break;
-                            } else if (actionLine.matches("[Ll][Ee][Ee][Cc][Hh].*") && s[i - 1].isEmpty()) {
+                            } else if (actionLine.matches("leech.*") && s[i - 1].isEmpty()) {
                                 // Skip redundant leech
                                 skip = true;
                                 break;
@@ -202,7 +202,7 @@ public class GameData implements Serializable {
                     if (actionLine.equals("cult_income_for_faction")) continue;
                     if (actionLine.equals("[opponent accepted power]")) continue;
                     if (actionLine.equals("[all opponents declined power]")) continue;
-                    if (actionLine.matches("\\+\\dvp for (FIRE|WATER|EARTH|AIR)")) continue;
+                    if (actionLine.matches("\\+\\dvp for (fire|water|earth|air)")) continue;
                     if (actionLine.matches("\\+[1-9][0-9]*vp for network")) continue;
                     if (actionLine.equals("score_resources")) continue;
                     final String[] actions = actionLine.split("\\. ");
