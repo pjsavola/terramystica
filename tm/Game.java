@@ -246,7 +246,7 @@ public class Game extends JPanel {
 
     public void rewind() {
         if (!newActions.isEmpty()) {
-            System.err.println("Undoing following moves: " + newActions);
+            log("Undoing following moves: " + newActions);
         }
         rewinding = true;
         final List<Action> history = new ArrayList<>(this.history);
@@ -361,7 +361,7 @@ public class Game extends JPanel {
             phase = Phase.ACTIONS;
         }
         if (round > 6) {
-            System.err.println("--- End Scoring ---");
+            log("--- End Scoring ---");
             phase = Phase.END;
             endScoring();
         } else {
@@ -586,7 +586,7 @@ public class Game extends JPanel {
             return true;
         }
         if (rewinding || importing) {
-            System.err.println("!!! " + action + " failed");
+            log("!!! " + action + " failed");
         }
         return false;
     }
@@ -620,7 +620,7 @@ public class Game extends JPanel {
         history.addAll(newActions);
         for (Action action : newActions) {
             if (!rewinding && !importing) {
-                System.err.println(getCurrentPlayer().getFaction().getName() + ": " + action);
+                log(getCurrentPlayer().getFaction().getName() + ": " + action);
             }
             action.confirmed();
         }
@@ -846,7 +846,7 @@ public class Game extends JPanel {
     private void endScoring() {
         for (Player player : players) {
             final int vp = player.autoConvert();
-            System.err.println(player + " VP from resources: " + vp);
+            log(player + " VP from resources: " + vp);
         }
 
         for (int i = 0; i < 4; ++i) {
@@ -874,7 +874,7 @@ public class Game extends JPanel {
                 while (j < k) {
                     final Player p = sorted.get(j);
                     p.score(playerReward);
-                    System.err.println(p + " " + playerReward + " VP from from " + Cults.getCultName(cult));
+                    log(p + " " + playerReward + " VP from from " + Cults.getCultName(cult));
                     if (++j >= sorted.size()) {
                         break;
                     }
@@ -909,7 +909,7 @@ public class Game extends JPanel {
             while (j < k) {
                 final Player p = sorted.get(j);
                 p.score(playerReward);
-                System.err.println(p + " " + playerReward + " VP from from network");
+                log(p + " " + playerReward + " VP from from network");
                 if (++j >= sorted.size()) {
                     break;
                 }
@@ -977,7 +977,7 @@ public class Game extends JPanel {
                                     found = true;
                                     break;
                                 }
-                                System.err.println(pair.faction.getName() + ": " + pair.action);
+                                log(pair.faction.getName() + ": " + pair.action);
                                 resolveAction(new LeechAction(accept));
                                 it.remove();
                                 found = true;
@@ -1026,13 +1026,13 @@ public class Game extends JPanel {
                     throw new RuntimeException("Player changed " + action);
                 }
                 if (!resolveAction(action)) {
-                    System.err.println("Failure " + action);
+                    log("Failure " + action);
                     counter = JMystica.maxReplayActionCount;
                     return;
                 }
             }
             ++counter;
-            System.err.println(counter + " -- " + player.getFaction().getName() + ": " + action);
+            log(counter + " -- " + player.getFaction().getName() + ": " + action);
         }
 
         public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
@@ -1351,7 +1351,7 @@ public class Game extends JPanel {
                         }
                         replayAction(new DarklingsConvertAction(count));
                     } else {
-                        System.err.println("Unhandled action: " + action);
+                        log("Unhandled action: " + action);
                         break;
                     }
                     if (player.getPendingActions().isEmpty() && pendingCultSource == null && pendingDigging == 0) {
@@ -1436,10 +1436,18 @@ public class Game extends JPanel {
                     stream.writeObject(action);
                 }
                 stream.flush();
-                System.err.println("Saved game to " + fileToSave.getAbsolutePath());
+                log("Saved game to " + fileToSave.getAbsolutePath());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    public void log(String s) {
+        if (gameData.silentMode) {
+            gameData.logs.add(s);
+        } else {
+            System.err.println(s);
         }
     }
 }

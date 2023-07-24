@@ -54,6 +54,8 @@ public class GameData implements Serializable {
     final transient Deque<Pair> leechFeed = new ArrayDeque<>();
     transient List<Action> history;
     final transient Map<String, Faction> factionMap = new HashMap<>();
+    transient boolean silentMode;
+    final transient List<String> logs = new ArrayList<>();
 
     public GameData(List<String> playerNames, int seed) {
         this.playerNames = playerNames;
@@ -237,5 +239,12 @@ public class GameData implements Serializable {
 
     public List<Round> getRounds() {
         return roundIndices.stream().map(i -> Round.snellmanMapping[i]).toList();
+    }
+
+    public void printAndClearLogs() {
+        for (String s : logs) {
+            System.err.println(s);
+        }
+        logs.clear();
     }
 }

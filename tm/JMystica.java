@@ -293,14 +293,21 @@ public class JMystica {
     public static boolean test(String file, int[] vpTargets) {
         try {
             final GameData test = new GameData(new Scanner(new File(file)));
+            test.silentMode = true;
             final JFrame frame = new JFrame();
-            final Game game = new Game(frame, test);
-            final int[] vps = game.getVictoryPoints();
-            if (Arrays.equals(vpTargets, vps)) {
-                game.rewind();
-                return true;
+            try {
+                final Game game = new Game(frame, test);
+                final int[] vps = game.getVictoryPoints();
+                if (Arrays.equals(vpTargets, vps)) {
+                    game.rewind();
+                    return true;
+                }
+                System.err.println("Wrong vps: " + Arrays.stream(vps).mapToObj(String::valueOf).collect(Collectors.joining(",")));
+                test.printAndClearLogs();
+            } catch (Throwable e) {
+                test.printAndClearLogs();
+                throw e;
             }
-            System.err.println("Wrong vps: " + Arrays.stream(vps).mapToObj(String::valueOf).collect(Collectors.joining(",")));
         } catch (Throwable e) {
             e.printStackTrace();
         }
