@@ -139,10 +139,10 @@ public class GameData implements Serializable {
         boolean start = false;
         while (scanner.hasNextLine()) {
             final String line = scanner.nextLine().trim().toLowerCase();
-            if (line.startsWith("default game options")) {
-                start = true;
-                continue;
-            } else if (!start) {
+            if (!start) {
+                if (line.startsWith("default game options")) {
+                    start = true;
+                }
                 continue;
             }
             if (line.startsWith("option variable-turn-order")) {
@@ -150,18 +150,27 @@ public class GameData implements Serializable {
             } else if (line.startsWith("option shipping-bonus")) {
                 bons.add(10);
             } else if (line.startsWith("map ")) {
-                mapData = MapData.mapsById.get(line.split("\\t")[0].substring(4)).getData();
+                final String id = line.split("\\t")[0].substring(4);
+                if (!MapData.mapsById.containsKey(id)) {
+                    throw new RuntimeException("Unknown map: " + id);
+                }
+                mapData = MapData.mapsById.get(id).getData();
             } else if (line.startsWith("option mini-expansion-1")) {
                 towns.add(6);
                 towns.add(7);
                 towns.add(7);
                 towns.add(8);
-            } else if (line.matches("round \\d scoring: score\\d, .*")) {
-                final int scoring = line.split(" ")[3].charAt(5) - '0' - 1;
-                roundIndices.add(scoring);
+            } else if (line.matches("round [1-6] scoring: score[1-9]\\d*, .*")) {
+                final int scoring = line.split(" ")[3].charAt(5) - '0';
+                if (scoring > Round.snellmanMapping.length) {
+                    throw new RuntimeException("Undefined round: " + scoring);
+                }
+                roundIndices.add(scoring - 1);
             } else if (line.matches("removing tile bon\\d.*")) {
                 final int bon = Integer.parseInt(line.split("[ \\t]")[2].substring(3));
-                bons.remove((Integer) bon);
+                if (!bons.remove((Integer) bon)) {
+                    throw new RuntimeException("Unknown bon: " + bon);
+                }
             } else if (line.matches("player \\d: .*")) {
                 ++players;
                 final String name = line.split(" ")[2].split("\\t")[0];
@@ -173,7 +182,7 @@ public class GameData implements Serializable {
                     factionsIndices.add(0, allFactions.indexOf(faction));
                     factionMap.put(factionName, faction);
                 } else {
-                    System.err.println(factionName + " not found");
+                    throw new RuntimeException("Faction " + factionName + " not found");
                 }
             } else {
                 final String[] s = line.split("\\t");
@@ -203,7 +212,7 @@ public class GameData implements Serializable {
                     if (actionLine.equals("[opponent accepted power]")) continue;
                     if (actionLine.equals("[all opponents declined power]")) continue;
                     if (actionLine.matches("\\+\\dvp for (fire|water|earth|air)")) continue;
-                    if (actionLine.matches("\\+[1-9][0-9]*vp for network")) continue;
+                    if (actionLine.matches("\\+[1-9]\\d*vp for network")) continue;
                     if (actionLine.equals("score_resources")) continue;
                     final String[] actions = actionLine.split("\\. ");
                     for (String action : actions) {
