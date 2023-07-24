@@ -219,7 +219,7 @@ public class GameData implements Serializable {
                         final Pair pair = new Pair();
                         pair.faction = faction;
                         pair.action = action;
-                        if (Game.leechPattern.matcher(action).matches()) {
+                        if (Game.Parser.leechPattern.matcher(action).matches()) {
                             leechFeed.addLast(pair);
                         } else {
                             actionFeed.addLast(pair);

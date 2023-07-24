@@ -96,7 +96,7 @@ public class Game extends JPanel {
             rewind();
         } else {
             reset();
-            replay(gameData.actionFeed, gameData.leechFeed);
+            new Parser().replay(gameData.actionFeed, gameData.leechFeed);
         }
         addComponents();
     }
@@ -921,465 +921,466 @@ public class Game extends JPanel {
         refresh();
     }
 
+    class Parser {
+        private static final String cultRegex = "([Ff][Ii][Rr][Ee]|[Ww][Aa][Tt][Ee][Rr]|[Ee][Aa][Rr][Tt][Hh]|[Aa][Ii][Rr])";
+        private static final String hexRegex = "[A-Za-z][1-9][0-9]*";
+        private static final String resourceRegex = "([Pp][Ww]|[Ww]|[Cc]|[Pp]|[Vv][Pp])";
+        private static final Pattern buildPattern = Pattern.compile("[Bb][Uu][Ii][Ll][Dd] " + hexRegex);
+        private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] " + hexRegex + "( [Tt][Oo] .*)?");
+        public static final Pattern leechPattern = Pattern.compile("([Ll][Ee][Ee][Cc][Hh]|[Dd][Ee][Cc][Ll][Ii][Nn][Ee]) [1-9][0-9]* from [A-Za-z]*");
+        private static final Pattern cultStepPattern = Pattern.compile("\\+[1-9]*" + cultRegex);
+        private static final Pattern passPattern = Pattern.compile("[Pp][Aa][Ss][Ss]( [Bb][Oo][Nn][1-9][0-9]*)*");
+        private static final Pattern digPattern = Pattern.compile("[Dd][Ii][Gg] \\d");
+        private static final Pattern upgradePattern = Pattern.compile("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] " + hexRegex + " to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])");
+        private static final Pattern actionPattern = Pattern.compile("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6)");
+        private static final Pattern priestPattern = Pattern.compile("[Ss][Ee][Nn][Dd] [Pp] to " + cultRegex + "( for [1-3])*");
+        private static final Pattern favorPattern = Pattern.compile("\\+[Ff][Aa][Vv][1-9][0-9]*");
+        private static final Pattern townPattern = Pattern.compile("\\+[1-9]?[Tt][Ww][1-9]");
+        private static final Pattern burnPattern = Pattern.compile("[Bb][Uu][Rr][Nn] [1-9][0-9]*");
+        private static final Pattern bridgePattern = Pattern.compile("[Bb][Rr][Ii][Dd][Gg][Ee] " + hexRegex + ":" + hexRegex);
+        private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]* ?" + resourceRegex + " to [1-9][0-9]* ?" + resourceRegex);
+        private static final Pattern advancePattern = Pattern.compile("[Aa][Dd][Vv][Aa][Nn][Cc][Ee] ([Dd][Ii][Gg].*|[Ss][Hh][Ii][Pp].*)");
+        private static final Pattern forfeitAction = Pattern.compile("-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
+        private static final Pattern connectPattern = Pattern.compile("[Cc][Oo][Nn][Nn][Ee][Cc][Tt] [Rr][0-9]*");
+        private static final Pattern darklingPattern = Pattern.compile("\\+[1-9]? ?[Pp]");
 
-    private static final String cultRegex = "([Ff][Ii][Rr][Ee]|[Ww][Aa][Tt][Ee][Rr]|[Ee][Aa][Rr][Tt][Hh]|[Aa][Ii][Rr])";
-    private static final String hexRegex = "[A-Za-z][1-9][0-9]*";
-    private static final String resourceRegex = "([Pp][Ww]|[Ww]|[Cc]|[Pp]|[Vv][Pp])";
-    private static final Pattern buildPattern = Pattern.compile("[Bb][Uu][Ii][Ll][Dd] " + hexRegex);
-    private static final Pattern transformPattern = Pattern.compile("[Tt][Rr][Aa][Nn][Ss][Ff][Oo][Rr][Mm] " + hexRegex + "( [Tt][Oo] .*)?");
-    public static final Pattern leechPattern = Pattern.compile("([Ll][Ee][Ee][Cc][Hh]|[Dd][Ee][Cc][Ll][Ii][Nn][Ee]) [1-9][0-9]* from [A-Za-z]*");
-    private static final Pattern cultStepPattern = Pattern.compile("\\+[1-9]*" + cultRegex);
-    private static final Pattern passPattern = Pattern.compile("[Pp][Aa][Ss][Ss]( [Bb][Oo][Nn][1-9][0-9]*)*");
-    private static final Pattern digPattern = Pattern.compile("[Dd][Ii][Gg] \\d");
-    private static final Pattern upgradePattern = Pattern.compile("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] " + hexRegex + " to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])");
-    private static final Pattern actionPattern = Pattern.compile("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6)");
-    private static final Pattern priestPattern = Pattern.compile("[Ss][Ee][Nn][Dd] [Pp] to " + cultRegex + "( for [1-3])*");
-    private static final Pattern favorPattern = Pattern.compile("\\+[Ff][Aa][Vv][1-9][0-9]*");
-    private static final Pattern townPattern = Pattern.compile("\\+[1-9]?[Tt][Ww][1-9]");
-    private static final Pattern burnPattern = Pattern.compile("[Bb][Uu][Rr][Nn] [1-9][0-9]*");
-    private static final Pattern bridgePattern = Pattern.compile("[Bb][Rr][Ii][Dd][Gg][Ee] " + hexRegex + ":" + hexRegex);
-    private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]* ?" + resourceRegex + " to [1-9][0-9]* ?" + resourceRegex);
-    private static final Pattern advancePattern = Pattern.compile("[Aa][Dd][Vv][Aa][Nn][Cc][Ee] ([Dd][Ii][Gg].*|[Ss][Hh][Ii][Pp].*)");
-    private static final Pattern forfeitAction = Pattern.compile("-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
-    private static final Pattern connectPattern = Pattern.compile("[Cc][Oo][Nn][Nn][Ee][Cc][Tt] [Rr][0-9]*");
-    private static final Pattern darklingPattern = Pattern.compile("\\+[1-9]? ?[Pp]");
+        private int findCult(String cultName) {
+            for (int i = 0; i < 4; ++i) {
+                if (Cults.getCultName(i).equalsIgnoreCase(cultName)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
 
-    private int findCult(String cultName) {
-        for (int i = 0; i < 4; ++i) {
-            if (Cults.getCultName(i).equalsIgnoreCase(cultName)) {
-                return i;
+        public void replayLeech(Faction from) {
+            while (phase == Phase.LEECH) {
+                if (getCurrentPlayer() != null) {
+                    boolean found = false;
+                    final Iterator<GameData.Pair> it = leechFeed.iterator();
+                    while (it.hasNext()) {
+                        final GameData.Pair pair = it.next();
+                        if (pair.faction == getCurrentPlayer().getFaction()) {
+                            if (!leechPattern.matcher(pair.action).matches()) {
+                                throw new RuntimeException("Invalid leech");
+                            }
+                            final String[] s = pair.action.split(" ");
+                            final boolean accept = s[0].equalsIgnoreCase("Leech");
+                            final Faction faction = gameData.getFactions().stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(s[3])).findAny().orElse(null);
+                            if (faction == null) {
+                                throw new RuntimeException("Faction not found " + s[3]);
+                            }
+                            if (faction == from) {
+                                if (getCurrentPlayer().getPendingLeech() != Integer.parseInt(s[1])) {
+                                    // Silent decline
+                                    resolveAction(new LeechAction(false));
+                                    found = true;
+                                    break;
+                                }
+                                System.err.println(pair.faction.getName() + ": " + pair.action);
+                                resolveAction(new LeechAction(accept));
+                                it.remove();
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!found) {
+                        throw new RuntimeException("Leech not found");
+                    }
+                }
             }
         }
-        return -1;
-    }
 
-    public void replayLeech(Faction from) {
-        while (phase == Phase.LEECH) {
-            if (getCurrentPlayer() != null) {
-                boolean found = false;
-                final Iterator<GameData.Pair> it = leechFeed.iterator();
+        private Deque<GameData.Pair> leechFeed;
+        private Deque<GameData.Pair> actionFeed;
+        private Deque<String> actions;
+        int pendingDigging;
+        CultStepAction.Source pendingCultSource = null;
+        int counter = 0;
+
+        private void postponeActions() {
+            while (!actions.isEmpty()) {
+                final GameData.Pair pair = new GameData.Pair();
+                pair.faction = getCurrentPlayer().getFaction();
+                pair.action = actions.removeLast();
+                actionFeed.addFirst(pair);
+            }
+        }
+
+        private void replayAction(Action action) {
+            final Player player = getCurrentPlayer();
+            if (!resolveAction(action)) {
+                postponeActions();
+                if (phase == Phase.CONFIRM_ACTION) {
+                    final Faction faction = getCurrentPlayer().getFaction();
+                    confirmTurn();
+                    replayLeech(faction);
+                }
+                if (!actions.isEmpty()) {
+                    throw new RuntimeException("Action stack not cleared");
+                }
+                pendingDigging = 0;
+                pendingCultSource = null;
+                if (player != getCurrentPlayer()) {
+                    throw new RuntimeException("Player changed " + action);
+                }
+                if (!resolveAction(action)) {
+                    System.err.println("Failure " + action);
+                    counter = JMystica.maxReplayActionCount;
+                    return;
+                }
+            }
+            ++counter;
+            System.err.println(counter + " -- " + player.getFaction().getName() + ": " + action);
+        }
+
+        public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
+            if (actionFeed.isEmpty()) return;
+
+            this.actionFeed = actionFeed;
+            this.leechFeed = leechFeed;
+
+            importing = true;
+            int setupCompleteCount = 0;
+            while (getCurrentPlayer() != null) {
+                final Player player = getCurrentPlayer();
+                actions = new ArrayDeque<>();
+                final Iterator<GameData.Pair> it = actionFeed.iterator();
                 while (it.hasNext()) {
                     final GameData.Pair pair = it.next();
-                    if (pair.faction == getCurrentPlayer().getFaction()) {
-                        if (!leechPattern.matcher(pair.action).matches()) {
-                            throw new RuntimeException("Invalid leech");
-                        }
-                        final String[] s = pair.action.split(" ");
-                        final boolean accept = s[0].equalsIgnoreCase("Leech");
-                        final Faction faction = gameData.getFactions().stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(s[3])).findAny().orElse(null);
-                        if (faction == null) {
-                            throw new RuntimeException("Faction not found " + s[3]);
-                        }
-                        if (faction == from) {
-                            if (getCurrentPlayer().getPendingLeech() != Integer.parseInt(s[1])) {
-                                // Silent decline
-                                resolveAction(new LeechAction(false));
-                                found = true;
-                                break;
-                            }
-                            System.err.println(pair.faction.getName() + ": " + pair.action);
-                            resolveAction(new LeechAction(accept));
-                            it.remove();
-                            found = true;
-                            break;
-                        }
+                    if (pair.action.equalsIgnoreCase("done")) {
+                        it.remove();
+                        break;
+                    }
+                    if (pair.faction == player.getFaction()) {
+                        actions.addLast(pair.action);
+                        it.remove();
+                    } else if (!actions.isEmpty()) {
+                        break;
                     }
                 }
-                if (!found) {
-                    throw new RuntimeException("Leech not found");
-                }
-            }
-        }
-    }
-
-    private Deque<GameData.Pair> leechFeed;
-    private Deque<GameData.Pair> actionFeed;
-    private Deque<String> actions;
-    int pendingDigging;
-    CultStepAction.Source pendingCultSource = null;
-    int counter = 0;
-
-    private void postponeActions() {
-        while (!actions.isEmpty()) {
-            final GameData.Pair pair = new GameData.Pair();
-            pair.faction = getCurrentPlayer().getFaction();
-            pair.action = actions.removeLast();
-            actionFeed.addFirst(pair);
-        }
-    }
-
-    private void replayAction(Action action) {
-        final Player player = getCurrentPlayer();
-        if (!resolveAction(action)) {
-            postponeActions();
-            if (phase == Phase.CONFIRM_ACTION) {
-                final Faction faction = getCurrentPlayer().getFaction();
-                confirmTurn();
-                replayLeech(faction);
-            }
-            if (!actions.isEmpty()) {
-                throw new RuntimeException("Action stack not cleared");
-            }
-            pendingDigging = 0;
-            pendingCultSource = null;
-            if (player != getCurrentPlayer()) {
-                throw new RuntimeException("Player changed " + action);
-            }
-            if (!resolveAction(action)) {
-                System.err.println("Failure " + action);
-                counter = JMystica.maxReplayActionCount;
-                return;
-            }
-        }
-        ++counter;
-        System.err.println(counter + " -- " + player.getFaction().getName() + ": " + action);
-    }
-
-    public void replay(Deque<GameData.Pair> actionFeed, Deque<GameData.Pair> leechFeed) {
-        if (actionFeed.isEmpty()) return;
-
-        this.actionFeed = actionFeed;
-        this.leechFeed = leechFeed;
-
-        importing = true;
-        int setupCompleteCount = 0;
-        while (getCurrentPlayer() != null) {
-            final Player player = getCurrentPlayer();
-            actions = new ArrayDeque<>();
-            final Iterator<GameData.Pair> it = actionFeed.iterator();
-            while (it.hasNext()) {
-                final GameData.Pair pair = it.next();
-                if (pair.action.equalsIgnoreCase("done")) {
-                    it.remove();
-                    break;
-                }
-                if (pair.faction == player.getFaction()) {
-                    actions.addLast(pair.action);
-                    it.remove();
-                } else if (!actions.isEmpty()) {
-                    break;
-                }
-            }
-            //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
-            while (!actions.isEmpty()) {
-                final String action = actions.removeFirst();
-                if (buildPattern.matcher(action).matches()) {
-                    final Point p = mapPanel.getPoint(action.split(" ")[1]);
-                    if (setupCompleteCount == 0) {
-                        replayAction(new PlaceInitialDwellingAction(p.x, p.y));
-                    } else {
+                //System.err.println(getCurrentPlayer().getFaction().getName() + ": " + actions);
+                while (!actions.isEmpty()) {
+                    final String action = actions.removeFirst();
+                    if (buildPattern.matcher(action).matches()) {
+                        final Point p = mapPanel.getPoint(action.split(" ")[1]);
+                        if (setupCompleteCount == 0) {
+                            replayAction(new PlaceInitialDwellingAction(p.x, p.y));
+                        } else {
+                            final Hex hex = mapPanel.getHex(p.x, p.y);
+                            if (pendingDigging > 0 && !player.hasPendingBuild(hex)) {
+                                final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, player.getHomeType());
+                                if (pendingDigging < cost) {
+                                    throw new RuntimeException("Not enough spades");
+                                }
+                                pendingDigging -= cost;
+                                replayAction(new DigAction(p.x, p.y, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
+                            } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
+                                replayAction(new SandstormAction(p.x, p.y));
+                            }
+                            replayAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
+                        }
+                    } else if (transformPattern.matcher(action).matches()) {
+                        final String[] s = action.split(" ");
+                        final Point p = mapPanel.getPoint(s[1]);
                         final Hex hex = mapPanel.getHex(p.x, p.y);
-                        if (pendingDigging > 0 && !player.hasPendingBuild(hex)) {
-                            final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, player.getHomeType());
-                            if (pendingDigging < cost) {
-                                throw new RuntimeException("Not enough spades");
-                            }
-                            pendingDigging -= cost;
-                            replayAction(new DigAction(p.x, p.y, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
-                        } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
+                        if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                             replayAction(new SandstormAction(p.x, p.y));
-                        }
-                        replayAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
-                    }
-                } else if (transformPattern.matcher(action).matches()) {
-                    final String[] s = action.split(" ");
-                    final Point p = mapPanel.getPoint(s[1]);
-                    final Hex hex = mapPanel.getHex(p.x, p.y);
-                    if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
-                        replayAction(new SandstormAction(p.x, p.y));
-                    } else {
-                        final Hex.Type type;
-                        if (s.length <= 3) {
-                            final Hex.Type home = player.getHomeType();
-                            final Hex.Type hexType = hex.getType();
-                            if (hexType == home) {
-                                throw new RuntimeException("Invalid implicit transform");
-                            }
+                        } else {
+                            final Hex.Type type;
+                            if (s.length <= 3) {
+                                final Hex.Type home = player.getHomeType();
+                                final Hex.Type hexType = hex.getType();
+                                if (hexType == home) {
+                                    throw new RuntimeException("Invalid implicit transform");
+                                }
 
-                            if (player.getFaction() instanceof Giants) {
-                                type = home;
-                            } else {
-                                int delta = 0;
-                                for (int i = 1; i <= 3; ++i) {
-                                    if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
-                                        delta = Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
-                                        break;
+                                if (player.getFaction() instanceof Giants) {
+                                    type = home;
+                                } else {
+                                    int delta = 0;
+                                    for (int i = 1; i <= 3; ++i) {
+                                        if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
+                                            delta = Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
+                                            break;
+                                        }
                                     }
-                                }
-                                for (int i = 1; i <= 3; ++i) {
-                                    if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
-                                        delta = -Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
-                                        break;
+                                    for (int i = 1; i <= 3; ++i) {
+                                        if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
+                                            delta = -Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
+                                            break;
+                                        }
                                     }
+                                    final int ordinal = (hexType.ordinal() + delta + 7) % 7;
+                                    type = Hex.Type.values()[ordinal];
                                 }
-                                final int ordinal = (hexType.ordinal() + delta + 7) % 7;
-                                type = Hex.Type.values()[ordinal];
-                            }
-                        } else {
-                            String typeName = s[3].toUpperCase();
-                            final String finalTypeName = typeName.equals("GREY") ? "GRAY" : typeName;
-                            type = Arrays.stream(Hex.Type.values()).filter(h -> h.name().equals(finalTypeName)).findAny().orElse(null);
-                        }
-                        final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
-                        if (!resolvingCultSpades()) {
-                            if (pendingDigging < cost) {
-                                throw new RuntimeException("Not enough spades");
-                            }
-                            pendingDigging -= cost;
-                        }
-                        replayAction(new DigAction(p.x, p.y, type, mapPanel.getJumpableTiles(player).contains(hex)));
-                    }
-                } else if (passPattern.matcher(action).matches()) {
-                    final String[] s = action.split(" ");
-                    if (s.length == 1) {
-                        replayAction(new PassAction());
-                    } else {
-                        final int bon = Integer.parseInt(action.split(" ")[1].substring(3));
-                        boolean found = false;
-                        for (int idx = 0; idx < bons.size(); ++idx) {
-                            if (bons.get(idx) == bon) {
-                                replayAction(new SelectBonAction(idx));
-                                ++setupCompleteCount;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) throw new RuntimeException("Bon not available " + bon);
-                    }
-                } else if (digPattern.matcher(action).matches()) {
-                    pendingDigging += Integer.parseInt(action.split(" ")[1]);
-                } else if (upgradePattern.matcher(action).matches()) {
-                    final Point p = mapPanel.getPoint(action.split(" ")[1]);
-                    final String type = action.split(" ")[3];
-                    Hex.Structure structure = null;
-                    if (type.equalsIgnoreCase("TP")) structure = Hex.Structure.TRADING_POST;
-                    if (type.equalsIgnoreCase("TE")) structure = Hex.Structure.TEMPLE;
-                    if (type.equalsIgnoreCase("SH")) structure = Hex.Structure.STRONGHOLD;
-                    if (type.equalsIgnoreCase("SA")) structure = Hex.Structure.SANCTUARY;
-                    replayAction(new BuildAction(p.x, p.y, structure));
-                    if (structure == Hex.Structure.STRONGHOLD && player.getFaction() instanceof Halflings) {
-                        pendingDigging = 3;
-                    }
-                } else if (actionPattern.matcher(action).matches()) {
-                    final String[] s = action.split(" ");
-                    final String str = s[1].toLowerCase();
-                    if (str.startsWith("act")) {
-                        switch (str.charAt(3)) {
-                            case '1':
-                            case '2':
-                            case '3':
-                            case '4':
-                            case '5':
-                            case '6':
-                                if (str.charAt(3) == '5' || str.charAt(3) == '6') {
-                                    pendingDigging = str.charAt(3) - '4';
-                                }
-                                replayAction(new SelectPowerActionAction(str.charAt(3) - '0'));
-                                break;
-                            case 'a':
-                                pendingCultSource = CultStepAction.Source.ACTA;
-                                break;
-                            case 'c':
-                                replayAction(new ChaosMagiciansDoubleAction());
-                                break;
-                            case 'e':
-                                replayAction(new EngineersBridgeAction());
-                                break;
-                            case 'g':
-                                pendingDigging = 2;
-                                replayAction(new SpadeAction(SpadeAction.Source.ACTG));
-                                break;
-                            case 'n':
-                                replayAction(new NomadsSandstormAction());
-                                break;
-                            case 's':
-                                replayAction(new SwarmlingsFreeTradingPostAction());
-                                break;
-                            case 'w':
-                                replayAction(new WitchesFreeDwellingAction());
-                                break;
-                        }
-                    } else if (str.startsWith("bon")) {
-                        switch (str.charAt(3)) {
-                            case '1' -> {
-                                pendingDigging = 1;
-                                replayAction(new SpadeAction(SpadeAction.Source.BON1));
-                            }
-                            case '2' -> pendingCultSource = CultStepAction.Source.BON2;
-                        }
-                    } else {
-                        pendingCultSource = CultStepAction.Source.FAV6;
-                    }
-                } else if (cultStepPattern.matcher(action).matches()) {
-                    if (pendingCultSource == null) {
-                        if (player.getFaction() instanceof Cultists) {
-                            postponeActions();
-                            if (phase != Phase.ACTIONS) {
-                                final GameData.Pair pair = new GameData.Pair();
-                                pair.faction = player.getFaction();
-                                pair.action = action;
-                                actionFeed.addFirst(pair);
-                                break;
                             } else {
-                                pendingCultSource = CultStepAction.Source.LEECH;
+                                String typeName = s[3].toUpperCase();
+                                final String finalTypeName = typeName.equals("GREY") ? "GRAY" : typeName;
+                                type = Arrays.stream(Hex.Type.values()).filter(h -> h.name().equals(finalTypeName)).findAny().orElse(null);
+                            }
+                            final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
+                            if (!resolvingCultSpades()) {
+                                if (pendingDigging < cost) {
+                                    throw new RuntimeException("Not enough spades");
+                                }
+                                pendingDigging -= cost;
+                            }
+                            replayAction(new DigAction(p.x, p.y, type, mapPanel.getJumpableTiles(player).contains(hex)));
+                        }
+                    } else if (passPattern.matcher(action).matches()) {
+                        final String[] s = action.split(" ");
+                        if (s.length == 1) {
+                            replayAction(new PassAction());
+                        } else {
+                            final int bon = Integer.parseInt(action.split(" ")[1].substring(3));
+                            boolean found = false;
+                            for (int idx = 0; idx < bons.size(); ++idx) {
+                                if (bons.get(idx) == bon) {
+                                    replayAction(new SelectBonAction(idx));
+                                    ++setupCompleteCount;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) throw new RuntimeException("Bon not available " + bon);
+                        }
+                    } else if (digPattern.matcher(action).matches()) {
+                        pendingDigging += Integer.parseInt(action.split(" ")[1]);
+                    } else if (upgradePattern.matcher(action).matches()) {
+                        final Point p = mapPanel.getPoint(action.split(" ")[1]);
+                        final String type = action.split(" ")[3];
+                        Hex.Structure structure = null;
+                        if (type.equalsIgnoreCase("TP")) structure = Hex.Structure.TRADING_POST;
+                        if (type.equalsIgnoreCase("TE")) structure = Hex.Structure.TEMPLE;
+                        if (type.equalsIgnoreCase("SH")) structure = Hex.Structure.STRONGHOLD;
+                        if (type.equalsIgnoreCase("SA")) structure = Hex.Structure.SANCTUARY;
+                        replayAction(new BuildAction(p.x, p.y, structure));
+                        if (structure == Hex.Structure.STRONGHOLD && player.getFaction() instanceof Halflings) {
+                            pendingDigging = 3;
+                        }
+                    } else if (actionPattern.matcher(action).matches()) {
+                        final String[] s = action.split(" ");
+                        final String str = s[1].toLowerCase();
+                        if (str.startsWith("act")) {
+                            switch (str.charAt(3)) {
+                                case '1':
+                                case '2':
+                                case '3':
+                                case '4':
+                                case '5':
+                                case '6':
+                                    if (str.charAt(3) == '5' || str.charAt(3) == '6') {
+                                        pendingDigging = str.charAt(3) - '4';
+                                    }
+                                    replayAction(new SelectPowerActionAction(str.charAt(3) - '0'));
+                                    break;
+                                case 'a':
+                                    pendingCultSource = CultStepAction.Source.ACTA;
+                                    break;
+                                case 'c':
+                                    replayAction(new ChaosMagiciansDoubleAction());
+                                    break;
+                                case 'e':
+                                    replayAction(new EngineersBridgeAction());
+                                    break;
+                                case 'g':
+                                    pendingDigging = 2;
+                                    replayAction(new SpadeAction(SpadeAction.Source.ACTG));
+                                    break;
+                                case 'n':
+                                    replayAction(new NomadsSandstormAction());
+                                    break;
+                                case 's':
+                                    replayAction(new SwarmlingsFreeTradingPostAction());
+                                    break;
+                                case 'w':
+                                    replayAction(new WitchesFreeDwellingAction());
+                                    break;
+                            }
+                        } else if (str.startsWith("bon")) {
+                            switch (str.charAt(3)) {
+                                case '1' -> {
+                                    pendingDigging = 1;
+                                    replayAction(new SpadeAction(SpadeAction.Source.BON1));
+                                }
+                                case '2' -> pendingCultSource = CultStepAction.Source.BON2;
                             }
                         } else {
-                            throw new RuntimeException("Unknown cult step source");
+                            pendingCultSource = CultStepAction.Source.FAV6;
                         }
-                    }
-                    int cultIdx = 1;
-                    int amount = 1;
-                    if (Character.isDigit(action.charAt(1))) {
-                        amount = 2;
-                        cultIdx = 2;
-                    }
-                    final int cult = findCult(action.substring(cultIdx));
-                    replayAction(new CultStepAction(cult, amount, pendingCultSource));
-                    pendingCultSource = null;
-                } else if (priestPattern.matcher(action).matches()) {
-                    final String[] s = action.split(" ");
-                    final int cult = findCult(s[3]);
-                    int steps = 1;
-                    if (s.length == 4) {
-                        if (cultPanel.isCultSpotFree(cult, 3)) steps = 3;
-                        else if (cultPanel.isCultSpotFree(cult, 2)) steps = 2;
-                    } else {
-                        steps = Integer.parseInt(s[5]);
-                    }
-                    replayAction(new PriestToCultAction(cult, steps));
-                } else if (favorPattern.matcher(action).matches()) {
-                    replayAction(new SelectFavAction(Integer.parseInt(action.substring(4))));
-                } else if (townPattern.matcher(action).matches()) {
-                    int amount = 1;
-                    int idx = 3;
-                    if (Character.isDigit(action.charAt(1))) {
-                        amount = action.charAt(1) - '0';
-                        ++idx;
-                    }
-                    while (amount-- > 0) {
-                        replayAction(new SelectTownAction(Integer.parseInt(action.substring(idx))));
-                    }
-                } else if (burnPattern.matcher(action).matches()) {
-                    replayAction(new BurnAction(Integer.parseInt(action.split(" ")[1])));
-                } else if (bridgePattern.matcher(action).matches()) {
-                    final String[] s = action.split(" ");
-                    final Point p1 = mapPanel.getPoint(s[1].split(":")[0]);
-                    final Point p2 = mapPanel.getPoint(s[1].split(":")[1]);
-                    replayAction(new PlaceBridgeAction(p1.x, p1.y, p2.x, p2.y));
-                } else if (convertPattern.matcher(action).matches()) {
-                    String s = action.substring("convert".length()).trim();
-                    int idx = 0;
-                    int fromCount = 0;
-                    while (Character.isDigit(s.charAt(idx))) {
-                        fromCount = fromCount * 10 + s.charAt(idx) - '0';
-                        ++idx;
-                    }
-                    while (Character.isWhitespace(s.charAt(idx))) {
-                        ++idx;
-                    }
-                    s = s.substring(idx);
-                    idx = s.indexOf(' ');
-                    String from = s.substring(0, idx);
-                    s = s.substring(idx + 4); // skip " to "
-
-                    idx = 0;
-                    int toCount = 0;
-                    while (Character.isDigit(s.charAt(idx))) {
-                        toCount = toCount * 10 + s.charAt(idx) - '0';
-                        ++idx;
-                    }
-                    while (Character.isWhitespace(s.charAt(idx))) {
-                        ++idx;
-                    }
-
-                    String to = s.substring(idx);
-                    int workersToPriests = 0;
-                    int priestsToWorkers = 0;
-                    int workersToCoins = 0;
-                    int pointsToCoins = 0;
-                    int pointsFromCoins = 0;
-                    Resources power = Resources.zero;
-                    if (from.equalsIgnoreCase("pw")) {
-                        if (to.equalsIgnoreCase("p")) {
-                            power = Resources.fromPriests(toCount);
-                        } else if (to.equalsIgnoreCase("w")) {
-                            power = Resources.fromWorkers(toCount);
-                        } else if (to.equalsIgnoreCase("c")) {
-                            power = Resources.fromCoins(toCount);
+                    } else if (cultStepPattern.matcher(action).matches()) {
+                        if (pendingCultSource == null) {
+                            if (player.getFaction() instanceof Cultists) {
+                                postponeActions();
+                                if (phase != Phase.ACTIONS) {
+                                    final GameData.Pair pair = new GameData.Pair();
+                                    pair.faction = player.getFaction();
+                                    pair.action = action;
+                                    actionFeed.addFirst(pair);
+                                    break;
+                                } else {
+                                    pendingCultSource = CultStepAction.Source.LEECH;
+                                }
+                            } else {
+                                throw new RuntimeException("Unknown cult step source");
+                            }
                         }
-                    } else if (from.equalsIgnoreCase("p")) {
-                        priestsToWorkers = fromCount;
-                        if (to.equalsIgnoreCase("c")) {
-                            workersToCoins = fromCount;
+                        int cultIdx = 1;
+                        int amount = 1;
+                        if (Character.isDigit(action.charAt(1))) {
+                            amount = 2;
+                            cultIdx = 2;
                         }
-                    }
-                    else if (from.equalsIgnoreCase("w")) {
-                        if (to.equalsIgnoreCase("p")) {
-                            workersToPriests = fromCount;
+                        final int cult = findCult(action.substring(cultIdx));
+                        replayAction(new CultStepAction(cult, amount, pendingCultSource));
+                        pendingCultSource = null;
+                    } else if (priestPattern.matcher(action).matches()) {
+                        final String[] s = action.split(" ");
+                        final int cult = findCult(s[3]);
+                        int steps = 1;
+                        if (s.length == 4) {
+                            if (cultPanel.isCultSpotFree(cult, 3)) steps = 3;
+                            else if (cultPanel.isCultSpotFree(cult, 2)) steps = 2;
                         } else {
-                            workersToCoins = fromCount;
+                            steps = Integer.parseInt(s[5]);
                         }
-                    }
-                    else if (from.equalsIgnoreCase("vp")) {
-                        pointsToCoins = fromCount;
-                    }
-                    if (to.equalsIgnoreCase("vp")) {
-                        pointsFromCoins = toCount;
-                    }
-                    if (workersToPriests > 0) {
-                        replayAction(new DarklingsConvertAction(workersToPriests));
+                        replayAction(new PriestToCultAction(cult, steps));
+                    } else if (favorPattern.matcher(action).matches()) {
+                        replayAction(new SelectFavAction(Integer.parseInt(action.substring(4))));
+                    } else if (townPattern.matcher(action).matches()) {
+                        int amount = 1;
+                        int idx = 3;
+                        if (Character.isDigit(action.charAt(1))) {
+                            amount = action.charAt(1) - '0';
+                            ++idx;
+                        }
+                        while (amount-- > 0) {
+                            replayAction(new SelectTownAction(Integer.parseInt(action.substring(idx))));
+                        }
+                    } else if (burnPattern.matcher(action).matches()) {
+                        replayAction(new BurnAction(Integer.parseInt(action.split(" ")[1])));
+                    } else if (bridgePattern.matcher(action).matches()) {
+                        final String[] s = action.split(" ");
+                        final Point p1 = mapPanel.getPoint(s[1].split(":")[0]);
+                        final Point p2 = mapPanel.getPoint(s[1].split(":")[1]);
+                        replayAction(new PlaceBridgeAction(p1.x, p1.y, p2.x, p2.y));
+                    } else if (convertPattern.matcher(action).matches()) {
+                        String s = action.substring("convert".length()).trim();
+                        int idx = 0;
+                        int fromCount = 0;
+                        while (Character.isDigit(s.charAt(idx))) {
+                            fromCount = fromCount * 10 + s.charAt(idx) - '0';
+                            ++idx;
+                        }
+                        while (Character.isWhitespace(s.charAt(idx))) {
+                            ++idx;
+                        }
+                        s = s.substring(idx);
+                        idx = s.indexOf(' ');
+                        String from = s.substring(0, idx);
+                        s = s.substring(idx + 4); // skip " to "
+
+                        idx = 0;
+                        int toCount = 0;
+                        while (Character.isDigit(s.charAt(idx))) {
+                            toCount = toCount * 10 + s.charAt(idx) - '0';
+                            ++idx;
+                        }
+                        while (Character.isWhitespace(s.charAt(idx))) {
+                            ++idx;
+                        }
+
+                        String to = s.substring(idx);
+                        int workersToPriests = 0;
+                        int priestsToWorkers = 0;
+                        int workersToCoins = 0;
+                        int pointsToCoins = 0;
+                        int pointsFromCoins = 0;
+                        Resources power = Resources.zero;
+                        if (from.equalsIgnoreCase("pw")) {
+                            if (to.equalsIgnoreCase("p")) {
+                                power = Resources.fromPriests(toCount);
+                            } else if (to.equalsIgnoreCase("w")) {
+                                power = Resources.fromWorkers(toCount);
+                            } else if (to.equalsIgnoreCase("c")) {
+                                power = Resources.fromCoins(toCount);
+                            }
+                        } else if (from.equalsIgnoreCase("p")) {
+                            priestsToWorkers = fromCount;
+                            if (to.equalsIgnoreCase("c")) {
+                                workersToCoins = fromCount;
+                            }
+                        }
+                        else if (from.equalsIgnoreCase("w")) {
+                            if (to.equalsIgnoreCase("p")) {
+                                workersToPriests = fromCount;
+                            } else {
+                                workersToCoins = fromCount;
+                            }
+                        }
+                        else if (from.equalsIgnoreCase("vp")) {
+                            pointsToCoins = fromCount;
+                        }
+                        if (to.equalsIgnoreCase("vp")) {
+                            pointsFromCoins = toCount;
+                        }
+                        if (workersToPriests > 0) {
+                            replayAction(new DarklingsConvertAction(workersToPriests));
+                        } else {
+                            replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins, pointsFromCoins));
+                        }
+                        pendingDigging = 0;
+                    } else if (advancePattern.matcher(action).matches()) {
+                        final String[] s = action.split(" ");
+                        replayAction(new AdvanceAction(s[1].toLowerCase().startsWith("dig")));
+                    } else if (forfeitAction.matcher(action).matches()) {
+                        replayAction(new ForfeitAction());
+                    } else if (connectPattern.matcher(action).matches()) {
+                        final String id = action.split(" ")[1];
+                        final Point p = mapPanel.getPoint(id);
+                        replayAction(new MermaidsTownAction(p.x, p.y));
+                    } else if (darklingPattern.matcher(action).matches()) {
+                        int count = 1;
+                        for (int i = 0; i < action.length(); ++i) {
+                            if (Character.isDigit(action.charAt(i))) {
+                                count = action.charAt(i) - '0';
+                                break;
+                            }
+                        }
+                        replayAction(new DarklingsConvertAction(count));
                     } else {
-                        replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins, pointsFromCoins));
+                        System.err.println("Unhandled action: " + action);
+                        break;
                     }
-                    pendingDigging = 0;
-                } else if (advancePattern.matcher(action).matches()) {
-                    final String[] s = action.split(" ");
-                    replayAction(new AdvanceAction(s[1].toLowerCase().startsWith("dig")));
-                } else if (forfeitAction.matcher(action).matches()) {
-                    replayAction(new ForfeitAction());
-                } else if (connectPattern.matcher(action).matches()) {
-                    final String id = action.split(" ")[1];
-                    final Point p = mapPanel.getPoint(id);
-                    replayAction(new MermaidsTownAction(p.x, p.y));
-                } else if (darklingPattern.matcher(action).matches()) {
-                    int count = 1;
-                    for (int i = 0; i < action.length(); ++i) {
-                        if (Character.isDigit(action.charAt(i))) {
-                            count = action.charAt(i) - '0';
-                            break;
+                    if (player.getPendingActions().isEmpty() && pendingCultSource == null && pendingDigging == 0) {
+                        if (!actions.isEmpty()) {
+                            if (!convertPattern.matcher(actions.getFirst()).matches() && !burnPattern.matcher(actions.getFirst()).matches() && !connectPattern.matcher(actions.getFirst()).matches()) {
+                                postponeActions();
+                            }
                         }
                     }
-                    replayAction(new DarklingsConvertAction(count));
-                } else {
-                    System.err.println("Unhandled action: " + action);
+                }
+                if (phase == Phase.CONFIRM_ACTION) {
+                    final Faction faction = player.getFaction();
+                    confirmTurn();
+                    replayLeech(faction);
+                }
+                if (counter >= JMystica.maxReplayActionCount) {
                     break;
                 }
-                if (player.getPendingActions().isEmpty() && pendingCultSource == null && pendingDigging == 0) {
-                    if (!actions.isEmpty()) {
-                        if (!convertPattern.matcher(actions.getFirst()).matches() && !burnPattern.matcher(actions.getFirst()).matches() && !connectPattern.matcher(actions.getFirst()).matches()) {
-                            postponeActions();
-                        }
-                    }
+                if (!actions.isEmpty()) {
+                    throw new RuntimeException("Action stack not cleared");
+                }
+                pendingDigging = 0;
+                pendingCultSource = null;
+                if (phase == Phase.END) {
+                    break;
                 }
             }
-            if (phase == Phase.CONFIRM_ACTION) {
-                final Faction faction = player.getFaction();
-                confirmTurn();
-                replayLeech(faction);
-            }
-            if (counter >= JMystica.maxReplayActionCount) {
-                break;
-            }
-            if (!actions.isEmpty()) {
-                throw new RuntimeException("Action stack not cleared");
-            }
-            pendingDigging = 0;
-            pendingCultSource = null;
-            if (phase == Phase.END) {
-                break;
-            }
+            importing = false;
         }
-        importing = false;
     }
 
     public int[] getVictoryPoints() {
