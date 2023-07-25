@@ -71,6 +71,7 @@ public class Player extends JPanel {
     public boolean pendingSandstorm;
     public boolean pendingFreeTradingPost;
     public boolean pendingFreeDwelling;
+    public final boolean[] maxedCults = new boolean[4];
     private boolean rangeUsedForDigging;
     public boolean allowExtraSpades;
 
@@ -125,6 +126,7 @@ public class Player extends JPanel {
         pendingSandstorm = false;
         pendingFreeTradingPost = false;
         pendingFreeDwelling = false;
+        for (int i = 0; i < 4; ++i) maxedCults[i] = false;
         allowExtraSpades = false;
         rangeUsedForDigging = false;
         dwellings = 0;
@@ -153,6 +155,10 @@ public class Player extends JPanel {
 
     public int getCultSteps(int cult) {
         return cultSteps[cult];
+    }
+
+    public int getRemainingKeys() {
+        return keys;
     }
 
     public Faction getFaction() {
@@ -509,7 +515,16 @@ public class Player extends JPanel {
 
     public void addCultSteps(int[] cults) {
         for (int i = 0; i < 4; ++i) {
+            if (cultSteps[i] < 10 && cultSteps[i] + cults[i] >= 10 && !game.cultOccupied((i))) {
+                maxedCults[i] = true;
+            }
             cultSteps[i] = addPowerFromCultSteps(cultSteps[i], cults[i], game.cultOccupied(i));
+        }
+    }
+
+    public void setCultSteps(int[] cults) {
+        for (int i = 0; i < 4; ++i) {
+            cultSteps[i] = cults[i];
         }
     }
 

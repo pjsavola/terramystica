@@ -603,6 +603,7 @@ public class Game extends JPanel {
                     resolveAction(new ForfeitAction());
                 }
                 getCurrentPlayer().pendingBuilds = null;
+                for (int i = 0; i < 4; ++i) getCurrentPlayer().maxedCults[i] = false;
                 phase = factionsPicked ? Phase.ACTIONS : Phase.PICK_FACTIONS;
                 endTurn();
                 refresh();
