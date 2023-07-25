@@ -122,7 +122,7 @@ public class Pool extends JPanel {
             g.drawString("Pool", x, y + 12);
             y += 16;
         }
-        final int itemsPerRow = player == null ? 10 : 7;
+        final int itemsPerRow = player == null ? 10 : 6;
         int items = 0;
         for (int i = 0; i < bons.size(); ++i) {
             final int bon = bons.get(i);
@@ -170,7 +170,7 @@ public class Pool extends JPanel {
 
     @Override
     public Dimension getPreferredSize() {
-        final int itemsPerRow = player == null ? 10 : 7;
+        final int itemsPerRow = player == null ? 10 : 6;
         final int itemCount = (int) (bons.size() + favs.stream().distinct().count() + towns.stream().distinct().count());
         final int cols = Math.min(itemCount, itemsPerRow);
         final int rows = (itemCount - 1) / itemsPerRow + 1;

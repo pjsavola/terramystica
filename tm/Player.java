@@ -899,7 +899,7 @@ public class Player extends JPanel {
                     factionColor = new Color(factionColor.getRed(), factionColor.getGreen(), factionColor.getBlue(), 50);
                 }
                 g.setColor(factionColor);
-                g.fillRect(dx, dy, 300, 16);
+                g.fillRect(dx, dy, 400, 16);
                 g.setColor(faction.getHomeType().getFontColor());
                 String factionName = faction.getName();
                 if (!name.isEmpty()) {
@@ -982,11 +982,11 @@ public class Player extends JPanel {
 
         @Override
         public Dimension getPreferredSize() {
-            final int itemsPerRow = 7;
+            final int itemsPerRow = 6;
             final int itemCount = (int) (bons.size() + favs.stream().distinct().count() + towns.stream().distinct().count());
             final int rows = (itemCount - 1) / itemsPerRow + 1;
             final int minHeight = 20 + 105 * rows;
-            return new Dimension(400, Math.max(128, minHeight));
+            return new Dimension(410, Math.max(128, minHeight));
         }
     }
 
