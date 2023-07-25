@@ -42,14 +42,14 @@ public class Cults extends JPanel {
 
                 final int px = e.getX();
                 final int py = e.getY();
-                if (py >= 540) {
+                if (py >= 540 && e.getButton() == MouseEvent.BUTTON1) {
                     for (int cult = 0; cult < 4; ++cult) {
                         if (px < (cult + 1) * 50) {
                             game.resolveAction(new PriestToCultAction(cult, getSpotOptions(cult).get(0)));
                             break;
                         }
                     }
-                } else if (py <= 20) {
+                } else if (py <= 20 || (py >= 540 && e.getButton() == MouseEvent.BUTTON3)) {
                     for (int cult = 0; cult < 4; ++cult) {
                         if (px < (cult + 1) * 50) {
                             final List<Integer> options = getSpotOptions(cult);
