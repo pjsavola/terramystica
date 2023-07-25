@@ -59,6 +59,7 @@ public class Game extends JPanel {
     boolean importing;
 
     JMenu[] menus;
+    boolean packNeeded;
 
     private final JFrame frame;
 
@@ -117,6 +118,7 @@ public class Game extends JPanel {
         mapPanel.reset(mapData);
         bridgeEnd = null;
         pendingTownPlacement = false;
+        packNeeded = false;
 
         favs.clear();
         IntStream.range(1, 5).boxed().forEach(favs::add);
@@ -604,8 +606,6 @@ public class Game extends JPanel {
                                     choices[i] = cultChoice[i].isSelected();
                                 }
                                 resolveAction(new ChooseMaxedCultsAction(choices));
-                            } else {
-                                resolveAction(new ForfeitAction());
                             }
                         }
                     }
@@ -805,7 +805,12 @@ public class Game extends JPanel {
         }
         final Set<Hex> clickables = getClickableHexes();
         mapPanel.getAllHexes().forEach(h -> h.setHighlight(clickables.contains(h)));
-        repaint();
+        if (packNeeded) {
+            frame.pack();
+            packNeeded = false;
+        } else {
+            repaint();
+        }
     }
 
     public void bridgePlaced(Bridge bridge) {

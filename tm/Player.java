@@ -215,7 +215,7 @@ public class Player extends JPanel {
         ownedFavors[number - 1] = true;
         --pendingFavors;
         favs.add(number);
-        pool.setSize(pool.getPreferredSize());
+        refreshSize();
     }
 
     public boolean canAddFavor(int number) {
@@ -390,7 +390,7 @@ public class Player extends JPanel {
         points += round.town;
         towns.add(number);
         --pendingTowns;
-        pool.setSize(pool.getPreferredSize());
+        refreshSize();
     }
 
     public void convert(Resources r) {
@@ -816,7 +816,7 @@ public class Player extends JPanel {
     public int pickBon(int newBon, int coins) {
         if (bons.isEmpty()) {
             bons.add(0);
-            pool.setSize(pool.getPreferredSize());
+            refreshSize();
         }
         final int oldBon = bons.set(0, newBon);
         this.coins += coins;
@@ -825,7 +825,7 @@ public class Player extends JPanel {
 
     public int removeBon() {
         final int bon = bons.remove(0);
-        pool.setSize(pool.getPreferredSize());
+        refreshSize();
         return bon;
     }
 
@@ -1061,5 +1061,16 @@ public class Player extends JPanel {
     @Override
     public String toString() {
         return faction == null ? name : faction.getName();
+    }
+
+    public void refreshSize() {
+        final Dimension oldDim = pool.getSize();
+        final Dimension newDim = pool.getPreferredSize();
+        if (oldDim.getHeight() != newDim.getHeight()) {
+            game.packNeeded = true;
+        }
+        if (!oldDim.equals(newDim)) {
+            pool.setSize(newDim);
+        }
     }
 }
