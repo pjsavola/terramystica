@@ -1032,6 +1032,9 @@ public class Player extends JPanel {
                 case SANDSTORM -> pendingSandstorm = false;
                 case FREE_TP -> pendingFreeTradingPost = false;
                 case FREE_D -> pendingFreeDwelling = false;
+                case CHOOSE_CULTS -> {
+                    for (int i = 0; i < 4; ++i) maxedCults[i] = false;
+                }
             }
         }
     }

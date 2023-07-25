@@ -35,7 +35,7 @@ public class ChooseMaxedCultsAction extends Action {
                 }
             }
         }
-        return neededKeys > usedKeys;
+        return usedKeys > 0 && neededKeys > usedKeys;
     }
 
     @Override
