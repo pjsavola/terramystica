@@ -1016,7 +1016,7 @@ public class Player extends JPanel {
         if (pendingSandstorm) result.add(PendingType.SANDSTORM);
         if (pendingFreeTradingPost) result.add(PendingType.FREE_TP);
         if (pendingFreeDwelling) result.add(PendingType.FREE_D);
-        if (ChooseMaxedCultsAction.actionNeeded(game)) result.add(PendingType.CHOOSE_CULTS);
+        if (ChooseMaxedCultsAction.actionNeeded(game) && pendingTowns == 0 && pendingFavors == 0) result.add(PendingType.CHOOSE_CULTS);
         return result;
     }
 

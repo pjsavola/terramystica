@@ -7,6 +7,7 @@ import tm.faction.*;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
 import java.io.*;
 import java.util.*;
@@ -584,8 +585,8 @@ public class Game extends JPanel {
                     endTurn();
                 }
             }
-            chooseCultToMax();
             refresh();
+            chooseCultToMax();
             return true;
         }
         if (rewinding || importing) {
@@ -1462,29 +1463,41 @@ public class Game extends JPanel {
     public void chooseCultToMax() {
         if (!rewinding && !importing && phase == Phase.CONFIRM_ACTION) {
             final Player player = getCurrentPlayer();
-            if (player.getPendingActions().contains(Player.PendingType.CHOOSE_CULTS)) {
-                final JRadioButton[] cultChoice = new JRadioButton[4];
+            final Set<Player.PendingType> types = player.getPendingActions();
+            if (types.contains(Player.PendingType.CHOOSE_CULTS)) {
+                final List<JRadioButton> buttons = new ArrayList<>();
                 final Deque<JRadioButton> selectedButtons = new ArrayDeque<>();
+                final ButtonGroup group = new ButtonGroup();
                 for (int i = 0; i < 4; ++i) {
-                    final JRadioButton button = new JRadioButton(Cults.getCultName(i));
-                    button.setSelected(player.getCultSteps(i) >= 10);
                     if (player.maxedCults[i]) {
-                        selectedButtons.add(button);
-                    }
-                    button.addChangeListener(l -> {
-                        if (button.isSelected()) {
-                            selectedButtons.removeFirst();
-                            selectedButtons.addLast(button);
+                        final JRadioButton button = new JRadioButton(Cults.getCultName(i));
+                        button.setSelected(player.getCultSteps(i) >= 10);
+                        if (player.getCultSteps(i) >= 10) {
+                            selectedButtons.add(button);
                         }
-                    });
-                    cultChoice[i] = button;
+                        button.addItemListener(l -> {
+                            if (l.getStateChange() == ItemEvent.SELECTED) {
+
+                            } else if (l.getStateChange() == ItemEvent.DESELECTED) {
+
+                            }
+                        });
+                        buttons.add(button);
+                        group.add(button);
+                    }
                 }
-                Object[] message = { "Choose " + selectedButtons.size() + " cults to max", cultChoice[0], cultChoice[1], cultChoice[2], cultChoice[3] };
+                // TODO: Scroll up so that cults are visible
+                final Object[] message = new Object[1 + buttons.size()];
+                message[0] = "Choose " + selectedButtons.size() + " cults to max";
+                for (int i = 0; i < buttons.size(); ++i) message[i + 1] = buttons.get(i);
                 final int option = JOptionPane.showConfirmDialog(this, message, "Choose Cults to max", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
                 if (option == JOptionPane.OK_OPTION) {
                     final boolean[] choices = new boolean[4];
+                    int choice = 0;
                     for (int i = 0; i < 4; ++i) {
-                        choices[i] = cultChoice[i].isSelected();
+                        if (player.maxedCults[i]) {
+                            choices[i] = buttons.get(choice++).isSelected();
+                        }
                     }
                     resolveAction(new ChooseMaxedCultsAction(choices));
                 }

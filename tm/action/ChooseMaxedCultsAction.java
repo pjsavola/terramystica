@@ -66,6 +66,7 @@ public class ChooseMaxedCultsAction extends Action {
         for (int i = 0; i < 4; ++i) {
             if (player.maxedCults[i]) {
                 newSteps[i] = cultsToMax[i] ? 10 : 9;
+                player.maxedCults[i] = false;
             } else {
                 newSteps[i] = player.getCultSteps(i);
             }
