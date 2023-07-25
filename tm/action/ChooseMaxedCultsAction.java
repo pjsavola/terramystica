@@ -17,7 +17,25 @@ public class ChooseMaxedCultsAction extends Action {
 
     @Override
     public boolean validatePhase() {
-        return game.phase == Game.Phase.CONFIRM_ACTION;
+        return game.phase == Game.Phase.CONFIRM_ACTION && player.getPendingActions().contains(Player.PendingType.CHOOSE_CULTS);
+    }
+
+    public static boolean actionNeeded(Game game) {
+        final Player player = game.getCurrentPlayer();
+        if (player.getRemainingKeys() > 0) {
+            return false;
+        }
+        int usedKeys = 0;
+        int neededKeys = 0;
+        for (int i = 0; i < 4; ++i) {
+            if (player.maxedCults[i]) {
+                ++neededKeys;
+                if (player.getCultSteps(i) >= 10) {
+                    ++usedKeys;
+                }
+            }
+        }
+        return neededKeys > usedKeys;
     }
 
     @Override

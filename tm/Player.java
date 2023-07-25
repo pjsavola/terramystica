@@ -23,7 +23,8 @@ public class Player extends JPanel {
         BUILD("Build Dwelling", true),
         SANDSTORM("Sandstorm", true),
         FREE_TP("Free TP", true),
-        FREE_D("Free D", true);
+        FREE_D("Free D", true),
+        CHOOSE_CULTS("Choose Cults", true);
 
         private final String description;
         private final boolean skippable;
@@ -1015,6 +1016,7 @@ public class Player extends JPanel {
         if (pendingSandstorm) result.add(PendingType.SANDSTORM);
         if (pendingFreeTradingPost) result.add(PendingType.FREE_TP);
         if (pendingFreeDwelling) result.add(PendingType.FREE_D);
+        if (ChooseMaxedCultsAction.actionNeeded(game)) result.add(PendingType.CHOOSE_CULTS);
         return result;
     }
 

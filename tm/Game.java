@@ -578,6 +578,37 @@ public class Game extends JPanel {
                 pendingPass = action.isPass();
                 if (action.needsConfirm()) {
                     phase = Phase.CONFIRM_ACTION;
+                    if (!rewinding && !importing) {
+                        if (player.getPendingActions().contains(Player.PendingType.CHOOSE_CULTS)) {
+                            final JRadioButton[] cultChoice = new JRadioButton[4];
+                            final Deque<JRadioButton> selectedButtons = new ArrayDeque<>();
+                            for (int i = 0; i < 4; ++i) {
+                                final JRadioButton button = new JRadioButton(Cults.getCultName(i));
+                                button.setSelected(player.getCultSteps(i) >= 10);
+                                if (player.maxedCults[i]) {
+                                    selectedButtons.add(button);
+                                }
+                                button.addChangeListener(l -> {
+                                    if (button.isSelected()) {
+                                        selectedButtons.removeFirst();
+                                        selectedButtons.addLast(button);
+                                    }
+                                });
+                                cultChoice[i] = button;
+                            }
+                            Object[] message = { "Choose " + selectedButtons.size() + " cults to max", cultChoice[0], cultChoice[1], cultChoice[2], cultChoice[3] };
+                            final int option = JOptionPane.showConfirmDialog(this, message, "Choose Cults to max", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                            if (option == JOptionPane.OK_OPTION) {
+                                final boolean[] choices = new boolean[4];
+                                for (int i = 0; i < 4; ++i) {
+                                    choices[i] = cultChoice[i].isSelected();
+                                }
+                                resolveAction(new ChooseMaxedCultsAction(choices));
+                            } else {
+                                resolveAction(new ForfeitAction());
+                            }
+                        }
+                    }
                 } else {
                     endTurn();
                 }
