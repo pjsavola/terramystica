@@ -6,6 +6,8 @@ import tm.Player;
 import tm.faction.Auren;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ChooseMaxedCultsAction extends Action {
 
@@ -81,12 +83,6 @@ public class ChooseMaxedCultsAction extends Action {
 
     @Override
     public String toString() {
-        String s = "";
-        for (int i = 0; i < 4; ++i) {
-            if (cultsToMax[i]) {
-                s += "Max " + Cults.getCultName(i);
-            }
-        }
-        return s;
+        return IntStream.range(0, 4).filter(cult -> cultsToMax[cult]).mapToObj(Cults::getCultName).collect(Collectors.joining(", "));
     }
 }
