@@ -1460,43 +1460,58 @@ public class Game extends JPanel {
         }
     }
 
+    private void buildCombos(Set<Set<Integer>> allCombos, Set<Integer> combo, Set<Integer> possibleCults, int count) {
+        if (count > 0) {
+            for (int i = 0; i < 4; ++i) {
+                if (!combo.contains(i) && possibleCults.contains(i)) {
+                    final Set<Integer> newCombo = new HashSet<>(combo);
+                    newCombo.add(i);
+                    buildCombos(allCombos, newCombo, possibleCults, count - 1);
+                }
+            }
+        } else {
+            allCombos.add(combo);
+        }
+    }
+
     public void chooseCultToMax() {
         if (!rewinding && !importing && phase == Phase.CONFIRM_ACTION) {
             final Player player = getCurrentPlayer();
             final Set<Player.PendingType> types = player.getPendingActions();
             if (types.contains(Player.PendingType.CHOOSE_CULTS)) {
                 final List<JRadioButton> buttons = new ArrayList<>();
-                final Deque<JRadioButton> selectedButtons = new ArrayDeque<>();
                 final ButtonGroup group = new ButtonGroup();
+                final Set<Integer> possibleCults = new HashSet<>();
+                int maxedCults = 0;
                 for (int i = 0; i < 4; ++i) {
                     if (player.maxedCults[i]) {
-                        final JRadioButton button = new JRadioButton(Cults.getCultName(i));
-                        button.setSelected(player.getCultSteps(i) >= 10);
+                        possibleCults.add(i);
                         if (player.getCultSteps(i) >= 10) {
-                            selectedButtons.add(button);
+                            ++maxedCults;
                         }
-                        button.addItemListener(l -> {
-                            if (l.getStateChange() == ItemEvent.SELECTED) {
-
-                            } else if (l.getStateChange() == ItemEvent.DESELECTED) {
-
-                            }
-                        });
-                        buttons.add(button);
-                        group.add(button);
                     }
+                }
+                final Set<Set<Integer>> allCombos = new HashSet<>();
+                buildCombos(allCombos, new HashSet<>(), possibleCults, maxedCults);
+                for (Set<Integer> combo : allCombos) {
+                    final JRadioButton button = new JRadioButton(combo.stream().map(Cults::getCultName).collect(Collectors.joining(", ")));
+                    button.setSelected(combo.stream().map(player::getCultSteps).allMatch(i -> i >= 10));
+                    buttons.add(button);
+                    group.add(button);
                 }
                 // TODO: Scroll up so that cults are visible
                 final Object[] message = new Object[1 + buttons.size()];
-                message[0] = "Choose " + selectedButtons.size() + " cults to max";
+                message[0] = "Choose which cults to max";
                 for (int i = 0; i < buttons.size(); ++i) message[i + 1] = buttons.get(i);
-                final int option = JOptionPane.showConfirmDialog(this, message, "Choose Cults to max", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                final int option = JOptionPane.showConfirmDialog(this, message, "Choose Cults", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
                 if (option == JOptionPane.OK_OPTION) {
                     final boolean[] choices = new boolean[4];
                     int choice = 0;
-                    for (int i = 0; i < 4; ++i) {
-                        if (player.maxedCults[i]) {
-                            choices[i] = buttons.get(choice++).isSelected();
+                    for (Set<Integer> combo : allCombos) {
+                        if (buttons.get(choice++).isSelected()) {
+                            for (int cult : combo) {
+                                choices[cult] = true;
+                            }
                         }
                     }
                     resolveAction(new ChooseMaxedCultsAction(choices));
