@@ -154,8 +154,8 @@ public class JMystica {
                     final JTextField field = new JTextField();
                     playerLabelList.add(label);
                     playerFieldList.add(field);
-                    panel.add(label, panel.getComponentCount() - 1);
-                    panel.add(field, panel.getComponentCount() - 1);
+                    panel.add(label, panel.getComponentCount() - 2);
+                    panel.add(field, panel.getComponentCount() - 2);
                     panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
                     dialog.pack();
                 }
