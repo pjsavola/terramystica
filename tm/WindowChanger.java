@@ -23,7 +23,7 @@ public class WindowChanger extends WindowAdapter {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         } else {
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            final int option = JOptionPane.showConfirmDialog(frame, "Are you sure you want to exit the game?", "Confirm exit", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+            final int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to exit the game?", "Confirm exit", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
             if (option != JOptionPane.OK_OPTION) {
                 return;
             }

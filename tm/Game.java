@@ -1447,7 +1447,7 @@ public class Game extends JPanel {
                 fileToSave = new File(fileToSave.getAbsolutePath() + "." + JMystica.gameFileExtension);
             }
             if (fileToSave.exists()) {
-                final int option = JOptionPane.showConfirmDialog(this, fileToSave.getName() + " already exists. Do you want to save anyway?", "File exists", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                final int option = JOptionPane.showConfirmDialog(null, fileToSave.getName() + " already exists. Do you want to save anyway?", "File exists", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
                 if (option != JOptionPane.OK_OPTION) {
                     return;
                 }
