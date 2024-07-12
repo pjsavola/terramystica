@@ -6,6 +6,7 @@ import tm.faction.*;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
@@ -1435,9 +1436,22 @@ public class Game extends JPanel {
     public void save() {
         final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Specify a file to save");
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter("JMystica Game", JMystica.gameFileExtension);
+        fileChooser.setFileFilter(filter);
+        fileChooser.setFileSystemView(new JtmFileSystemView());
         final int userSelection = fileChooser.showSaveDialog(frame);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
-            final File fileToSave = fileChooser.getSelectedFile();
+            File fileToSave = fileChooser.getSelectedFile();
+            if (fileChooser.getFileFilter() == filter && !filter.accept(fileToSave)) {
+                fileToSave = new File(fileToSave.getAbsolutePath() + "." + JMystica.gameFileExtension);
+            }
+            if (fileToSave.exists()) {
+                final int option = JOptionPane.showConfirmDialog(this, fileToSave.getName() + " already exists. Do you want to save anyway?", "File exists", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+                if (option != JOptionPane.OK_OPTION) {
+                    return;
+                }
+            }
             try (ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(fileToSave))) {
                 stream.writeObject(gameData);
                 stream.writeInt(history.size());

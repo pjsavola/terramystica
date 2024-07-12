@@ -4,6 +4,7 @@ import tm.action.Action;
 import tm.faction.Giants;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class JMystica {
     public static final int maxReplayActionCount = 2000;
+    public static final String gameFileExtension = "jtm";
 
     public static Hex.Type getType(String type) {
         return switch (type) {
@@ -236,6 +238,9 @@ public class JMystica {
         loadButton.addActionListener(l -> {
             final JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Specify a file to load");
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setFileFilter(new FileNameExtensionFilter("JMystica Game", gameFileExtension));
+            fileChooser.setFileSystemView(new JtmFileSystemView());
             final int userSelection = fileChooser.showOpenDialog(frame);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 final File fileToLoad = fileChooser.getSelectedFile();
