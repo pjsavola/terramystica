@@ -209,8 +209,6 @@ public class GameData implements Serializable {
                         }
                     }
                     if (skip) continue;
-                    if (actionLine.equals("other_income_for_faction")) continue;
-                    if (actionLine.equals("cult_income_for_faction")) continue;
                     if (actionLine.equals("[opponent accepted power]")) continue;
                     if (actionLine.equals("[all opponents declined power]")) continue;
                     if (actionLine.matches("\\+\\dvp for (fire|water|earth|air)")) continue;
@@ -218,6 +216,9 @@ public class GameData implements Serializable {
                     if (actionLine.equals("score_resources")) continue;
                     final String[] actions = actionLine.split("\\. ");
                     for (String action : actions) {
+                        if (action.equals("other_income_for_faction")) continue;
+                        if (action.equals("cult_income_for_faction")) continue;
+
                         final Pair pair = new Pair();
                         pair.faction = faction;
                         pair.action = action;

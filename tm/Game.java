@@ -1341,7 +1341,7 @@ public class Game extends JPanel {
                         } else {
                             replayAction(new ConvertAction(power, priestsToWorkers, workersToCoins, pointsToCoins, pointsFromCoins));
                         }
-                        pendingDigging = 0;
+                        // pendingDigging = 0; This was added in "Fix turn order issues" commit for unknown reason, likely not needed.
                     } else if (advancePattern.matcher(action).matches()) {
                         final String[] s = action.split(" ");
                         replayAction(new AdvanceAction(s[1].toLowerCase().startsWith("dig")));

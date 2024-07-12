@@ -61,6 +61,8 @@ public class JMystica {
         tests.put("tests/Petri18", new int[] {120, 128, 116, 152});
         tests.put("tests/Petri19", new int[] {93, 126, 150, 140});
         tests.put("tests/Petri20", new int[] {131, 202, 104, 145});
+        tests.put("tests/Petri21", new int[] {127, 66, 145, 96});
+        tests.put("tests/Petri22", new int[] {174, 160});
 
         if (maxReplayActionCount >= 2000) {
             tests.forEach((file, vps) -> {
