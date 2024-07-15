@@ -63,6 +63,7 @@ public class JMystica {
         tests.put("tests/Petri20", new int[] {131, 202, 104, 145});
         tests.put("tests/Petri21", new int[] {127, 66, 145, 96});
         tests.put("tests/Petri22", new int[] {174, 160});
+        //tests.put("tests/Petri23", null); -- Dodgy resource manipulation!
 
         if (maxReplayActionCount >= 2000) {
             tests.forEach((file, vps) -> {
@@ -306,7 +307,7 @@ public class JMystica {
             try {
                 final Game game = new Game(frame, test);
                 final int[] vps = game.getVictoryPoints();
-                if (Arrays.equals(vpTargets, vps)) {
+                if (game.validateVictoryPoints(vpTargets)) {
                     game.rewind();
                     return true;
                 }

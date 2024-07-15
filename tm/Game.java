@@ -1393,6 +1393,19 @@ public class Game extends JPanel {
         }
     }
 
+    public boolean validateVictoryPoints(int[] vps) {
+        if (gameData.results != null) {
+            if (vps == null) {
+                vps = new int[gameData.playerNames.size()];
+                for (int i = 0; i < gameData.playerNames.size(); ++i) {
+                    vps[i] = gameData.results.get(gameData.playerNames.get(i));
+                }
+            }
+            return Arrays.equals(vps, getVictoryPoints());
+        }
+        return true;
+    }
+
     public int[] getVictoryPoints() {
         final List<Faction> factions = gameData.getFactions();
         return players.stream().sorted((p1, p2) -> factions.indexOf(p2.getFaction()) - factions.indexOf(p1.getFaction())).mapToInt(Player::getPoints).toArray();

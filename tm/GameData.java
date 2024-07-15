@@ -45,6 +45,7 @@ public class GameData implements Serializable {
 
     final int playerCount;
     List<String> playerNames;
+    Map<String, Integer> results;
 
     final List<Integer> factionsIndices;
     final List<Integer> bons;
@@ -139,11 +140,28 @@ public class GameData implements Serializable {
         playerNames = new ArrayList<>();
         int players = 0;
         boolean start = false;
+        boolean scanningResults = false;
         while (scanner.hasNextLine()) {
             final String line = scanner.nextLine().trim().toLowerCase();
             if (!start) {
                 if (line.startsWith("default game options")) {
                     start = true;
+                } else if (line.startsWith("the game is over")) {
+                    scanningResults = true;
+                } else if (scanningResults) {
+                    if (line.startsWith("info")) {
+                        scanningResults = false;
+                    } else {
+                        final int nameStart = line.indexOf('(') + 1;
+                        final int nameEnd = line.lastIndexOf(')');
+                        final String name = line.substring(nameStart, nameEnd);
+                        final int pts = Integer.parseInt(line.substring(nameEnd + 1).trim());
+                        if (results == null) {
+                            results = new HashMap<>();
+                        }
+                        results.put(name, pts);
+                        System.err.println(name + " " + pts);
+                    }
                 }
                 continue;
             }
