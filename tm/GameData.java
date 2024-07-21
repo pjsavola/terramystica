@@ -160,7 +160,7 @@ public class GameData implements Serializable {
                             results = new HashMap<>();
                         }
                         results.put(name, pts);
-                        System.err.println(name + " " + pts);
+                        //System.err.println(name + " " + pts);
                     }
                 }
                 continue;

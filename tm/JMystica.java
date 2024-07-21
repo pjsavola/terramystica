@@ -64,6 +64,20 @@ public class JMystica {
         tests.put("tests/Petri21", new int[] {127, 66, 145, 96});
         tests.put("tests/Petri22", new int[] {174, 160});
         //tests.put("tests/Petri23", null); -- Dodgy resource manipulation!
+        tests.put("tests/Petri24", null);
+        tests.put("tests/Petri25", null);
+        tests.put("tests/Petri26", null);
+        tests.put("tests/Petri27", null);
+        tests.put("tests/Petri28", null);
+        tests.put("tests/Petri29", null);
+        tests.put("tests/Petri30", null);
+        tests.put("tests/Petri31", null);
+        tests.put("tests/Petri32", null);
+        tests.put("tests/Petri33", null);
+        tests.put("tests/Petri34", null);
+        tests.put("tests/Petri35", null);
+        tests.put("tests/Petri36", null);
+        tests.put("tests/Petri37", null);
 
         if (maxReplayActionCount >= 2000) {
             tests.forEach((file, vps) -> {

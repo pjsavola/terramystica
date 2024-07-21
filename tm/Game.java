@@ -1098,38 +1098,7 @@ public class Game extends JPanel {
                         if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                             replayAction(new SandstormAction(p.x, p.y));
                         } else {
-                            final Hex.Type type;
-                            if (s.length <= 3) {
-                                final Hex.Type home = player.getHomeType();
-                                final Hex.Type hexType = hex.getType();
-                                if (hexType == home) {
-                                    throw new RuntimeException("Invalid implicit transform");
-                                }
-
-                                if (player.getFaction() instanceof Giants) {
-                                    type = home;
-                                } else {
-                                    int delta = 0;
-                                    for (int i = 1; i <= 3; ++i) {
-                                        if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
-                                            delta = Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
-                                            break;
-                                        }
-                                    }
-                                    for (int i = 1; i <= 3; ++i) {
-                                        if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
-                                            delta = -Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
-                                            break;
-                                        }
-                                    }
-                                    final int ordinal = (hexType.ordinal() + delta + 7) % 7;
-                                    type = Hex.Type.values()[ordinal];
-                                }
-                            } else {
-                                String typeName = s[3].toUpperCase();
-                                final String finalTypeName = typeName.equals("GREY") ? "GRAY" : typeName;
-                                type = Arrays.stream(Hex.Type.values()).filter(h -> h.name().equals(finalTypeName)).findAny().orElse(null);
-                            }
+                            final Hex.Type type = getTransformTerrain(s, player, hex, pendingDigging);
                             final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
                             if (!resolvingCultSpades()) {
                                 if (pendingDigging < cost) {
@@ -1185,6 +1154,45 @@ public class Game extends JPanel {
                                         pendingDigging = str.charAt(3) - '4';
                                     }
                                     replayAction(new SelectPowerActionAction(str.charAt(3) - '0'));
+
+                                    // Partial digging of multiple hexes is not allowed by the rules. JMystica enforces
+                                    // that digging towards home terrain is done first but Snellman allows arbitrary order.
+                                    // Here we switch the action order if partial digging is done first.
+                                    if (str.charAt(3) == '6' && actions.size() > 1) {
+                                        final Iterator<String> actionIterator = actions.iterator();
+                                        final String action1 = actionIterator.next();
+                                        if (transformPattern.matcher(action1).matches()) {
+                                            final String[] transform1 = action1.split(" ");
+                                            final Point p1 = mapPanel.getPoint(transform1[1]);
+                                            final Hex hex1 = mapPanel.getHex(p1.x, p1.y);
+                                            final Hex.Type type1 = getTransformTerrain(transform1, player, hex1, 2);
+                                            final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex1, type1);
+                                            if (cost == 1 && type1 != player.getHomeType()) {
+                                                final String action2 = actionIterator.next();
+                                                if (transformPattern.matcher(action2).matches()) {
+                                                    final String[] transform2 = action2.split(" ");
+                                                    final Point p2 = mapPanel.getPoint(transform2[1]);
+                                                    final Hex hex2 = mapPanel.getHex(p2.x, p2.y);
+                                                    final Hex.Type type2 = getTransformTerrain(transform2, player, hex2, 2);
+                                                    if (type2 == player.getHomeType()) {
+                                                        final String a1 = actions.pollFirst();
+                                                        final String a2 = actions.pollFirst();
+                                                        actions.addFirst(a1);
+                                                        actions.addFirst(a2);
+                                                        System.err.println("Swapping actions 2");
+                                                    } else {
+                                                        throw new RuntimeException("Partial digging of multiple hexes");
+                                                    }
+                                                } else if (buildPattern.matcher(action2).matches()) {
+                                                    final String a1 = actions.pollFirst();
+                                                    final String a2 = actions.pollFirst();
+                                                    actions.addFirst(a1);
+                                                    actions.addFirst(a2);
+                                                    System.err.println("Swapping " + player + ": " + a1 + " <-> " + a2);
+                                                }
+                                            }
+                                        }
+                                    }
                                     break;
                                 case 'a':
                                     pendingCultSource = CultStepAction.Source.ACTA;
@@ -1391,6 +1399,42 @@ public class Game extends JPanel {
             }
             importing = false;
         }
+    }
+
+    private Hex.Type getTransformTerrain(String[] splitAction, Player player, Hex hex, int pendingDigging) {
+        final Hex.Type type;
+        if (splitAction.length <= 3) {
+            final Hex.Type home = player.getHomeType();
+            final Hex.Type hexType = hex.getType();
+            if (hexType == home) {
+                throw new RuntimeException("Invalid implicit transform");
+            }
+
+            if (player.getFaction() instanceof Giants) {
+                type = home;
+            } else {
+                int delta = 0;
+                for (int i = 1; i <= 3; ++i) {
+                    if (Hex.Type.values()[(hexType.ordinal() + i) % 7] == home) {
+                        delta = Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
+                        break;
+                    }
+                }
+                for (int i = 1; i <= 3; ++i) {
+                    if (Hex.Type.values()[(hexType.ordinal() - i + 7) % 7] == home) {
+                        delta = -Math.min(i, resolvingCultSpades() ? player.getPendingSpades() : pendingDigging);
+                        break;
+                    }
+                }
+                final int ordinal = (hexType.ordinal() + delta + 7) % 7;
+                type = Hex.Type.values()[ordinal];
+            }
+        } else {
+            String typeName = splitAction[3].toUpperCase();
+            final String finalTypeName = typeName.equals("GREY") ? "GRAY" : typeName;
+            type = Arrays.stream(Hex.Type.values()).filter(h -> h.name().equals(finalTypeName)).findAny().orElse(null);
+        }
+        return type;
     }
 
     public boolean validateVictoryPoints(int[] vps) {
