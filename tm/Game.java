@@ -924,6 +924,9 @@ public class Game extends JPanel {
         for (int j = 0; j < sorted.size(); ) {
             final Player player = sorted.get(j);
             final int steps = results.get(player);
+            if (steps == 0) {
+                break;
+            }
             int totalReward = rewards[rewardIdx++];
             int k = j + 1;
             while (k < sorted.size()) {

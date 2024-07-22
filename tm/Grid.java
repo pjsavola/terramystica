@@ -63,7 +63,7 @@ public class Grid extends JPanel {
                     if (col < map[row - 1].length) {
                         neighbors.add(map[row - 1][col]);
                     }
-                    final int otherCol = col + (row % 2 == 0 ? -1 : 1);
+                    final int otherCol = col + ((row + rowDelta) % 2 == 0 ? -1 : 1);
                     if (otherCol >= 0 && otherCol < map[row - 1].length) {
                         neighbors.add(map[row - 1][otherCol]);
                     }
@@ -72,7 +72,7 @@ public class Grid extends JPanel {
                     if (col < map[row + 1].length) {
                         neighbors.add(map[row + 1][col]);
                     }
-                    final int otherCol = col + (row % 2 == 0 ? -1 : 1);
+                    final int otherCol = col + ((row + rowDelta) % 2 == 0 ? -1 : 1);
                     if (otherCol >= 0 && otherCol < map[row + 1].length) {
                         neighbors.add(map[row + 1][otherCol]);
                     }
