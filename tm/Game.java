@@ -948,7 +948,7 @@ public class Game extends JPanel {
         private static final Pattern townPattern = Pattern.compile("\\+[1-9]?[Tt][Ww][1-9]");
         private static final Pattern burnPattern = Pattern.compile("[Bb][Uu][Rr][Nn] [1-9][0-9]*");
         private static final Pattern bridgePattern = Pattern.compile("[Bb][Rr][Ii][Dd][Gg][Ee] " + hexRegex + ":" + hexRegex);
-        private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] [1-9][0-9]* ?" + resourceRegex + " to [1-9][0-9]* ?" + resourceRegex);
+        private static final Pattern convertPattern = Pattern.compile("[Cc][Oo][Nn][Vv][Ee][Rr][Tt] ([1-9][0-9]*)? ?" + resourceRegex + " to ([1-9][0-9]*)? ?" + resourceRegex);
         private static final Pattern advancePattern = Pattern.compile("[Aa][Dd][Vv][Aa][Nn][Cc][Ee] ([Dd][Ii][Gg].*|[Ss][Hh][Ii][Pp].*)");
         private static final Pattern forfeitAction = Pattern.compile("-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
         private static final Pattern connectPattern = Pattern.compile("[Cc][Oo][Nn][Nn][Ee][Cc][Tt] [Rr][0-9]*");
@@ -1188,7 +1188,8 @@ public class Game extends JPanel {
                                                     final String a2 = actions.pollFirst();
                                                     actions.addFirst(a1);
                                                     actions.addFirst(a2);
-                                                    System.err.println("Swapping " + player + ": " + a1 + " <-> " + a2);
+                                                    //System.err.println(gameData.playerNames);
+                                                    //System.err.println("Swapping " + player + ": " + a1 + " <-> " + a2);
                                                 }
                                             }
                                         }
@@ -1288,12 +1289,16 @@ public class Game extends JPanel {
                         String s = action.substring("convert".length()).trim();
                         int idx = 0;
                         int fromCount = 0;
-                        while (Character.isDigit(s.charAt(idx))) {
-                            fromCount = fromCount * 10 + s.charAt(idx) - '0';
-                            ++idx;
-                        }
-                        while (Character.isWhitespace(s.charAt(idx))) {
-                            ++idx;
+                        if (Character.isDigit(s.charAt(idx))) {
+                            while (Character.isDigit(s.charAt(idx))) {
+                                fromCount = fromCount * 10 + s.charAt(idx) - '0';
+                                ++idx;
+                            }
+                            while (Character.isWhitespace(s.charAt(idx))) {
+                                ++idx;
+                            }
+                        } else {
+                            fromCount = 1;
                         }
                         s = s.substring(idx);
                         idx = s.indexOf(' ');
@@ -1302,12 +1307,16 @@ public class Game extends JPanel {
 
                         idx = 0;
                         int toCount = 0;
-                        while (Character.isDigit(s.charAt(idx))) {
-                            toCount = toCount * 10 + s.charAt(idx) - '0';
-                            ++idx;
-                        }
-                        while (Character.isWhitespace(s.charAt(idx))) {
-                            ++idx;
+                        if (Character.isDigit(s.charAt(idx))) {
+                            while (Character.isDigit(s.charAt(idx))) {
+                                toCount = toCount * 10 + s.charAt(idx) - '0';
+                                ++idx;
+                            }
+                            while (Character.isWhitespace(s.charAt(idx))) {
+                                ++idx;
+                            }
+                        } else {
+                            toCount = 1;
                         }
 
                         String to = s.substring(idx);
