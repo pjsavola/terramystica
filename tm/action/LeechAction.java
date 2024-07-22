@@ -22,6 +22,8 @@ public class LeechAction extends Action {
     public void execute() {
         if (accept) {
             player.acceptLeech();
+        } else {
+            player.declineLeech();
         }
     }
 

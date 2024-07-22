@@ -67,7 +67,7 @@ public class Player extends JPanel {
     private int pendingWorkerToPriestConversions;
     private int pendingBridges;
     private int pendingTowns;
-    private int pendingLeech;
+    private Deque<Integer> pendingLeechQueue = new ArrayDeque<>(2);
     List<Hex> pendingBuilds = null;
     public boolean pendingSandstorm;
     public boolean pendingFreeTradingPost;
@@ -121,7 +121,6 @@ public class Player extends JPanel {
         pendingFavors = 0;
         pendingWorkerToPriestConversions = 0;
         pendingBridges = 0;
-        pendingLeech = 0;
         pendingTowns = 0;
         pendingBuilds = null;
         pendingSandstorm = false;
@@ -464,17 +463,21 @@ public class Player extends JPanel {
     }
 
     public void acceptLeech() {
-        if (pendingLeech > 0) {
+        if (!pendingLeechQueue.isEmpty()) {
+            final int pendingLeech = pendingLeechQueue.removeFirst();
             final int unused = addPower(pendingLeech);
             if (unused < pendingLeech) {
                 points -= pendingLeech - unused - 1;
             }
-            pendingLeech = 0;
         }
     }
 
+    public void declineLeech() {
+        pendingLeechQueue.removeFirst();
+    }
+
     public void addPendingLeech(int amount) {
-        pendingLeech = Math.min(amount, points + 1);
+        pendingLeechQueue.addLast(Math.min(amount, points + 1));
     }
 
     public void addPendingBuild(Hex hex) {
@@ -497,7 +500,7 @@ public class Player extends JPanel {
     }
 
     public int getPendingLeech() {
-        return pendingLeech;
+        return pendingLeechQueue.isEmpty() ? 0 : pendingLeechQueue.peekFirst();
     }
 
     private int addPower(int amount) {

@@ -308,7 +308,7 @@ public class JMystica {
         mainPanel.add(buttonPanel);
         frame.setContentPane(mainPanel);
         frame.addWindowListener(windowChanger);
-        frame.setResizable(false);
+        //frame.setResizable(false);
         frame.pack();
         frame.setVisible(true);
     }
