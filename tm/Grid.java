@@ -509,7 +509,7 @@ public class Grid extends JPanel {
         if (newCol2 == -1) {
             throw new RuntimeException("Neighbor not found");
         }
-        return getDistance(row1, row2, newRow2, newCol2) + 1;
+        return getDistance(row1, col1, newRow2, newCol2) + 1;
     }
 
     public int getNetworkSize(Player player) {
@@ -544,24 +544,27 @@ public class Grid extends JPanel {
 
     public int getEdgeCount(Player player) {
         return getConnectedSets(player).stream().map(s -> {
-            int edgeCount = 0;
-            for (Hex hex : s) {
+            int edgeCount = (int) s.stream().filter(hex -> {
+                // Sides
                 for (Hex[] hexes : map) {
                     if (hexes[0] == hex || hexes[hexes.length - 1] == hex) {
-                        ++edgeCount;
+                        return true;
                     }
                 }
+                // Top
                 for (int col = 0; col < map[0].length; ++col) {
                     if (map[0][col] == hex) {
-                        ++edgeCount;
+                        return true;
                     }
                 }
-                for (int col = map.length - 1; col < map[map.length - 1].length; ++col) {
+                // Bottom
+                for (int col = 0; col < map[map.length - 1].length; ++col) {
                     if (map[map.length - 1][col] == hex) {
-                        ++edgeCount;
+                        return true;
                     }
                 }
-            }
+                return false;
+            }).count();
             return edgeCount;
         }).max(Integer::compareTo).orElse(0);
     }

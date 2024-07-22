@@ -78,6 +78,12 @@ public class JMystica {
         tests.put("tests/Petri35", null);
         tests.put("tests/Petri36", null);
         tests.put("tests/Petri37", null);
+        tests.put("tests/Petri38", null);
+        tests.put("tests/Petri39", null);
+        tests.put("tests/Petri40", null);
+        tests.put("tests/Petri41", null);
+        tests.put("tests/Petri42", null);
+        tests.put("tests/Petri43", null);
 
         if (maxReplayActionCount >= 2000) {
             tests.forEach((file, vps) -> {
