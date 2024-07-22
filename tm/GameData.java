@@ -51,6 +51,7 @@ public class GameData implements Serializable {
     final List<Integer> bons;
     final List<Integer> towns;
     final List<Integer> roundIndices;
+    String extraScoring;
     final transient Deque<Pair> actionFeed = new ArrayDeque<>();
     final transient Deque<Pair> leechFeed = new ArrayDeque<>();
     transient List<Action> history;
@@ -204,6 +205,8 @@ public class GameData implements Serializable {
                 } else {
                     throw new RuntimeException("Faction " + factionName + " not found");
                 }
+            } else if (line.matches("added final scoring tile: .*")) {
+                extraScoring = line.split(" ")[4].split("\\t")[0];
             } else {
                 final String[] s = line.split("\\t");
                 if (s.length == 0) throw new RuntimeException("Empty line: " + line);

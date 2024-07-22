@@ -899,16 +899,35 @@ public class Game extends JPanel {
         for (Player player : players) {
             networkSizes.put(player, mapPanel.getNetworkSize(player));
         }
-        final List<Player> sorted = players.stream().sorted((p1, p2) -> networkSizes.get(p2) - networkSizes.get(p1)).toList();
+        resolveEndGameScoring(networkSizes, "network");
+        if (gameData.extraScoring != null) {
+            networkSizes.clear();
+            for (Player player : players) {
+                int result = 0;
+                switch (gameData.extraScoring) {
+                    case "connected-sa-sh-distance" -> result = mapPanel.getSASHDistance(player);
+                    case "building-on-edge" -> result = mapPanel.getEdgeCount(player);
+                    case "connected-distance" -> result = mapPanel.getMaxDistance(player);
+                    case "connected-clusters" -> result = mapPanel.getClusterCount(player);
+                }
+                networkSizes.put(player, result);
+            }
+            resolveEndGameScoring(networkSizes, gameData.extraScoring);
+        }
+        refresh();
+    }
+
+    private void resolveEndGameScoring(Map<Player, Integer> results, String identifier) {
+        final List<Player> sorted = players.stream().sorted((p1, p2) -> results.get(p2) - results.get(p1)).toList();
         final int[] rewards = { 18, 12, 6 };
         int rewardIdx = 0;
         for (int j = 0; j < sorted.size(); ) {
             final Player player = sorted.get(j);
-            final int steps = networkSizes.get(player);
+            final int steps = results.get(player);
             int totalReward = rewards[rewardIdx++];
             int k = j + 1;
             while (k < sorted.size()) {
-                if (networkSizes.get(sorted.get(k)) < steps) {
+                if (results.get(sorted.get(k)) < steps) {
                     break;
                 }
                 totalReward += rewardIdx >= rewards.length ? 0 : rewards[rewardIdx++];
@@ -919,7 +938,7 @@ public class Game extends JPanel {
             while (j < k) {
                 final Player p = sorted.get(j);
                 p.score(playerReward);
-                log(p + " " + playerReward + " VP from from network");
+                log(p + " " + playerReward + " VP from from " + identifier);
                 if (++j >= sorted.size()) {
                     break;
                 }
@@ -928,7 +947,6 @@ public class Game extends JPanel {
                 break;
             }
         }
-        refresh();
     }
 
     class Parser {

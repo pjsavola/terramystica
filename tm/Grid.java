@@ -459,23 +459,166 @@ public class Grid extends JPanel {
         return null;
     }
 
+    private int getDistance(Hex hex1, Hex hex2) {
+        int row1 = -1;
+        int row2 = -1;
+        int col1 = -1;
+        int col2 = -1;
+        for (int row = 0; row < map.length; ++row) {
+            for (int col = 0; col < map[row].length; ++col) {
+                if (map[row][col] == hex1) {
+                    row1 = row;
+                    col1 = col;
+                } else if (map[row][col] == hex2) {
+                    row2 = row;
+                    col2 = col;
+                }
+            }
+        }
+        if (row1 == -1 || row2 == -1) {
+            throw new RuntimeException("Couldn't find hexes");
+        }
+        return getDistance(row1, col1, row2, col2);
+    }
+
+    private int getDistance(int row1, int col1, int row2, int col2) {
+        final int colDelta = Math.abs(col1 - col2);
+        if (row1 == row2) {
+            return colDelta;
+        }
+        final int rowDelta = Math.abs(row1 - row2);
+        if (rowDelta % 2 == 0) {
+            return rowDelta + Math.max(0, colDelta - rowDelta / 2);
+        }
+        // Move one step towards optimal direction which then enables usage of the above simple distance calculation cases.
+        final int newRow2 = row2 + Integer.compare(row1, row2);
+        final Hex hex2 = map[row2][col2];
+        int minColDelta = Integer.MAX_VALUE;
+        int newCol2 = -1;
+        for (Hex n : hex2.getNeighbors()) {
+            for (int col = 0; col < map[newRow2].length; ++col) {
+                if (map[newRow2][col] == n) {
+                    final int neighborColDelta = Math.abs(col1 - col);
+                    if (neighborColDelta < minColDelta) {
+                        minColDelta = neighborColDelta;
+                        newCol2 = col;
+                    }
+                }
+            }
+        }
+        if (newCol2 == -1) {
+            throw new RuntimeException("Neighbor not found");
+        }
+        return getDistance(row1, row2, newRow2, newCol2) + 1;
+    }
+
     public int getNetworkSize(Player player) {
+        return getConnectedSets(player).stream().map(List::size).max(Integer::compareTo).orElse(0);
+    }
+
+    public int getMaxDistance(Player player) {
+        return getConnectedSets(player).stream().map(s -> {
+            int maxDistance = 0;
+            for (int i = 0; i < s.size(); ++i) {
+                for (int j = i + 1; j < s.size(); ++j) {
+                    final int distance = getDistance(s.get(i), s.get(j));
+                    if (distance > maxDistance) {
+                        maxDistance = distance;
+                    }
+                }
+            }
+            return maxDistance;
+        }).max(Integer::compareTo).orElse(0);
+    }
+
+    public int getSASHDistance(Player player) {
+        return getConnectedSets(player).stream().map(s -> {
+            final Hex saHex = s.stream().filter(h -> h.getStructure() == Hex.Structure.SANCTUARY).findAny().orElse(null);
+            final Hex shHex = s.stream().filter(h -> h.getStructure() == Hex.Structure.STRONGHOLD).findAny().orElse(null);
+            if (saHex != null && shHex != null) {
+                return getDistance(saHex, shHex);
+            }
+            return 0;
+        }).max(Integer::compareTo).orElse(0);
+    }
+
+    public int getEdgeCount(Player player) {
+        return getConnectedSets(player).stream().map(s -> {
+            int edgeCount = 0;
+            for (Hex hex : s) {
+                for (Hex[] hexes : map) {
+                    if (hexes[0] == hex || hexes[hexes.length - 1] == hex) {
+                        ++edgeCount;
+                    }
+                }
+                for (int col = 0; col < map[0].length; ++col) {
+                    if (map[0][col] == hex) {
+                        ++edgeCount;
+                    }
+                }
+                for (int col = map.length - 1; col < map[map.length - 1].length; ++col) {
+                    if (map[map.length - 1][col] == hex) {
+                        ++edgeCount;
+                    }
+                }
+            }
+            return edgeCount;
+        }).max(Integer::compareTo).orElse(0);
+    }
+
+    public int getClusterCount(Player player) {
+        final List<Hex> mermaidTowns = new ArrayList<>();
+        if (player.getFaction() instanceof Mermaids) {
+            getAllHexes().stream().filter(h -> h.getType() == Hex.Type.WATER && h.town).forEach(mermaidTowns::add);
+        }
+        return getConnectedSets(player).stream().map(s -> {
+            int clusters = 0;
+            final Set<Hex> remaining = new HashSet<>(s);
+            remaining.addAll(mermaidTowns);
+            final Deque<Hex> work = new ArrayDeque<>();
+            while (!remaining.isEmpty()) {
+                final Iterator<Hex> it = remaining.iterator();
+                work.add(it.next());
+                it.remove();
+                ++clusters;
+                while (!work.isEmpty()) {
+                    final Hex hex = work.removeFirst();
+                    hex.getNeighbors().stream().filter(remaining::contains).forEach(n -> {
+                        if (remaining.remove(n)) {
+                            work.add(n);
+                        }
+                    });
+                    for (Bridge bridge : bridges) {
+                        final Hex neighbor = bridge.getOtherEnd(hex);
+                        if (neighbor != null) {
+                            if (remaining.remove(neighbor)) {
+                                work.add(neighbor);
+                            }
+                        }
+                    }
+                }
+            }
+            return clusters;
+        }).max(Integer::compareTo).orElse(0);
+    }
+
+    private List<List<Hex>> getConnectedSets(Player player) {
+        final List<List<Hex>> connectedSets = new ArrayList<>();
         final Deque<Hex> work = new ArrayDeque<>();
         final int shipping = player.getShipping();
         final int range = player.getRange();
         final Set<Hex> visited = new HashSet<>();
-        int maxSize = 0;
 
         if (range == 1) {
             Hex a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).findAny().orElse(null);
             while (a != null) {
-                int size = 0;
+                final List<Hex> connectedSet = new ArrayList<>();
                 work.add(a);
                 visited.add(a);
                 while (!work.isEmpty()) {
                     final Hex hex = work.removeFirst();
                     if (!hex.isEmpty() && hex.getType() == player.getHomeType()) {
-                        ++size;
+                        connectedSet.add(hex);
                     }
                     final Deque<Hex> water = new ArrayDeque<>();
                     final Map<Hex, Integer> waterDistances = new HashMap<>();
@@ -512,21 +655,19 @@ public class Grid extends JPanel {
                         }
                     }
                 }
-                if (size > maxSize) {
-                    maxSize = size;
-                }
+                connectedSets.add(connectedSet);
                 a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
             }
         } else {
             Hex a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).findAny().orElse(null);
             while (a != null) {
-                int size = 0;
+                final List<Hex> connectedSet = new ArrayList<>();
                 work.add(a);
                 visited.add(a);
                 while (!work.isEmpty()) {
                     final Hex hex = work.removeFirst();
                     if (!hex.isEmpty() && hex.getType() == player.getHomeType()) {
-                        ++size;
+                        connectedSet.add(hex);
                     }
                     final Deque<Hex> other = new ArrayDeque<>();
                     final Map<Hex, Integer> otherDistances = new HashMap<>();
@@ -561,12 +702,10 @@ public class Grid extends JPanel {
                         }
                     }
                 }
-                if (size > maxSize) {
-                    maxSize = size;
-                }
+                connectedSets.add(connectedSet);
                 a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
             }
         }
-        return maxSize;
+        return connectedSets;
     }
 }
