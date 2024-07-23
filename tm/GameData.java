@@ -239,6 +239,7 @@ public class GameData implements Serializable {
                     for (String action : actions) {
                         if (action.equals("other_income_for_faction")) continue;
                         if (action.equals("cult_income_for_faction")) continue;
+                        if (action.equals("wait")) continue;
 
                         final Pair pair = new Pair();
                         pair.faction = faction;

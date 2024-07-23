@@ -389,6 +389,16 @@ public class Player extends JPanel {
         points += round.town;
         towns.add(number);
         --pendingTowns;
+
+        // You can pick fav5 or build SA to complete town, but max out cult before receiving the key.
+        for (int i = 0; i < 4; ++i) {
+            if (cultSteps[i] == 9 && maxedCults[i]) {
+                cultSteps[i] = addPowerFromCultSteps(9, 1, game.cultOccupied(i));
+                if (keys == 0) {
+                    break;
+                }
+            }
+        }
         refreshSize();
     }
 
