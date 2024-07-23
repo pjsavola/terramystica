@@ -639,8 +639,10 @@ public class Grid extends JPanel {
                             }
                         });
                         waterHex.getNeighbors().stream().filter(n -> n.getType() == player.getHomeType() && !n.isEmpty()).forEach(n -> {
-                            if (visited.add(n)) {
-                                work.add(n);
+                            if (shipping >= distance - 1) {
+                                if (visited.add(n)) {
+                                    work.add(n);
+                                }
                             }
                         });
                     }
