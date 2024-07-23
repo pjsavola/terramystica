@@ -68,7 +68,11 @@ public class Pool extends JPanel {
                             }
                         } else if (player == null) {
                             if (game.phase == Game.Phase.INITIAL_BONS || game.phase == Game.Phase.ACTIONS) {
-                                game.resolveAction(new SelectBonAction(idx));
+                                if (game.getRound() < 6) {
+                                    game.resolveAction(new SelectBonAction(idx));
+                                } else {
+                                    game.resolveAction(new PassAction());
+                                }
                             }
                         }
                     } else if (idx - bonCount < favCount) {
