@@ -638,6 +638,19 @@ public class Player extends JPanel {
             }
             points += 2 * amount;
             priests -= amount;
+        } else if (faction instanceof Dragonlords) {
+            while (amount-- > 0) {
+                if (power[0] > 0) {
+                    --power[0];
+                } else if (power[1] > 0) {
+                    --power[1];
+                } else if (power[2] > 0 ) {
+                    --power[2];
+                } else {
+                    throw new RuntimeException("Cannot afford to dig" + amount);
+                }
+            }
+            amount = 1;
         } else {
             if (workers < amount * digging)
                 throw new RuntimeException("Cannot afford to dig " + amount);
@@ -650,12 +663,29 @@ public class Player extends JPanel {
         addSpades(amount, false);
     }
 
+    public void dig(int amount, int cult) {
+        if (cultSteps[cult] < amount) {
+            throw new RuntimeException("Cannot afford to dig using cult steps");
+        }
+        cultSteps[cult] -= amount;
+        addSpades(1, false);
+    }
+
     public boolean canDig(int amount, boolean useRange) {
         if (useRange && jumpCost == Resources.zero) {
             throw new RuntimeException("Cannot use range to dig");
         }
         if (faction instanceof Darklings) {
             return priests >= amount;
+        } else if (faction instanceof Dragonlords) {
+            return power[0] + power[1] + power[2] >= amount;
+        } else if (faction instanceof Acolytes) {
+            for (int i = 0; i < 4; ++i) {
+                if (cultSteps[i] >= amount) {
+                    return true;
+                }
+            }
+            return false;
         } else {
             if ((amount + pendingSpades) % 2 != 0 && faction instanceof Giants) return false;
             if (useRange) {

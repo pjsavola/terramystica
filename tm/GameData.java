@@ -17,7 +17,7 @@ public class GameData implements Serializable {
         public String action;
     }
 
-    public static final List<Faction> allFactions = List.of(new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
+    public static final List<Faction> allFactions = List.of(new Acolytes(), new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dragonlords(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches());
     public static final Map<String, Integer> revisedStartingVPs = new HashMap<>();
 
     static {

@@ -1,5 +1,6 @@
 package tm.action;
 
+import tm.Cults;
 import tm.Game;
 import tm.Hex;
 import tm.Player;
@@ -11,6 +12,7 @@ public class DigAction extends Action {
     private final int col;
     private final Hex.Type type;
     private final boolean jump;
+    private final int cult;
     private transient Hex target;
     private transient int requiredSpades;
     private transient int requiredDigging;
@@ -22,16 +24,30 @@ public class DigAction extends Action {
         this.col = col;
         this.type = type;
         this.jump = jump;
+        cult = -1;
+    }
+
+    public DigAction(int row, int col, Hex.Type type, int cult) {
+        this.row = row;
+        this.col = col;
+        this.type = type;
+        jump = false;
+        this.cult = cult;
     }
 
     @Override
     public void setData(Game game, Player player) {
         super.setData(game, player);
         target = game.getHex(row, col);
-        requiredSpades = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
-        pendingSpades = player.getPendingSpades();
-        requiredDigging = Math.max(0, requiredSpades - pendingSpades);
-        resolvingCultSpades = game.resolvingCultSpades();
+        if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
+            requiredSpades = 1;
+            requiredDigging = game.getVolcanoDigCost(target, player);
+        } else {
+            requiredSpades = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
+            pendingSpades = player.getPendingSpades();
+            requiredDigging = Math.max(0, requiredSpades - pendingSpades);
+            resolvingCultSpades = game.resolvingCultSpades();
+        }
     }
 
     public static int getSpadeCost(Hex hex, Hex.Type type) {
@@ -75,7 +91,11 @@ public class DigAction extends Action {
         }
         if (requiredDigging > 0) {
             if (pendingSpades > 0 && !player.allowExtraSpades) throw new RuntimeException("Adding extra spades not allowed");
-            player.dig(requiredDigging);
+            if (cult >= 0) {
+                player.dig(requiredDigging, cult);
+            } else {
+                player.dig(requiredDigging);
+            }
         }
         player.useSpades(requiredSpades);
         target.setType(type);
@@ -91,9 +111,12 @@ public class DigAction extends Action {
 
     @Override
     public String toString() {
-        final String txt = "Transform " + target.getId() + " to " + type;
+        String txt = "Transform " + target.getId() + " to " + type;
         if (requiredDigging > 0) {
-            return "Dig " + requiredDigging + ". " + txt;
+            txt = "Dig " + (player.getHomeType() == Hex.Type.VOLCANO ? requiredSpades : requiredDigging) + ". " + txt;
+            if (cult >= 0) {
+                txt += ". -" + requiredDigging + Cults.getCultName(cult);
+            }
         }
         return txt;
     }

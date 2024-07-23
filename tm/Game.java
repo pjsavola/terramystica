@@ -529,6 +529,9 @@ public class Game extends JPanel {
         if (hex.getStructure() != null || getCurrentPlayer().hasPendingBuild(hex)) {
             return;
         }
+        if (hex.getType() == Hex.Type.ICE || hex.getType() == Hex.Type.VOLCANO) {
+            return;
+        }
         final Player player = getCurrentPlayer();
         boolean jump = false;
         if (!isReachable(hex, player)) {
@@ -537,37 +540,63 @@ public class Game extends JPanel {
             }
             jump = true;
         }
-        int options = 0;
-        final JDialog popup = new JDialog(frame, true);
-        final JPanel terraformPanel = new JPanel();
-        final int ordinal = hex.getType().ordinal();
-        final Hex.Type[] result = new Hex.Type[1];
-        for (int i = ordinal + 4; i < ordinal + 11; ++i) {
-            final Hex.Type type = Hex.Type.values()[i % 7];
-            if (type == hex.getType()) continue;
+        if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
+            final int cost = getVolcanoDigCost(hex, player);
+            if (player.canDig(cost, jump)) {
+                if (player.getFaction() instanceof Acolytes) {
+                    final List<String> options = new ArrayList<>();
+                    for (int i = 0; i < 4; ++i) {
+                        if (player.getCultSteps(i) >= cost) {
+                            options.add(Cults.getCultName(i));
+                        }
+                    }
+                    final String[] choices = options.toArray(String[]::new);
+                    final int response = JOptionPane.showOptionDialog(this, "Spend " + cost + " cult steps from ...", "Choose cult", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                    if (response >= 0 && response < options.size()) {
+                        for (int i = 0; i < 4; ++i) {
+                            if (Cults.getCultName(i).equals(choices[response])) {
+                                resolveAction(new DigAction(row, col, Hex.Type.VOLCANO, i));
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    resolveAction(new DigAction(row, col, Hex.Type.VOLCANO, jump));
+                }
+            }
+        } else {
+            int options = 0;
+            final JDialog popup = new JDialog(frame, true);
+            final JPanel terraformPanel = new JPanel();
+            final int ordinal = hex.getType().ordinal();
+            final Hex.Type[] result = new Hex.Type[1];
+            for (int i = ordinal + 4; i < ordinal + 11; ++i) {
+                final Hex.Type type = Hex.Type.values()[i % 7];
+                if (type == hex.getType()) continue;
 
-            final int requiredSpades = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
-            final int requiredDigging = Math.max(0, requiredSpades - player.getPendingSpades());
-            if (!player.canDig(requiredDigging, jump)) continue;
-            if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) continue;
-            if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades())
-                continue;
+                final int requiredSpades = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
+                final int requiredDigging = Math.max(0, requiredSpades - player.getPendingSpades());
+                if (!player.canDig(requiredDigging, jump)) continue;
+                if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) continue;
+                if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades())
+                    continue;
 
-            terraformPanel.add(new TerrainButton(popup, hex.getId(), type, requiredDigging, result));
-            ++options;
+                terraformPanel.add(new TerrainButton(popup, hex.getId(), type, requiredDigging, result));
+                ++options;
+            }
+            if (options == 0) {
+                return;
+            }
+            popup.setTitle("Select target terrain");
+            popup.setContentPane(terraformPanel);
+            popup.setLocationRelativeTo(frame);
+            popup.pack();
+            popup.setVisible(true);
+            if (result[0] == null) {
+                return;
+            }
+            resolveAction(new DigAction(row, col, result[0], jump));
         }
-        if (options == 0) {
-            return;
-        }
-        popup.setTitle("Select target terrain");
-        popup.setContentPane(terraformPanel);
-        popup.setLocationRelativeTo(frame);
-        popup.pack();
-        popup.setVisible(true);
-        if (result[0] == null) {
-            return;
-        }
-        resolveAction(new DigAction(row, col, result[0], jump));
     }
 
     public Hex getHex(int row, int col) {
@@ -1633,5 +1662,24 @@ public class Game extends JPanel {
             case "connected-clusters" -> "clusters";
             default -> null;
         };
+    }
+
+    public int getVolcanoDigCost(Hex hex, Player player) {
+        boolean homeType = false;
+        for (Player p : players) {
+            if (hex.getType() == p.getFaction().getHomeType()) {
+                homeType = true;
+                break;
+            }
+        }
+        final int cost;
+        if (player.getFaction() instanceof Dragonlords) {
+            cost = homeType ? 2 : 1;
+        } else if (player.getFaction() instanceof Acolytes) {
+            cost = homeType ? 4 : 3;
+        } else {
+            throw new RuntimeException("Unimplemented Volcano faction");
+        }
+        return cost;
     }
 }
