@@ -233,6 +233,10 @@ public class Game extends JPanel {
         final JPanel actsTurnOrderAndRounds = new JPanel();
         actsTurnOrderAndRounds.add(actsAndTurnOrder);
         actsTurnOrderAndRounds.add(roundPanel);
+        if (gameData.extraScoring != null) {
+            final JLabel extraScoring = new JLabel(getAbbreviation(gameData.extraScoring));
+            actsTurnOrderAndRounds.add(extraScoring);
+        }
         add(actsTurnOrderAndRounds);
 
         for (Player player : players) {
@@ -1619,5 +1623,15 @@ public class Game extends JPanel {
                 }
             }
         }
+    }
+
+    private static String getAbbreviation(String extraScoring) {
+        return switch (extraScoring) {
+            case "connected-sa-sh-distance" -> "SA-SH";
+            case "building-on-edge" -> "edge";
+            case "connected-distance" -> "distance";
+            case "connected-clusters" -> "clusters";
+            default -> null;
+        };
     }
 }
