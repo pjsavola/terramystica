@@ -25,7 +25,7 @@ public class TerrainButton extends JButton {
         hex.draw((Graphics2D) g, 40, 40, 40);
         g.setColor(hex.getType().getFontColor());
         g.setFont(Hex.font);
-        final String txt = spadeCost + " spd";
+        final String txt = spadeCost == 0 ? "" : spadeCost + " spd";
         final FontMetrics metrics = g.getFontMetrics();
         final int w = metrics.stringWidth(txt);
         g.drawString(txt, 40 - w / 2, 40);
