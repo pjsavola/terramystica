@@ -22,6 +22,10 @@ public abstract class Faction {
         return homeType;
     }
 
+    public int getInitialPowerTokenCount() {
+        return 12;
+    }
+
     public Resources getInitialIncome() {
         return new Resources(15, 3, 0, 7);
     }

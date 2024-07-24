@@ -185,7 +185,7 @@ public class Player extends JPanel {
     public void selectFaction(Faction faction) {
         this.faction = faction;
         this.points = game.getStartingVictoryPoints(faction);
-        power[0] = 12;
+        power[0] = faction.getInitialPowerTokenCount();
         power[1] = 0;
         power[2] = 0;
         if (faction instanceof Dwarves) {
@@ -324,6 +324,8 @@ public class Player extends JPanel {
                     game.resolveAction(new DarklingsConvertAction(response));
                 }
             }
+        } else if (faction instanceof Dragonlords) {
+            power[0] += game.getPlayerCount();
         } else if (faction instanceof Dwarves) {
             jumpCost = Resources.w1;
         } else if (faction instanceof Fakirs) {
@@ -548,10 +550,13 @@ public class Player extends JPanel {
 
     public void sendPriestToCult(int cult, int amount) {
         --priests;
-        cultSteps[cult] = addPowerFromCultSteps(cultSteps[cult], amount, game.cultOccupied(cult));
         if (amount > 1) {
             --maxPriests;
         }
+        if (faction instanceof Acolytes && strongholds > 0) {
+            ++amount;
+        }
+        cultSteps[cult] = addPowerFromCultSteps(cultSteps[cult], amount, game.cultOccupied(cult));
     }
 
     private void addIncomeFromCults(int steps, int requiredSteps, Resources income) {

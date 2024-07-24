@@ -1682,4 +1682,8 @@ public class Game extends JPanel {
         }
         return cost;
     }
+
+    public int getPlayerCount() {
+        return players.size();
+    }
 }
