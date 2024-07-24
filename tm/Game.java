@@ -51,6 +51,8 @@ public class Game extends JPanel {
     private Hex bridgeEnd;
     private boolean pendingTownPlacement;
     private boolean doubleTurn;
+    private Hex.Type iceColor;
+    private Hex.Type volcanoColor;
 
     public Phase phase;
     private boolean factionsPicked;
@@ -1518,12 +1520,28 @@ public class Game extends JPanel {
         return players.stream().sorted((p1, p2) -> factions.indexOf(p2.getFaction()) - factions.indexOf(p1.getFaction())).mapToInt(Player::getPoints).toArray();
     }
 
+    public Set<Integer> getSelectedOrdinals() {
+        final Set<Integer> selectedOrdinals = new HashSet<>();
+        for (Player p : players) {
+            if (p.getFaction() != null) {
+                selectedOrdinals.add(p.getFaction().getHomeType().ordinal());
+            }
+        }
+        return selectedOrdinals;
+    }
+
     public Stream<Faction> getSelectableFactions() {
         final Set<Hex.Type> selectedColors = new HashSet<>();
         for (Player p : players) {
             if (p.getFaction() != null) {
                 selectedColors.add(p.getFaction().getHomeType());
             }
+        }
+        if (selectedColors.contains(Hex.Type.ICE)) {
+            selectedColors.add(iceColor);
+        }
+        if (selectedColors.contains(Hex.Type.VOLCANO)) {
+            selectedColors.add(volcanoColor);
         }
         return GameData.allFactions.stream().filter(f -> !selectedColors.contains(f.getHomeType()));
     }
@@ -1685,5 +1703,13 @@ public class Game extends JPanel {
 
     public int getPlayerCount() {
         return players.size();
+    }
+
+    public void setIceColor(Hex.Type type) {
+        iceColor = type;
+    }
+
+    public void setVolcanoColor(Hex.Type type) {
+        volcanoColor = type;
     }
 }

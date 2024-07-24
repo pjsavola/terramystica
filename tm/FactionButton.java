@@ -5,6 +5,7 @@ import tm.faction.Faction;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Set;
 
 public class FactionButton extends JButton {
 
@@ -15,7 +16,20 @@ public class FactionButton extends JButton {
         this.faction = faction;
         hex = new Hex("", faction.getHomeType());
         addActionListener(e -> {
-            game.resolveAction(new SelectFactionAction(GameData.allFactions.indexOf(faction)));
+            Hex.Type color = null;
+            if (faction.getHomeType() == Hex.Type.VOLCANO) {
+                final JDialog popup = new JDialog(dialog, true);
+                final Set<Integer> selectedOrdinals = game.getSelectedOrdinals();
+                final JPanel terraformPanel = new JPanel();
+                final Hex.Type[] result = new Hex.Type[1];
+                for (int i = 0; i < 7; ++i) {
+                    if (!selectedOrdinals.contains(i)) {
+                        terraformPanel.add(new TerrainButton(popup, "", Hex.Type.values()[i], 0, result));
+                    }
+                }
+                color = result[0];
+            }
+            game.resolveAction(new SelectFactionAction(GameData.allFactions.indexOf(faction), color));
             dialog.setVisible(false);
         });
     }
