@@ -91,8 +91,8 @@ public class DigAction extends Action {
         }
         if (requiredDigging > 0) {
             if (pendingSpades > 0 && !player.allowExtraSpades) throw new RuntimeException("Adding extra spades not allowed");
-            if (cult >= 0) {
-                player.dig(requiredDigging, cult);
+            if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
+                player.volcanoDig(requiredDigging, cult);
             } else {
                 player.dig(requiredDigging);
             }

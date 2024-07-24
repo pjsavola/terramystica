@@ -200,6 +200,7 @@ public class Player extends JPanel {
         addIncome(faction.getInitialIncome());
         final int[] initialCultSteps = faction.getInitialCultSteps();
         System.arraycopy(initialCultSteps, 0, cultSteps, 0, cultSteps.length);
+        game.factionPicked(this, faction);
     }
 
     public void addFavor(int number) {
@@ -643,19 +644,6 @@ public class Player extends JPanel {
             }
             points += 2 * amount;
             priests -= amount;
-        } else if (faction instanceof Dragonlords) {
-            while (amount-- > 0) {
-                if (power[0] > 0) {
-                    --power[0];
-                } else if (power[1] > 0) {
-                    --power[1];
-                } else if (power[2] > 0 ) {
-                    --power[2];
-                } else {
-                    throw new RuntimeException("Cannot afford to dig" + amount);
-                }
-            }
-            amount = 1;
         } else {
             if (workers < amount * digging)
                 throw new RuntimeException("Cannot afford to dig " + amount);
@@ -668,12 +656,27 @@ public class Player extends JPanel {
         addSpades(amount, false);
     }
 
-    public void dig(int amount, int cult) {
-        if (cultSteps[cult] < amount) {
-            throw new RuntimeException("Cannot afford to dig using cult steps");
+    public void volcanoDig(int amount, int cult) {
+        if (cult >= 0) {
+            if (cultSteps[cult] < amount) {
+                throw new RuntimeException("Cannot afford to dig using cult steps");
+            }
+            cultSteps[cult] -= amount;
+        } else { // Dragonlords
+            while (amount-- > 0) {
+                if (power[0] > 0) {
+                    --power[0];
+                } else if (power[1] > 0) {
+                    --power[1];
+                } else if (power[2] > 0 ) {
+                    --power[2];
+                } else {
+                    throw new RuntimeException("Cannot afford to dig" + amount);
+                }
+            }
         }
-        cultSteps[cult] -= amount;
-        addSpades(1, false);
+        pendingSpades = 1;
+        allowExtraSpades = false;
     }
 
     public boolean canDig(int amount, boolean useRange) {
@@ -705,8 +708,14 @@ public class Player extends JPanel {
     }
 
     public void addSpades(int amount, boolean allowExtraSpades) {
-        pendingSpades += amount;
-        this.allowExtraSpades = allowExtraSpades;
+        if (faction instanceof Acolytes) {
+
+        } else if (faction instanceof Dragonlords) {
+            power[0] += amount;
+        } else {
+            pendingSpades += amount;
+            this.allowExtraSpades = allowExtraSpades;
+        }
     }
 
     public int getPendingSpades() {

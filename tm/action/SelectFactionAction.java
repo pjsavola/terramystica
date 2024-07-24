@@ -9,12 +9,10 @@ import tm.faction.Faction;
 public class SelectFactionAction extends Action {
 
     private final int factionIdx;
-    private final Hex.Type color;
     private transient Faction faction;
 
-    public SelectFactionAction(int factionIdx, Hex.Type color) {
+    public SelectFactionAction(int factionIdx) {
         this.factionIdx = factionIdx;
-        this.color = color;
     }
 
     @Override
@@ -30,17 +28,11 @@ public class SelectFactionAction extends Action {
 
     @Override
     public boolean canExecute() {
-        if (faction.getHomeType() == Hex.Type.ICE || faction.getHomeType() == Hex.Type.VOLCANO) {
-            if (color == null) return false;
-            if (game.getSelectedOrdinals().contains(color.ordinal())) return false;
-        }
         return player.getFaction() == null && game.getSelectableFactions().anyMatch(f -> f == faction);
     }
 
     @Override
     public void execute() {
-        if (faction.getHomeType() == Hex.Type.ICE) game.setIceColor(color);
-        if (faction.getHomeType() == Hex.Type.VOLCANO) game.setVolcanoColor(color);
         player.selectFaction(faction);
     }
 

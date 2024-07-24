@@ -34,7 +34,13 @@ public class TurnOrder extends JPanel {
         g.setFont(font);
 
         switch (game.phase) {
-            case PICK_FACTIONS -> g.drawString("Select Faction, " + game.getCurrentPlayer(), 0, topMargin + 16);
+            case PICK_FACTIONS -> {
+                if (game.getCurrentPlayer().getFaction() == null) {
+                    g.drawString("Select Faction, " + game.getCurrentPlayer(), 0, topMargin + 16);
+                } else {
+                    drawPlayers(g, 0, topMargin, "Pick Color", List.of(game.getCurrentPlayer()));
+                }
+            }
             case INITIAL_DWELLINGS -> drawPlayers(g, 0, topMargin, "Setup", turnOrder);
             case INITIAL_BONS -> drawPlayers(g, 0, topMargin, "Pick Bon", turnOrder);
             case ACTIONS -> {

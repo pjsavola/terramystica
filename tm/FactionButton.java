@@ -16,22 +16,27 @@ public class FactionButton extends JButton {
         this.faction = faction;
         hex = new Hex("", faction.getHomeType());
         addActionListener(e -> {
-            Hex.Type color = null;
-            if (faction.getHomeType() == Hex.Type.VOLCANO) {
-                final JDialog popup = new JDialog(dialog, true);
-                final Set<Integer> selectedOrdinals = game.getSelectedOrdinals();
-                final JPanel terraformPanel = new JPanel();
-                final Hex.Type[] result = new Hex.Type[1];
-                for (int i = 0; i < 7; ++i) {
-                    if (!selectedOrdinals.contains(i)) {
-                        terraformPanel.add(new TerrainButton(popup, "", Hex.Type.values()[i], 0, result));
-                    }
-                }
-                color = result[0];
-            }
-            game.resolveAction(new SelectFactionAction(GameData.allFactions.indexOf(faction), color));
+            game.resolveAction(new SelectFactionAction(GameData.allFactions.indexOf(faction)));
             dialog.setVisible(false);
         });
+    }
+
+    public static Hex.Type pickReplacedColor(JFrame parent, Game game) {
+        final JDialog popup = new JDialog(parent, true);
+        final Set<Integer> selectedOrdinals = game.getSelectedOrdinals();
+        final JPanel terraformPanel = new JPanel();
+        final Hex.Type[] result = new Hex.Type[1];
+        for (int i = 0; i < 7; ++i) {
+            if (!selectedOrdinals.contains(i)) {
+                terraformPanel.add(new TerrainButton(popup, "", Hex.Type.values()[i], 0, result));
+            }
+        }
+        popup.setTitle("Select replaced color");
+        popup.setContentPane(terraformPanel);
+        popup.setLocationRelativeTo(parent);
+        popup.pack();
+        popup.setVisible(true);
+        return result[0];
     }
 
     @Override

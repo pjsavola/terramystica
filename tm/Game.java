@@ -708,7 +708,13 @@ public class Game extends JPanel {
                         phase = Phase.INITIAL_DWELLINGS;
                         setupTurnOrder();
                     } else if (!rewinding) {
-                        showFactionPopup();
+                        if (turnOrder.get(0).getFaction() == null) {
+                            showFactionPopup();
+                        } else {
+                            repaint();
+                            final Hex.Type type = FactionButton.pickReplacedColor(frame, this);
+                            resolveAction(new PickColorAction(type));
+                        }
                     }
                 } else if (turnOrder.isEmpty()) {
                     if (cultIncome == round) {
@@ -1711,5 +1717,13 @@ public class Game extends JPanel {
 
     public void setVolcanoColor(Hex.Type type) {
         volcanoColor = type;
+        factionsPicked = true;
+    }
+
+    public void factionPicked(Player player, Faction faction) {
+        switch (faction.getHomeType()) {
+            case ICE -> turnOrder.add(0, player);
+            case VOLCANO -> turnOrder.add(player);
+        }
     }
 }
