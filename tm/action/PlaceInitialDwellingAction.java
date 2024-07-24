@@ -24,12 +24,26 @@ public class PlaceInitialDwellingAction extends Action {
     @Override
     public boolean canExecute() {
         final Hex hex = game.getHex(row, col);
-        return hex.getType() == player.getHomeType() && hex.getStructure() == null;
+        if (hex.getStructure() != null) return false;
+
+        if (player.getHomeType() == Hex.Type.ICE) {
+            return game.getIceColor() == hex.getType();
+        } else if (player.getHomeType() == Hex.Type.VOLCANO) {
+            return game.getVolcanoColor() == hex.getType();
+        } else {
+            return hex.getType() == player.getHomeType();
+        }
     }
 
     @Override
     public void execute() {
-        game.getHex(row, col).setStructure(Hex.Structure.DWELLING);
+        final Hex hex = game.getHex(row, col);
+        hex.setStructure(Hex.Structure.DWELLING);
+        if (player.getHomeType() == Hex.Type.ICE) {
+            hex.setType(Hex.Type.ICE);
+        } else if (player.getHomeType() == Hex.Type.VOLCANO) {
+            hex.setType(Hex.Type.VOLCANO);
+        }
         player.placeInitialDwelling();
     }
 

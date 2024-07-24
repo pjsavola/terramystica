@@ -404,7 +404,17 @@ public class Game extends JPanel {
 
         switch (phase) {
             case INITIAL_DWELLINGS -> {
-                return mapPanel.getAllHexes().stream().filter(hex -> hex.isEmpty() && hex.getType() == player.getHomeType()).collect(Collectors.toSet());
+                return mapPanel.getAllHexes().stream().filter(hex -> {
+                    if (!hex.isEmpty()) return false;
+
+                    if (player.getHomeType() == Hex.Type.ICE) {
+                        return getIceColor() == hex.getType();
+                    } else if (player.getHomeType() == Hex.Type.VOLCANO) {
+                        return getVolcanoColor() == hex.getType();
+                    } else {
+                        return hex.getType() == player.getHomeType();
+                    }
+                }).collect(Collectors.toSet());
             }
             case CONFIRM_ACTION -> {
                 final Set<Hex> result = new HashSet<>();
@@ -1718,6 +1728,14 @@ public class Game extends JPanel {
     public void setVolcanoColor(Hex.Type type) {
         volcanoColor = type;
         factionsPicked = true;
+    }
+
+    public Hex.Type getIceColor() {
+        return iceColor;
+    }
+
+    public Hex.Type getVolcanoColor() {
+        return volcanoColor;
     }
 
     public void factionPicked(Player player, Faction faction) {
