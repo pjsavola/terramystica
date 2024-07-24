@@ -32,6 +32,11 @@ public class PickColorAction extends Action {
     }
 
     @Override
+    public boolean isPass() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "Pick " + type;
     }

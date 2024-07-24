@@ -1727,7 +1727,6 @@ public class Game extends JPanel {
 
     public void setVolcanoColor(Hex.Type type) {
         volcanoColor = type;
-        factionsPicked = true;
     }
 
     public Hex.Type getIceColor() {
