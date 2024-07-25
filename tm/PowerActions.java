@@ -1,6 +1,7 @@
 package tm;
 
 import tm.action.SelectPowerActionAction;
+import tm.faction.Yetis;
 
 import javax.swing.*;
 import java.awt.*;
@@ -110,8 +111,8 @@ public class PowerActions extends JPanel {
         return new Dimension(354, 49);
     }
 
-    public static int getRequiredPower(int act) {
-        return switch (act) {
+    public static int getRequiredPower(Player player, int act) {
+        final int power = switch (act) {
             case 1 -> 3;
             case 2 -> 3;
             case 3 -> 4;
@@ -120,5 +121,9 @@ public class PowerActions extends JPanel {
             case 6 -> 6;
             default -> throw new RuntimeException("Unknown act: " + act);
         };
+        if (player.getFaction() instanceof Yetis) {
+            return power - 1;
+        }
+        return power;
     }
 }

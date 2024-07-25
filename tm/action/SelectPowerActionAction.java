@@ -1,6 +1,7 @@
 package tm.action;
 
 import tm.PowerActions;
+import tm.faction.Yetis;
 
 public class SelectPowerActionAction extends Action {
 
@@ -12,7 +13,9 @@ public class SelectPowerActionAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return act >= 1 && act <= 6 && !game.usedPowerActions[act - 1] && player.canAffordPower(PowerActions.getRequiredPower(act));
+        if (act < 1 || act > 6) return false;
+
+        return (!game.usedPowerActions[act - 1] || (player.getFaction() instanceof Yetis && player.hasStronghold())) && player.canAffordPower(PowerActions.getRequiredPower(player, act));
     }
 
     @Override

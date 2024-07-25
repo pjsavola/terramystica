@@ -56,7 +56,6 @@ public class Player extends JPanel {
     private Resources favorIncome = Resources.zero;
     private final int[] cultSteps = new int[4];
     private static final int[] cumulativeCultPower = { 0, 0, 0, 1, 1, 3, 3, 5, 5, 5, 8 };
-    private static final int[] actionCost = { 3, 3, 4, 4, 4, 6 };
     private Faction faction;
     private int bridgesLeft = 3;
 
@@ -421,18 +420,18 @@ public class Player extends JPanel {
     }
 
     public boolean canUseAction(int act) {
-        if (game.usedPowerActions[act - 1]) return false;
+        if (game.usedPowerActions[act - 1] && (!(faction instanceof Yetis) || !hasStronghold())) return false;
 
         if (act == 1 && bridgesLeft == 0) return false;
 
-        return canAffordPower(actionCost[act - 1]);
+        return canAffordPower(PowerActions.getRequiredPower(this, act));
     }
 
     public void usePowerAction(int act) {
         if (!canUseAction(act))
             throw new RuntimeException("Unable to afford action " + act);
 
-        payPower(actionCost[act - 1]);
+        payPower(PowerActions.getRequiredPower(this, act));
         switch (act) {
             case 1 -> ++pendingBridges;
             case 2 -> addIncome(Resources.p1);

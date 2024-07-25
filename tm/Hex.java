@@ -1,5 +1,7 @@
 package tm;
 
+import tm.faction.Yetis;
+
 import java.util.List;
 import java.awt.*;
 
@@ -144,8 +146,8 @@ public class Hex {
             case DWELLING -> 1;
             case TRADING_POST -> 2;
             case TEMPLE -> 2;
-            case STRONGHOLD -> 3;
-            case SANCTUARY -> 3;
+            case STRONGHOLD -> player.getFaction() instanceof Yetis ? 4 : 3;
+            case SANCTUARY -> player.getFaction() instanceof Yetis ? 4 : 3;
         };
     }
 
