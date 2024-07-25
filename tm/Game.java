@@ -1583,6 +1583,9 @@ public class Game extends JPanel {
                 selectedOrdinals.add(p.getFaction().getHomeType().ordinal());
             }
         }
+        if (iceColor != null) {
+            selectedOrdinals.add(iceColor.ordinal());
+        }
         return selectedOrdinals;
     }
 
