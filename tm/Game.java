@@ -780,6 +780,7 @@ public class Game extends JPanel {
                     if (leechAccepted) {
                         turnOrder.add(0, leechTrigger);
                         if (!rewinding && !importing) {
+                            repaint();
                             final int cult = Cults.selectCult(this, 1, true);
                             resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
                         }
