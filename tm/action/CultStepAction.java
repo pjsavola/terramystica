@@ -56,7 +56,7 @@ public class CultStepAction extends Action {
     }
 
     public boolean isFree() {
-        return source == Source.ACOLYTES;
+        return source == Source.ACOLYTES && !game.resolvingCultSpades();
     }
 
     @Override

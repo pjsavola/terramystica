@@ -305,6 +305,9 @@ public class Game extends JPanel {
             final int cult = Cults.selectCult(this, 1, true);
             resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
         }
+        if (resolvingCultSpades()) {
+            selectPendingCultSteps();
+        }
         if (!factionsPicked) {
             if (turnOrder.get(0).getFaction() == null) {
                 showFactionPopup();
@@ -677,6 +680,9 @@ public class Game extends JPanel {
                 phase = factionsPicked ? Phase.ACTIONS : Phase.PICK_FACTIONS;
                 endTurn();
                 refresh();
+                if (resolvingCultSpades()) {
+                    selectPendingCultSteps();
+                }
             }
         }
     }
@@ -752,7 +758,7 @@ public class Game extends JPanel {
                         if (cultIncome > 0 && cultIncome < 6) {
                             for (Player p : nextTurnOrder) {
                                 p.addCultIncome(gameData.getRounds().get(cultIncome - 1));
-                                if (p.getPendingSpades() > 0) {
+                                if (p.getPendingSpades() > 0 || p.pendingCultSteps > 0) {
                                     turnOrder.add(p);
                                 }
                             }
