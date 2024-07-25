@@ -1068,6 +1068,8 @@ public class Game extends JPanel {
         private static final Pattern forfeitAction = Pattern.compile("-([Ss][Pp][Aa][Dd][Ee]|[Bb][Rr][Ii][Dd][Gg][Ee])");
         private static final Pattern connectPattern = Pattern.compile("[Cc][Oo][Nn][Nn][Ee][Cc][Tt] [Rr][0-9]*");
         private static final Pattern darklingPattern = Pattern.compile("\\+[1-9]? ?[Pp]");
+        private static final Pattern pickColorPattern = Pattern.compile("[Pp][Ii][Cc][Kk]-[Cc][Oo][Ll][Oo][Rr] .*");
+        private static final Pattern payCultPattern = Pattern.compile("-[34] ?" + cultRegex);
 
         private int findCult(String cultName) {
             for (int i = 0; i < 4; ++i) {
@@ -1167,6 +1169,7 @@ public class Game extends JPanel {
             this.leechFeed = leechFeed;
 
             importing = true;
+            Point acolyteDig = null;
             int setupCompleteCount = 0;
             while (getCurrentPlayer() != null) {
                 final Player player = getCurrentPlayer();
@@ -1201,7 +1204,11 @@ public class Game extends JPanel {
                                     throw new RuntimeException("Not enough spades");
                                 }
                                 pendingDigging -= cost;
-                                replayAction(new DigAction(p.x, p.y, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
+                                if (player.getFaction() instanceof Acolytes) {
+                                    acolyteDig = p;
+                                } else {
+                                    replayAction(new DigAction(p.x, p.y, player.getHomeType(), mapPanel.getJumpableTiles(player).contains(hex)));
+                                }
                             } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                                 replayAction(new SandstormAction(p.x, p.y));
                             }
@@ -1223,7 +1230,11 @@ public class Game extends JPanel {
                                 }
                                 pendingDigging -= cost;
                             }
-                            replayAction(new DigAction(p.x, p.y, type, mapPanel.getJumpableTiles(player).contains(hex)));
+                            if (player.getFaction() instanceof Acolytes) {
+                                acolyteDig = p;
+                            } else {
+                                replayAction(new DigAction(p.x, p.y, type, mapPanel.getJumpableTiles(player).contains(hex)));
+                            }
                         }
                     } else if (passPattern.matcher(action).matches()) {
                         final String[] s = action.split(" ");
@@ -1495,6 +1506,26 @@ public class Game extends JPanel {
                             }
                         }
                         replayAction(new DarklingsConvertAction(count));
+                    } else if (pickColorPattern.matcher(action).matches()) {
+                        final Hex.Type color = Hex.Type.valueOf(action.split(" ")[1].toUpperCase());
+                        if (player.getFaction().getHomeType() == Hex.Type.ICE) {
+                            iceColor = color;
+                        } else if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
+                            volcanoColor = color;
+                        }
+                    } else if (payCultPattern.matcher(action).matches()) {
+                        if (acolyteDig != null) {
+                            final String cult = action.substring(2).trim();
+                            for (int i = 0; i < 4; ++i) {
+                                if (Cults.getCultName(i).equalsIgnoreCase(cult)) {
+                                    replayAction(new DigAction(acolyteDig.x, acolyteDig.y, Hex.Type.VOLCANO, i));
+                                    break;
+                                }
+                            }
+                            acolyteDig = null;
+                        } else {
+                            throw new RuntimeException("Illegal move");
+                        }
                     } else {
                         log("Unhandled action: " + action);
                         break;
