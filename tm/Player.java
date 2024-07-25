@@ -1142,27 +1142,35 @@ public class Player extends JPanel {
     }
 
     public void paintColorWheel(Graphics g, int x, int y) {
+        final int circleRadius = 8;
+        final int wheelRadius = 25;
         final Hex.Type type = faction.getHomeType();
         int ordinal = type.ordinal();
         if (type == Hex.Type.ICE) {
             if (game.getIceColor() == null) return;
 
             ordinal = game.getIceColor().ordinal();
+            g.setColor(Color.BLACK);
+            g.fillOval(x + wheelRadius, y + wheelRadius - circleRadius, circleRadius * 2, circleRadius * 2);
+            g.setColor(Hex.Type.ICE.getHexColor());
+            g.fillOval(x + wheelRadius + 1, y + wheelRadius - circleRadius + 1, circleRadius * 2 - 2, circleRadius * 2 - 2);
         } else if (type == Hex.Type.VOLCANO) {
             if (game.getVolcanoColor() == null) return;
 
             ordinal = game.getVolcanoColor().ordinal();
+            g.setColor(Color.BLACK);
+            g.fillOval(x + wheelRadius, y + wheelRadius, circleRadius * 2, circleRadius * 2);
+            g.setColor(Hex.Type.VOLCANO.getHexColor());
+            g.fillOval(x + wheelRadius + 1, y + wheelRadius + 1, circleRadius * 2 - 2, circleRadius * 2 - 2);
         }
-        final int circleRadius = 8;
-        final int wheelRadius = 25;
         double angle = Math.PI * 1.5;
         for (int i = 0; i < 7; ++i) {
             final int dx = (int) (Math.cos(angle) * wheelRadius + 0.5);
             final int dy = (int) (Math.sin(angle) * wheelRadius + 0.5);
             g.setColor(Color.BLACK);
             g.fillOval(x + wheelRadius + dx, y + wheelRadius + dy, circleRadius * 2, circleRadius * 2);
-            final Hex.Type topType = Hex.Type.values()[(ordinal - i + 7) % 7];
-            g.setColor(topType.getHexColor());
+            final Hex.Type circleType = Hex.Type.values()[(ordinal - i + 7) % 7];
+            g.setColor(circleType.getHexColor());
             g.fillOval(x + wheelRadius + dx + 1, y + wheelRadius + dy + 1, circleRadius * 2 - 2, circleRadius * 2 - 2);
             angle += 2 * Math.PI / 7;
         }
