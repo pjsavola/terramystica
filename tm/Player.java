@@ -203,6 +203,9 @@ public class Player extends JPanel {
         final int[] initialCultSteps = faction.getInitialCultSteps();
         System.arraycopy(initialCultSteps, 0, cultSteps, 0, cultSteps.length);
         game.factionPicked(this, faction);
+        if (faction instanceof IceMaidens) {
+            ++pendingFavors;
+        }
     }
 
     public void addFavor(int number) {
@@ -868,6 +871,9 @@ public class Player extends JPanel {
         }
         if (faction instanceof Engineers && strongholds > 0) {
             points += (3 - bridgesLeft) * 3;
+        }
+        if (faction instanceof IceMaidens && strongholds > 0) {
+            points += 3 * temples;
         }
         passed = true;
     }
