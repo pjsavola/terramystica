@@ -1564,13 +1564,11 @@ public class Game extends JPanel {
         return type;
     }
 
-    public boolean validateVictoryPoints(int[] vps) {
+    public boolean validateVictoryPoints() {
         if (gameData.results != null) {
-            if (vps == null) {
-                vps = new int[gameData.playerNames.size()];
-                for (int i = 0; i < gameData.playerNames.size(); ++i) {
-                    vps[i] = gameData.results.get(gameData.playerNames.get(i));
-                }
+            final int[] vps = new int[gameData.playerNames.size()];
+            for (int i = 0; i < gameData.playerNames.size(); ++i) {
+                vps[i] = gameData.results.get(gameData.playerNames.get(i));
             }
             return Arrays.equals(vps, getVictoryPoints());
         }

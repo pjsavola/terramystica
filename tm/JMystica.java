@@ -40,54 +40,21 @@ public class JMystica {
 
         MapData.init();
 
-        final Map<String, int[]> tests = new HashMap<>();
-        tests.put("tests/Petri01", new int[] {145, 120, 94, 142});
-        //tests.put("tests/Petri02", new int[] {177, 162, 76}); -- Dodgy resource manipulation!
-        tests.put("tests/Petri03", new int[] {113, 120, 176});
-        tests.put("tests/Petri04", new int[] {151, 168, 109});
-        tests.put("tests/Petri05", new int[] {150, 145, 126});
-        tests.put("tests/Petri06", new int[] {152, 164, 166});
-        tests.put("tests/Petri07", new int[] {127, 164, 119});
-        tests.put("tests/Petri08", new int[] {161, 109, 120});
-        tests.put("tests/Petri09", new int[] {126, 152, 145});
-        tests.put("tests/Petri10", new int[] {110, 153, 146});
-        //tests.put("tests/Petri11", new int[] {121, 110, 159}); -- Has illegal moves!
-        tests.put("tests/Petri12", new int[] {103, 156, 111});
-        tests.put("tests/Petri13", new int[] {138, 110, 138});
-        tests.put("tests/Petri14", new int[] {169, 111, 119});
-        tests.put("tests/Petri15", new int[] {162, 127, 111});
-        tests.put("tests/Petri16", new int[] {116, 149, 98});
-        tests.put("tests/Petri17", new int[] {82, 169, 104});
-        tests.put("tests/Petri18", new int[] {120, 128, 116, 152});
-        tests.put("tests/Petri19", new int[] {93, 126, 150, 140});
-        tests.put("tests/Petri20", new int[] {131, 202, 104, 145});
-        tests.put("tests/Petri21", new int[] {127, 66, 145, 96});
-        tests.put("tests/Petri22", new int[] {174, 160});
-        //tests.put("tests/Petri23", null); -- Dodgy resource manipulation!
-        tests.put("tests/Petri24", null);
-        tests.put("tests/Petri25", null);
-        tests.put("tests/Petri26", null);
-        tests.put("tests/Petri27", null);
-        tests.put("tests/Petri28", null);
-        tests.put("tests/Petri29", null);
-        tests.put("tests/Petri30", null);
-        tests.put("tests/Petri31", null);
-        tests.put("tests/Petri32", null);
-        tests.put("tests/Petri33", null);
-        tests.put("tests/Petri34", null);
-        tests.put("tests/Petri35", null);
-        tests.put("tests/Petri36", null);
-        tests.put("tests/Petri37", null);
-        tests.put("tests/Petri38", null);
-        tests.put("tests/Petri39", null);
-        tests.put("tests/Petri40", null);
-        tests.put("tests/Petri41", null);
-        tests.put("tests/Petri42", null);
-        tests.put("tests/Petri43", null);
+        final Set<File> tests = new HashSet<>();
+        final File testFolder = new File("tests");
+        if (testFolder.exists() && testFolder.isDirectory()) {
+            final File[] files = FileSystemView.getFileSystemView().getFiles(testFolder, false);
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    tests.add(file);
+                    System.err.println(file.getName());
+                }
+            }
+        }
 
         if (maxReplayActionCount >= 2000) {
-            tests.forEach((file, vps) -> {
-                if (!test(file, vps))
+            tests.forEach(file -> {
+                if (!test(file))
                     throw new RuntimeException("Test " + file + " failed!");
             });
         }
@@ -319,15 +286,15 @@ public class JMystica {
         frame.setVisible(true);
     }
 
-    public static boolean test(String file, int[] vpTargets) {
+    public static boolean test(File file) {
         try {
-            final GameData test = new GameData(new Scanner(new File(file)));
+            final GameData test = new GameData(new Scanner(file));
             test.silentMode = true;
             final JFrame frame = new JFrame();
             try {
                 final Game game = new Game(frame, test);
                 final int[] vps = game.getVictoryPoints();
-                if (game.validateVictoryPoints(vpTargets)) {
+                if (game.validateVictoryPoints()) {
                     game.rewind();
                     return true;
                 }
