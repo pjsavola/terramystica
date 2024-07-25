@@ -311,7 +311,10 @@ public class Game extends JPanel {
             if (turnOrder.get(0).getFaction() == null) {
                 showFactionPopup();
             } else {
-                final Hex.Type type = FactionButton.pickReplacedColor(frame, this);
+                Hex.Type type;
+                do {
+                    type = FactionButton.pickReplacedColor(frame, this);
+                } while (type == null);
                 resolveAction(new PickColorAction(type));
             }
         }
