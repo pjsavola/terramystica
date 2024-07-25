@@ -310,7 +310,7 @@ public class Game extends JPanel {
         if (!factionsPicked) {
             if (turnOrder.get(0).getFaction() == null) {
                 showFactionPopup();
-            } else {
+            } else if (turnOrder.get(0).getFaction().getHomeType() == Hex.Type.VOLCANO) {
                 final Hex.Type type = FactionButton.pickReplacedColor(frame, this);
                 resolveAction(new PickColorAction(type));
             }
@@ -682,6 +682,13 @@ public class Game extends JPanel {
                 if (resolvingCultSpades()) {
                     selectPendingCultSteps();
                 }
+                if (!factionsPicked && iceColor == null && !turnOrder.isEmpty() && turnOrder.get(0).getFaction() != null && turnOrder.get(0).getFaction().getHomeType() == Hex.Type.ICE) {
+                    Hex.Type type;
+                    do {
+                        type = FactionButton.pickReplacedColor(frame, this);
+                    } while (type == null);
+                    resolveAction(new PickColorAction(type));
+                }
             }
         }
     }
@@ -746,9 +753,12 @@ public class Game extends JPanel {
                     } else if (!rewinding) {
                         if (turnOrder.get(0).getFaction() == null) {
                             showFactionPopup();
-                        } else {
+                        } else if (turnOrder.get(0).getFaction().getHomeType() == Hex.Type.VOLCANO) {
                             repaint();
-                            final Hex.Type type = FactionButton.pickReplacedColor(frame, this);
+                            Hex.Type type;
+                            do {
+                                type = FactionButton.pickReplacedColor(frame, this);
+                            } while (type == null);
                             resolveAction(new PickColorAction(type));
                         }
                     }

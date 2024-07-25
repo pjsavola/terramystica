@@ -43,6 +43,6 @@ public class PickColorAction extends Action {
 
     @Override
     public String toString() {
-        return "Pick " + type;
+        return "Pick-color " + type;
     }
 }
