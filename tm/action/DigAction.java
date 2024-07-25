@@ -43,7 +43,8 @@ public class DigAction extends Action {
             requiredSpades = 1;
             requiredDigging = game.getVolcanoDigCost(target, player);
         } else {
-            requiredSpades = player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, type);
+            final Hex.Type effectiveType = type == Hex.Type.ICE ? game.getIceColor() : type;
+            requiredSpades = Math.max(1, player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, effectiveType));
             pendingSpades = player.getPendingSpades();
             requiredDigging = Math.max(0, requiredSpades - pendingSpades);
             resolvingCultSpades = game.resolvingCultSpades();

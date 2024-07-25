@@ -603,22 +603,25 @@ public class Game extends JPanel {
             }
         } else {
             int options = 0;
+            final boolean iceDig = player.getFaction().getHomeType() == Hex.Type.ICE;
             final JDialog popup = new JDialog(frame, true);
             final JPanel terraformPanel = new JPanel();
             final int ordinal = hex.getType().ordinal();
             final Hex.Type[] result = new Hex.Type[1];
             for (int i = ordinal + 4; i < ordinal + 11; ++i) {
                 final Hex.Type type = Hex.Type.values()[i % 7];
-                if (type == hex.getType()) continue;
+                if (type == hex.getType() && (type != iceColor || !iceDig)) continue;
 
-                final int requiredSpades = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
+                final int requiredSpades = Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type));
                 final int requiredDigging = Math.max(0, requiredSpades - player.getPendingSpades());
                 if (!player.canDig(requiredDigging, jump)) continue;
                 if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) continue;
-                if (player.getPendingSpades() > 1 && type != player.getHomeType() && requiredSpades < player.getPendingSpades())
+
+                final Hex.Type finalType = iceDig && type == iceColor ? Hex.Type.ICE : type;
+                if (player.getPendingSpades() > 1 && finalType != player.getHomeType() && requiredSpades < player.getPendingSpades())
                     continue;
 
-                terraformPanel.add(new TerrainButton(popup, hex.getId(), type, requiredDigging, result));
+                terraformPanel.add(new TerrainButton(popup, hex.getId(), finalType, requiredDigging, result));
                 ++options;
             }
             if (options == 0) {
@@ -1192,7 +1195,8 @@ public class Game extends JPanel {
                         } else {
                             final Hex hex = mapPanel.getHex(p.x, p.y);
                             if (pendingDigging > 0 && !player.hasPendingBuild(hex)) {
-                                final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, player.getHomeType());
+                                final Hex.Type effectiveType = player.getFaction().getHomeType() == Hex.Type.ICE ? iceColor : player.getHomeType();
+                                final int cost = Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, effectiveType));
                                 if (pendingDigging < cost) {
                                     throw new RuntimeException("Not enough spades");
                                 }
@@ -1211,7 +1215,8 @@ public class Game extends JPanel {
                             replayAction(new SandstormAction(p.x, p.y));
                         } else {
                             final Hex.Type type = getTransformTerrain(s, player, hex, pendingDigging);
-                            final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type);
+                            final Hex.Type effectiveType = type == Hex.Type.ICE ? iceColor : type;
+                            final int cost = Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, effectiveType));
                             if (!resolvingCultSpades()) {
                                 if (pendingDigging < cost) {
                                     throw new RuntimeException("Not enough spades");
@@ -1278,7 +1283,8 @@ public class Game extends JPanel {
                                             final Point p1 = mapPanel.getPoint(transform1[1]);
                                             final Hex hex1 = mapPanel.getHex(p1.x, p1.y);
                                             final Hex.Type type1 = getTransformTerrain(transform1, player, hex1, 2);
-                                            final int cost = player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex1, type1);
+                                            final Hex.Type effectiveType1 = type1 == Hex.Type.ICE ? iceColor : type1;
+                                            final int cost = Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex1, effectiveType1));
                                             if (cost == 1 && type1 != player.getHomeType()) {
                                                 final String action2 = actionIterator.next();
                                                 if (transformPattern.matcher(action2).matches()) {
