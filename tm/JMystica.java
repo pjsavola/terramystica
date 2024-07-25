@@ -1,7 +1,6 @@
 package tm;
 
 import tm.action.Action;
-import tm.faction.Giants;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -11,8 +10,6 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -47,7 +44,6 @@ public class JMystica {
             for (File file : files) {
                 if (!file.isDirectory()) {
                     tests.add(file);
-                    System.err.println(file.getName());
                 }
             }
         }

@@ -965,6 +965,7 @@ public class Player extends JPanel {
                 }
                 g.setColor(factionColor);
                 g.fillRect(dx, dy, 400, 16);
+                paintColorWheel(g, 335, 25);
                 g.setColor(faction.getHomeType().getFontColor());
                 String factionName = faction.getName();
                 if (!name.isEmpty()) {
@@ -1137,6 +1138,33 @@ public class Player extends JPanel {
         }
         if (!oldDim.equals(newDim)) {
             pool.setSize(newDim);
+        }
+    }
+
+    public void paintColorWheel(Graphics g, int x, int y) {
+        final Hex.Type type = faction.getHomeType();
+        int ordinal = type.ordinal();
+        if (type == Hex.Type.ICE) {
+            if (game.getIceColor() == null) return;
+
+            ordinal = game.getIceColor().ordinal();
+        } else if (type == Hex.Type.VOLCANO) {
+            if (game.getVolcanoColor() == null) return;
+
+            ordinal = game.getVolcanoColor().ordinal();
+        }
+        final int circleRadius = 8;
+        final int wheelRadius = 25;
+        double angle = Math.PI * 1.5;
+        for (int i = 0; i < 7; ++i) {
+            final int dx = (int) (Math.cos(angle) * wheelRadius + 0.5);
+            final int dy = (int) (Math.sin(angle) * wheelRadius + 0.5);
+            g.setColor(Color.BLACK);
+            g.fillOval(x + wheelRadius + dx, y + wheelRadius + dy, circleRadius * 2, circleRadius * 2);
+            final Hex.Type topType = Hex.Type.values()[(ordinal - i + 7) % 7];
+            g.setColor(topType.getHexColor());
+            g.fillOval(x + wheelRadius + dx + 1, y + wheelRadius + dy + 1, circleRadius * 2 - 2, circleRadius * 2 - 2);
+            angle += 2 * Math.PI / 7;
         }
     }
 }
