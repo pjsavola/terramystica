@@ -1,12 +1,10 @@
 package tm.action;
 
 import tm.Game;
-import tm.Hex;
 import tm.Player;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ForfeitAction extends Action {
 

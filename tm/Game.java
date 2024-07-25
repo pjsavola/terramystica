@@ -8,7 +8,6 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
 import java.io.*;
 import java.util.*;

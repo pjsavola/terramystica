@@ -1,10 +1,7 @@
 package tm.action;
 
 import tm.Game;
-import tm.Grid;
 import tm.Hex;
-import tm.Player;
-import tm.faction.Faction;
 
 public class PlaceInitialDwellingAction extends Action {
 

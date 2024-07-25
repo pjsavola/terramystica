@@ -1,7 +1,6 @@
 package tm.action;
 
 import tm.Cults;
-import tm.Game;
 
 public class PriestToCultAction extends Action {
 

@@ -1,6 +1,5 @@
 package tm.action;
 
-import tm.Game;
 import tm.Player;
 
 public class SelectFavAction extends PendingAction {

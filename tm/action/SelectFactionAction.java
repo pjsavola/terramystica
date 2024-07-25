@@ -2,7 +2,6 @@ package tm.action;
 
 import tm.Game;
 import tm.GameData;
-import tm.Hex;
 import tm.Player;
 import tm.faction.Faction;
 

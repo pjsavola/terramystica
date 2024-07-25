@@ -1,7 +1,6 @@
 package tm.action;
 
 import tm.faction.ChaosMagicians;
-import tm.faction.Engineers;
 
 public class ChaosMagiciansDoubleAction extends Action {
 

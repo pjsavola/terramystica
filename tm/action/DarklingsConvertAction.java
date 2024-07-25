@@ -1,8 +1,6 @@
 package tm.action;
 
-import tm.Game;
 import tm.Player;
-import tm.Resources;
 
 public class DarklingsConvertAction extends PendingAction {
 

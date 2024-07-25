@@ -1,6 +1,5 @@
 package tm.action;
 
-import tm.PowerActions;
 import tm.faction.Giants;
 
 public class SpadeAction extends Action {

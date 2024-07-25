@@ -3,7 +3,6 @@ package tm.action;
 import tm.Game;
 import tm.Player;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 public abstract class Action implements Serializable {

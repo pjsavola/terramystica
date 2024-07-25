@@ -1,7 +1,6 @@
 package tm.action;
 
 import tm.Game;
-import tm.Player;
 
 public class LeechAction extends Action {
 

@@ -1,11 +1,9 @@
 package tm;
 
 import tm.action.*;
-import tm.action.Action;
 import tm.faction.Alchemists;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.Set;

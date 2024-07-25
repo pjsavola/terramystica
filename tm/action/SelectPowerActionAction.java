@@ -1,6 +1,5 @@
 package tm.action;
 
-import tm.Game;
 import tm.PowerActions;
 
 public class SelectPowerActionAction extends Action {

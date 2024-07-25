@@ -3,7 +3,6 @@ package tm.action;
 import tm.Game;
 import tm.Hex;
 import tm.Player;
-import tm.faction.Engineers;
 import tm.faction.Mermaids;
 
 public class MermaidsTownAction extends Action {
