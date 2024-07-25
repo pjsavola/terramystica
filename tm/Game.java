@@ -653,6 +653,7 @@ public class Game extends JPanel {
             }
             refresh();
             chooseCultToMax();
+            selectPendingCultSteps();
             return true;
         }
         if (rewinding || importing) {
@@ -1660,6 +1661,15 @@ public class Game extends JPanel {
             }
         } else {
             allCombos.add(combo);
+        }
+    }
+
+    public void selectPendingCultSteps() {
+        if (!rewinding && !importing && phase == Phase.CONFIRM_ACTION) {
+            if (!turnOrder.isEmpty() && turnOrder.get(0).pendingCultSteps > 0) {
+                final int cult = Cults.selectCult(this, 1, true);
+                resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.ACOLYTES));
+            }
         }
     }
 

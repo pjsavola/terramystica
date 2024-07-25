@@ -24,7 +24,8 @@ public class Player extends JPanel {
         SANDSTORM("Sandstorm", true),
         FREE_TP("Free TP", true),
         FREE_D("Free D", true),
-        CHOOSE_CULTS("Choose Cults", true);
+        CHOOSE_CULTS("Choose Cults", true),
+        CULT_STEP("Cult Step", false);
 
         private final String description;
         private final boolean skippable;
@@ -67,11 +68,12 @@ public class Player extends JPanel {
     private int pendingWorkerToPriestConversions;
     private int pendingBridges;
     private int pendingTowns;
-    private Deque<Integer> pendingLeechQueue = new ArrayDeque<>(2);
+    private final Deque<Integer> pendingLeechQueue = new ArrayDeque<>(2);
     List<Hex> pendingBuilds = null;
     public boolean pendingSandstorm;
     public boolean pendingFreeTradingPost;
     public boolean pendingFreeDwelling;
+    public int pendingCultSteps;
     public final boolean[] maxedCults = new boolean[4];
     private boolean rangeUsedForDigging;
     public boolean allowExtraSpades;
@@ -126,6 +128,7 @@ public class Player extends JPanel {
         pendingSandstorm = false;
         pendingFreeTradingPost = false;
         pendingFreeDwelling = false;
+        pendingCultSteps = 0;
         for (int i = 0; i < 4; ++i) maxedCults[i] = false;
         allowExtraSpades = false;
         rangeUsedForDigging = false;
@@ -709,7 +712,7 @@ public class Player extends JPanel {
 
     public void addSpades(int amount, boolean allowExtraSpades) {
         if (faction instanceof Acolytes) {
-
+            pendingCultSteps += amount;
         } else if (faction instanceof Dragonlords) {
             power[0] += amount;
         } else {
@@ -1061,6 +1064,7 @@ public class Player extends JPanel {
         final Set<PendingType> result = getSkippablePendingActions();
         if (pendingTowns > 0) result.add(PendingType.SELECT_TOWN);
         if (pendingFavors > 0) result.add(PendingType.SELECT_FAV);
+        if (pendingCultSteps > 0) result.add(PendingType.CULT_STEP);
         return result;
     }
 
