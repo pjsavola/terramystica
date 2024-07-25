@@ -59,6 +59,7 @@ public class Resources implements Serializable {
     public static final Resources c10w4 = Resources.fromCoins(10).combine(w4);
     public static final Resources c8w5 = Resources.fromCoins(8).combine(Resources.fromWorkers(5));
     public static final Resources c4p1 = c4.combine(p1);
+    public static final Resources c5w1p1 = c5.combine(w1).combine(p1);
     public static final Resources c5w2p1 = c5.combine(w2).combine(p1);
     public static final Resources c1w2p1 = c1.combine(w2).combine(p1);
     public static final Resources w1pw3 = w1.combine(pw3);
