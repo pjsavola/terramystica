@@ -152,6 +152,8 @@ public class Game extends JPanel {
                 players.sort((p1, p2) -> factions.indexOf(p2.getFaction()) - factions.indexOf(p1.getFaction()));
                 setupTurnOrder();
             } else {
+                iceColor = null;
+                volcanoColor = null;
                 turnOrder.clear();
                 nextTurnOrder.clear();
                 for (int i = 0; i < gameData.playerNames.size(); ++i) {
@@ -189,6 +191,19 @@ public class Game extends JPanel {
                 final Player player = new Player(this, name);
                 final Faction faction = factions.remove(factions.size() - 1);
                 player.selectFaction(faction);
+                // Ice and Volcano colors are already selected, so we'll need to remove the color selection turn.
+                switch (faction.getHomeType()) {
+                    case ICE -> {
+                        if (turnOrder.remove(0).getHomeType() != Hex.Type.ICE) {
+                            throw new RuntimeException("Internal error");
+                        }
+                    }
+                    case VOLCANO -> {
+                        if (turnOrder.remove(turnOrder.size() - 1).getHomeType() != Hex.Type.VOLCANO) {
+                            throw new RuntimeException("Internal error");
+                        }
+                    }
+                }
                 factions.removeIf(f -> f.getHomeType() == faction.getHomeType());
                 players.add(player);
             }
@@ -291,7 +306,12 @@ public class Game extends JPanel {
             resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
         }
         if (!factionsPicked) {
-            showFactionPopup();
+            if (turnOrder.get(0).getFaction() == null) {
+                showFactionPopup();
+            } else {
+                final Hex.Type type = FactionButton.pickReplacedColor(frame, this);
+                resolveAction(new PickColorAction(type));
+            }
         }
         refresh();
     }

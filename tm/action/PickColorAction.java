@@ -20,7 +20,12 @@ public class PickColorAction extends Action {
     public boolean canExecute() {
         if (type == null || game.getSelectedOrdinals().contains(type.ordinal())) return false;
 
-        return player.getFaction() != null && (player.getFaction().getHomeType() == Hex.Type.ICE || player.getFaction().getHomeType() == Hex.Type.VOLCANO);
+        final boolean ice = player.getFaction().getHomeType() == Hex.Type.ICE;
+        final boolean volcano = player.getFaction().getHomeType() == Hex.Type.VOLCANO;
+        if (ice && game.getIceColor() != null) return false;
+        if (volcano && game.getVolcanoColor() != null) return false;
+
+        return player.getFaction() != null && (ice || volcano);
     }
 
     @Override
