@@ -1842,4 +1842,13 @@ public class Game extends JPanel {
             case VOLCANO -> turnOrder.add(player);
         }
     }
+
+    public Player getPlayer(Hex.Type homeType) {
+        for (Player player : players) {
+            if (player.getHomeType() == homeType) {
+                return player;
+            }
+        }
+        return null;
+    }
 }

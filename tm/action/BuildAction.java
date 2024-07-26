@@ -119,13 +119,13 @@ public class BuildAction extends Action {
         final Hex hex = game.getHex(row, col);
         for (Hex n : hex.getNeighbors()) {
             if (n.getStructure() != null && n.getType() != player.getHomeType()) {
-                final int power = n.getStructureSize(player);
+                final int power = n.getStructureSize(game.getPlayer(n.getType()));
                 leech.put(n.getType(), leech.getOrDefault(n.getType(), 0) + power);
             }
         }
         for (Hex n : game.getBridgeNeighbors(hex)) {
             if (n.getStructure() != null && n.getType() != player.getHomeType()) {
-                final int power = n.getStructureSize(player);
+                final int power = n.getStructureSize(game.getPlayer(n.getType()));
                 leech.put(n.getType(), leech.getOrDefault(n.getType(), 0) + power);
             }
         }
