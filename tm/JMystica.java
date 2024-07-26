@@ -318,7 +318,7 @@ public class JMystica {
                 System.err.println("Wrong vps: " + Arrays.stream(vps).mapToObj(String::valueOf).collect(Collectors.joining(",")));
                 test.printAndClearLogs();
             } catch (ReplayFailure e) {
-                test.printAndClearLogs();
+                //test.printAndClearLogs();
                 e.printStackTrace();
                 throw e;
             }

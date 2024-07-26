@@ -1175,6 +1175,7 @@ public class Game extends JPanel {
 
             importing = true;
             Point acolyteDig = null;
+            Point acolyteBuild = null;
             int setupCompleteCount = 0;
             while (getCurrentPlayer() != null) {
                 final Player player = getCurrentPlayer();
@@ -1204,7 +1205,7 @@ public class Game extends JPanel {
                             final Hex hex = mapPanel.getHex(p.x, p.y);
                             if (pendingDigging > 0 && !player.hasPendingBuild(hex)) {
                                 final Hex.Type effectiveType = player.getFaction().getHomeType() == Hex.Type.ICE ? iceColor : player.getHomeType();
-                                final int cost = Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, effectiveType));
+                                final int cost = player.getFaction().getHomeType() == Hex.Type.VOLCANO ? 1 : Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, effectiveType));
                                 if (pendingDigging < cost) {
                                     throw new RuntimeException("Not enough spades");
                                 }
@@ -1217,7 +1218,11 @@ public class Game extends JPanel {
                             } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                                 replayAction(new SandstormAction(p.x, p.y));
                             }
-                            replayAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
+                            if (acolyteDig != null) {
+                                acolyteBuild = p;
+                            } else {
+                                replayAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
+                            }
                         }
                     } else if (transformPattern.matcher(action).matches()) {
                         final String[] s = action.split(" ");
@@ -1530,6 +1535,10 @@ public class Game extends JPanel {
                             acolyteDig = null;
                         } else {
                             throw new RuntimeException("Illegal move");
+                        }
+                        if (acolyteBuild != null) {
+                            replayAction(new BuildAction(acolyteBuild.x, acolyteBuild.y, Hex.Structure.DWELLING));
+                            acolyteBuild = null;
                         }
                     } else {
                         log("Unhandled action: " + action);
