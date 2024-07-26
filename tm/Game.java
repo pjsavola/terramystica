@@ -1173,8 +1173,8 @@ public class Game extends JPanel {
             this.leechFeed = leechFeed;
 
             importing = true;
+            final List<Action> postponedAcolyteActions = new ArrayList<>();
             Point acolyteDig = null;
-            Point acolyteBuild = null;
             int setupCompleteCount = 0;
             while (getCurrentPlayer() != null) {
                 final Player player = getCurrentPlayer();
@@ -1217,10 +1217,11 @@ public class Game extends JPanel {
                             } else if (player.getPendingActions().contains(Player.PendingType.SANDSTORM)) {
                                 replayAction(new SandstormAction(p.x, p.y));
                             }
+                            final Action buildAction = new BuildAction(p.x, p.y, Hex.Structure.DWELLING);
                             if (acolyteDig != null) {
-                                acolyteBuild = p;
+                                postponedAcolyteActions.add(buildAction);
                             } else {
-                                replayAction(new BuildAction(p.x, p.y, Hex.Structure.DWELLING));
+                                replayAction(buildAction);
                             }
                         }
                     } else if (transformPattern.matcher(action).matches()) {
@@ -1408,7 +1409,12 @@ public class Game extends JPanel {
                         }
                         replayAction(new PriestToCultAction(cult, steps));
                     } else if (favorPattern.matcher(action).matches()) {
-                        replayAction(new SelectFavAction(Integer.parseInt(action.substring(4))));
+                        final int fav = Integer.parseInt(action.substring(4));
+                        if (player.getFaction() instanceof IceMaidens && phase == Phase.INITIAL_DWELLINGS) {
+                            selectFav(player, fav);
+                        } else {
+                            replayAction(new SelectFavAction(fav));
+                        }
                     } else if (townPattern.matcher(action).matches()) {
                         int amount = 1;
                         int idx = 3;
@@ -1417,7 +1423,12 @@ public class Game extends JPanel {
                             ++idx;
                         }
                         while (amount-- > 0) {
-                            replayAction(new SelectTownAction(Integer.parseInt(action.substring(idx))));
+                            final Action townAction = new SelectTownAction(Integer.parseInt(action.substring(idx)));
+                            if (acolyteDig != null) {
+                                postponedAcolyteActions.add(townAction);
+                            } else {
+                                replayAction(townAction);
+                            }
                         }
                     } else if (burnPattern.matcher(action).matches()) {
                         replayAction(new BurnAction(Integer.parseInt(action.split(" ")[1])));
@@ -1534,10 +1545,10 @@ public class Game extends JPanel {
                         } else {
                             throw new RuntimeException("Illegal move");
                         }
-                        if (acolyteBuild != null) {
-                            replayAction(new BuildAction(acolyteBuild.x, acolyteBuild.y, Hex.Structure.DWELLING));
-                            acolyteBuild = null;
+                        for (Action postponedAction : postponedAcolyteActions) {
+                            replayAction(postponedAction);
                         }
+                        postponedAcolyteActions.clear();
                     } else {
                         log("Unhandled action: " + action);
                         break;
