@@ -54,7 +54,10 @@ public class JMystica {
             for (File file : tests) {
                 try {
                     if (!test(file)) {
-                        throw new RuntimeException("Test " + file.getName() + " failed");
+                        System.err.println("!!! Test " + file.getName() + " failed");
+                        lastActionBeforeFailure = maxReplayActionCount;
+                        failedTest = file;
+                        break;
                     }
                 } catch (ReplayFailure e) {
                     lastActionBeforeFailure = e.getLastActionBeforeFailure();
@@ -316,7 +319,7 @@ public class JMystica {
                     return true;
                 }
                 System.err.println("Wrong vps: " + Arrays.stream(vps).mapToObj(String::valueOf).collect(Collectors.joining(",")));
-                test.printAndClearLogs();
+                //test.printAndClearLogs();
             } catch (ReplayFailure e) {
                 //test.printAndClearLogs();
                 e.printStackTrace();
