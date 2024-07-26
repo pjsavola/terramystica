@@ -31,6 +31,9 @@ public class CultStepAction extends Action {
     }
 
     private boolean isAmountValid() {
+        if (source == Source.ACOLYTES) {
+            return amount == 1 || amount == 2;
+        }
         return amount == (source == Source.ACTA ? 2 : 1);
     }
 
@@ -39,10 +42,12 @@ public class CultStepAction extends Action {
         return game.phase == Game.Phase.ACTIONS || (game.phase == Game.Phase.CONFIRM_ACTION && source == Source.ACOLYTES);
     }
 
+    @Override
     public boolean canExecute() {
         return isSourceValid(source, game, player) && isAmountValid() && cult >= 0 && cult < 4;
     }
 
+    @Override
     public void execute() {
         final int[] steps = new int[4];
         steps[cult] = amount;
@@ -55,6 +60,7 @@ public class CultStepAction extends Action {
         }
     }
 
+    @Override
     public boolean isFree() {
         return source == Source.ACOLYTES && !game.resolvingCultSpades();
     }

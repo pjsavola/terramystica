@@ -670,6 +670,7 @@ public class Game extends JPanel {
             return true;
         }
         if (rewinding || importing) {
+            // This may be okay if it means we need to confirm previous turn to pass some phase validations later.
             log("!!! " + action + " failed");
         }
         return false;
@@ -1529,12 +1530,8 @@ public class Game extends JPanel {
                     } else if (payCultPattern.matcher(action).matches()) {
                         if (acolyteDig != null) {
                             final String cult = action.substring(2).trim();
-                            for (int i = 0; i < 4; ++i) {
-                                if (Cults.getCultName(i).equalsIgnoreCase(cult)) {
-                                    replayAction(new DigAction(acolyteDig.x, acolyteDig.y, Hex.Type.VOLCANO, i));
-                                    break;
-                                }
-                            }
+                            final int cultIdx = findCult(cult);
+                            replayAction(new DigAction(acolyteDig.x, acolyteDig.y, Hex.Type.VOLCANO, cultIdx));
                             acolyteDig = null;
                         } else {
                             throw new RuntimeException("Illegal move");
