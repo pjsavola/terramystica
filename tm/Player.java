@@ -713,10 +713,13 @@ public class Player extends JPanel {
     }
 
     public void addSpades(int amount, boolean allowExtraSpades) {
-        if (faction instanceof Acolytes) {
-            pendingCultSteps += amount;
-        } else if (faction instanceof Dragonlords) {
-            power[0] += amount;
+        if (faction.getHomeType() == Hex.Type.VOLCANO) {
+            if (faction instanceof Acolytes) {
+                pendingCultSteps += amount;
+            } else if (faction instanceof Dragonlords) {
+                power[0] += amount;
+            }
+            points += amount * round.spade;
         } else {
             pendingSpades += amount;
             this.allowExtraSpades = allowExtraSpades;
@@ -732,12 +735,15 @@ public class Player extends JPanel {
             throw new RuntimeException("Trying to use too many spades");
 
         pendingSpades -= amount;
-        points += amount * round.spade;
-        allowExtraSpades = false;
-        if (faction instanceof Halflings) {
-            points += amount;
-        } else if (faction instanceof Alchemists && strongholds > 0) {
-            addPower(2 * amount);
+        if (faction.getHomeType() != Hex.Type.VOLCANO) {
+            // TODO: Maybe volcano factions shouldn't call this method at all
+            points += amount * round.spade;
+            allowExtraSpades = false;
+            if (faction instanceof Halflings) {
+                points += amount;
+            } else if (faction instanceof Alchemists && strongholds > 0) {
+                addPower(2 * amount);
+            }
         }
         if (pendingSpades == 0) {
             rangeUsedForDigging = false;
