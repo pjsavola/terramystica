@@ -20,6 +20,11 @@ public class IceMaidens extends Faction {
     }
 
     @Override
+    public Resources getStrongholdIncome() {
+        return Resources.pw4;
+    }
+
+    @Override
     public Resources getAdvanceDiggingCost() {
         return Resources.c5w1p1;
     }
