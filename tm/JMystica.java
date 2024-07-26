@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class JMystica {
-    public static final int maxReplayActionCount = 2000;
+    public static int maxReplayActionCount = 2000;
     public static final String gameFileExtension = "jtm";
 
     public static Hex.Type getType(String type) {
@@ -48,11 +48,20 @@ public class JMystica {
             }
         }
 
+        int lastActionBeforeFailure = 0;
+        File failedTest = null;
         if (maxReplayActionCount >= 2000) {
-            tests.forEach(file -> {
-                if (!test(file))
-                    throw new RuntimeException("Test " + file + " failed!");
-            });
+            for (File file : tests) {
+                try {
+                    if (!test(file)) {
+                        throw new RuntimeException("Test " + file.getName() + " failed");
+                    }
+                } catch (ReplayFailure e) {
+                    lastActionBeforeFailure = e.getLastActionBeforeFailure();
+                    failedTest = file;
+                    break;
+                }
+            }
         }
 
         final JFrame frame = new JFrame();
@@ -210,7 +219,11 @@ public class JMystica {
                 gameData.useRevisedStartingVPs = startingVPsChooser.getSelectedIndex() == 1;
                 gameData.useAuction = startingVPsChooser.getSelectedIndex() == 2;
                 gameData.chooseFactions = factionPickChooser.getSelectedIndex() == 0;
-                Game.open(frame, gameData);
+                try {
+                    Game.open(frame, gameData);
+                } catch (ReplayFailure e) {
+                    throw new RuntimeException(e);
+                }
                 dialog.setVisible(false);
             });
             cancel.addActionListener(el -> dialog.setVisible(false));
@@ -240,7 +253,7 @@ public class JMystica {
                     }
                     gameData.history = actions;
                     Game.open(frame, gameData);
-                } catch (IOException | ClassNotFoundException e) {
+                } catch (IOException | ClassNotFoundException | ReplayFailure e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -279,10 +292,18 @@ public class JMystica {
         frame.addWindowListener(windowChanger);
         //frame.setResizable(false);
         frame.pack();
+        if (failedTest != null) {
+            maxReplayActionCount = lastActionBeforeFailure;
+            try {
+                Game.open(frame, new Scanner(failedTest));
+            } catch (IOException | ReplayFailure e) {
+                throw new RuntimeException(e);
+            }
+        }
         frame.setVisible(true);
     }
 
-    public static boolean test(File file) {
+    public static boolean test(File file) throws ReplayFailure {
         try {
             final GameData test = new GameData(new Scanner(file));
             test.silentMode = true;
@@ -296,12 +317,17 @@ public class JMystica {
                 }
                 System.err.println("Wrong vps: " + Arrays.stream(vps).mapToObj(String::valueOf).collect(Collectors.joining(",")));
                 test.printAndClearLogs();
-            } catch (Throwable e) {
+            } catch (ReplayFailure e) {
                 test.printAndClearLogs();
+                e.printStackTrace();
                 throw e;
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            if (e instanceof ReplayFailure) {
+                throw (ReplayFailure) e;
+            } else {
+                e.printStackTrace();
+            }
         }
         return false;
     }

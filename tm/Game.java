@@ -66,11 +66,11 @@ public class Game extends JPanel {
 
     private final JFrame frame;
 
-    public static void open(JFrame frame, Scanner inputScanner) {
+    public static void open(JFrame frame, Scanner inputScanner) throws ReplayFailure {
         open(frame, new GameData(inputScanner));
     }
 
-    public static void open(JFrame frame, GameData gameData) {
+    public static void open(JFrame frame, GameData gameData) throws ReplayFailure {
         final Game game = new Game(frame, gameData);
         final int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
         final int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
@@ -80,7 +80,7 @@ public class Game extends JPanel {
         game.refresh();
     }
 
-    public Game(JFrame frame, GameData gameData) {
+    public Game(JFrame frame, GameData gameData) throws ReplayFailure {
         this.frame = frame;
         this.mapData = gameData.mapData;
         this.gameData = gameData;
@@ -100,7 +100,12 @@ public class Game extends JPanel {
             rewind();
         } else {
             reset();
-            new Parser().replay(gameData.actionFeed, gameData.leechFeed);
+            final Parser parser = new Parser();
+            try {
+                parser.replay(gameData.actionFeed, gameData.leechFeed);
+            } catch (Exception e) {
+                throw new ReplayFailure(e, parser.counter);
+            }
         }
         addComponents();
     }
