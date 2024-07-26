@@ -56,7 +56,7 @@ public class CultStepAction extends Action {
             case BON2 -> game.bonUsed[1] = true;
             case FAV6 -> player.usedFav6[0] = true;
             case ACTA -> player.usedFactionAction = true;
-            case ACOLYTES -> --player.pendingCultSteps;
+            case ACOLYTES -> player.pendingCultSteps -= amount;
         }
     }
 

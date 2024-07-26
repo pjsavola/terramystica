@@ -1159,9 +1159,7 @@ public class Game extends JPanel {
                     throw new RuntimeException("Player changed " + action);
                 }
                 if (!resolveAction(action)) {
-                    log("Failure " + action);
-                    counter = JMystica.maxReplayActionCount;
-                    return;
+                    throw new RuntimeException("Failed to execute: " + action);
                 }
             }
             ++counter;
