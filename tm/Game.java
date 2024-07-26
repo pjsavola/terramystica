@@ -1233,7 +1233,7 @@ public class Game extends JPanel {
                         } else {
                             final Hex.Type type = getTransformTerrain(s, player, hex, pendingDigging);
                             final Hex.Type effectiveType = type == Hex.Type.ICE ? iceColor : type;
-                            final int cost = Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, effectiveType));
+                            final int cost = player.getFaction().getHomeType() == Hex.Type.VOLCANO ? 1 : Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, effectiveType));
                             if (!resolvingCultSpades()) {
                                 if (pendingDigging < cost) {
                                     throw new RuntimeException("Not enough spades");
@@ -1381,6 +1381,9 @@ public class Game extends JPanel {
                                 } else {
                                     pendingCultSource = CultStepAction.Source.LEECH;
                                 }
+                            } else if (player.getFaction() instanceof Acolytes) {
+                                // TODO: More validation
+                                pendingCultSource = CultStepAction.Source.ACOLYTES;
                             } else {
                                 throw new RuntimeException("Unknown cult step source");
                             }
