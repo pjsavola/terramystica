@@ -89,6 +89,7 @@ public class Player extends JPanel {
     private int digging = 3;
     private int range = 1;
     private Resources jumpCost = Resources.zero;
+    private int initialFav;
 
     private final List<Integer> bons = new ArrayList<>();
     private final List<Integer> favs = new ArrayList<>();
@@ -146,6 +147,9 @@ public class Player extends JPanel {
         towns.clear();
         if (game.phase == Game.Phase.INITIAL_DWELLINGS) {
             selectFaction(faction);
+            if (initialFav > 0) {
+                game.selectFav(this, initialFav);
+            }
         } else {
             faction = null;
         }
@@ -220,6 +224,9 @@ public class Player extends JPanel {
         ownedFavors[number - 1] = true;
         --pendingFavors;
         favs.add(number);
+        if (game.phase == Game.Phase.INITIAL_DWELLINGS) {
+            initialFav = number;
+        }
         refreshSize();
     }
 
