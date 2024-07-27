@@ -181,6 +181,9 @@ public class GameData implements Serializable {
                     throw new RuntimeException("Unknown map: " + id);
                 }
                 mapData = MapData.mapsById.get(id).getData();
+                if (MapData.mapsById.get(id).getName().equals("Base")) {
+                    useRevisedStartingVPs = true;
+                }
             } else if (line.startsWith("option mini-expansion-1")) {
                 towns.add(6);
                 towns.add(7);
