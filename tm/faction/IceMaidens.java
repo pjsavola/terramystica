@@ -10,6 +10,11 @@ public class IceMaidens extends Faction {
     }
 
     @Override
+    public Resources getInitialIncome() {
+        return new Resources(15, 3, 0, 6);
+    }
+
+    @Override
     public int[] getInitialCultSteps() {
         return new int[] { 0, 1, 0, 1 };
     }
