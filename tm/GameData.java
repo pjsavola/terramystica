@@ -15,6 +15,7 @@ public class GameData implements Serializable {
     public static class Pair {
         public Faction faction;
         public String action;
+        public int idx;
     }
 
     public static final List<Faction> allFactions = List.of(new Acolytes(), new Alchemists(), new Auren(), new ChaosMagicians(), new Cultists(), new Darklings(), new Dragonlords(), new Dwarves(), new Engineers(), new Fakirs(), new Giants(), new Halflings(), new IceMaidens(), new Mermaids(), new Nomads(), new Swarmlings(), new Witches(), new Yetis());
@@ -248,6 +249,7 @@ public class GameData implements Serializable {
                         final Pair pair = new Pair();
                         pair.faction = faction;
                         pair.action = action;
+                        pair.idx = leechFeed.size() + actionFeed.size() + 1;
                         if (Game.Parser.leechPattern.matcher(action).matches()) {
                             leechFeed.addLast(pair);
                         } else {

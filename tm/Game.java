@@ -1089,10 +1089,24 @@ public class Game extends JPanel {
         public void replayLeech(Faction from) {
             while (phase == Phase.LEECH) {
                 if (getCurrentPlayer() != null) {
+                    int mustLeechBeforeIdx = 0;
+                    for (GameData.Pair pair : actionFeed) {
+                        if (pair.idx == 0) continue;
+
+                        if (pair.faction == getCurrentPlayer().getFaction()) {
+                            mustLeechBeforeIdx = pair.idx;
+                            break;
+                        }
+                    }
                     boolean found = false;
                     final Iterator<GameData.Pair> it = leechFeed.iterator();
                     while (it.hasNext()) {
                         final GameData.Pair pair = it.next();
+                        if (mustLeechBeforeIdx > 0 && pair.idx >= mustLeechBeforeIdx) {
+                            resolveAction(new LeechAction(false));
+                            found = true;
+                            break;
+                        }
                         if (pair.faction == getCurrentPlayer().getFaction()) {
                             if (!leechPattern.matcher(pair.action).matches()) {
                                 throw new RuntimeException("Invalid leech");
@@ -1104,12 +1118,6 @@ public class Game extends JPanel {
                                 throw new RuntimeException("Faction not found " + s[3]);
                             }
                             if (faction == from) {
-                                if (getCurrentPlayer().getPendingLeech() != Integer.parseInt(s[1])) {
-                                    // Silent decline
-                                    resolveAction(new LeechAction(false));
-                                    found = true;
-                                    break;
-                                }
                                 log(pair.faction.getName() + ": " + pair.action);
                                 resolveAction(new LeechAction(accept));
                                 it.remove();
