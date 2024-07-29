@@ -617,6 +617,7 @@ public class Player extends JPanel {
         coins += income.coins;
         workers += income.workers;
         if (faction instanceof Riverwalkers) {
+            /*
             int possibleCheapUnlocks = 0;
             int possibleExpensiveUnlocks = 0;
             if (unlockedTerrain != null) {
@@ -656,6 +657,8 @@ public class Player extends JPanel {
                 }
             }
             priests = Math.min(priests + priestsLeft, maxPriests);
+             */
+            pendingTerrainUnlock += income.priests;
         } else {
             priests = Math.min(priests + income.priests, maxPriests);
         }
@@ -1008,6 +1011,27 @@ public class Player extends JPanel {
                             } else if (faction instanceof Witches && game.getCurrentPlayer().getFaction() instanceof Witches) {
                                 game.resolveAction(new WitchesFreeDwellingAction());
                             }
+                        }
+                    }
+                    if (faction instanceof Riverwalkers && game.getVariableColor() != null) {
+                        final int x = e.getX() - 335;
+                        final int y = e.getY() - 25;
+                        final int circleRadius = 8;
+                        final int wheelRadius = 25;
+                        double angle = Math.PI * 1.5;
+                        for (int i = 0; i < 7; ++i) {
+                            final Hex.Type circleType = Hex.Type.values()[(game.getVariableColor().ordinal() - i + 7) % 7];
+                            final int dx = (int) (Math.cos(angle) * wheelRadius + 0.5);
+                            final int dy = (int) (Math.sin(angle) * wheelRadius + 0.5);
+                            final int px = wheelRadius + dx + circleRadius;
+                            final int py = wheelRadius + dy + circleRadius;
+                            final int distX = px - x;
+                            final int distY = py - y;
+                            if (distX * distX + distY * distY <= circleRadius * circleRadius) {
+                                game.resolveAction(new UnlockTerrainAction(circleType));
+                                break;
+                            }
+                            angle += 2 * Math.PI / 7;
                         }
                     }
                 }
