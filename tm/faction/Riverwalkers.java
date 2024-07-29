@@ -6,7 +6,7 @@ import tm.Resources;
 public class Riverwalkers extends Faction {
 
     public Riverwalkers() {
-        super("Riverwalkers", null);
+        super("Riverwalkers", Hex.Type.VARIABLE);
     }
 
     @Override

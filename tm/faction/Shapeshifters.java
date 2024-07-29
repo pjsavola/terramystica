@@ -1,11 +1,12 @@
 package tm.faction;
 
+import tm.Hex;
 import tm.Resources;
 
 public class Shapeshifters extends Faction {
 
     public Shapeshifters() {
-        super("Shapeshifters", null);
+        super("Shapeshifters", Hex.Type.VARIABLE);
     }
 
     @Override

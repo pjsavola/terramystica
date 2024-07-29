@@ -1886,6 +1886,7 @@ public class Game extends JPanel {
         switch (faction.getHomeType()) {
             case ICE -> turnOrder.add(0, player);
             case VOLCANO -> turnOrder.add(player);
+            case VARIABLE -> turnOrder.add(0, player);
         }
     }
 

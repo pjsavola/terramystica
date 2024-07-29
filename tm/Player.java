@@ -149,7 +149,7 @@ public class Player extends JPanel {
         bons.clear();
         favs.clear();
         towns.clear();
-        Arrays.fill(unlockedTerrain, false);
+        unlockedTerrain = null;
         if (game.phase == Game.Phase.INITIAL_DWELLINGS) {
             selectFaction(faction);
             if (initialFav > 0) {
@@ -180,7 +180,7 @@ public class Player extends JPanel {
     }
 
     public Hex.Type getHomeType() {
-        if (faction.getHomeType() == Hex.Type.VARIABLE) {
+        if (faction.getHomeType() == Hex.Type.VARIABLE && game.getVariableColor() != null) {
             return game.getVariableColor();
         }
         return faction.getHomeType();
@@ -1196,15 +1196,25 @@ public class Player extends JPanel {
             g.fillOval(x + wheelRadius, y + wheelRadius, circleRadius * 2, circleRadius * 2);
             g.setColor(Hex.Type.VOLCANO.getHexColor());
             g.fillOval(x + wheelRadius + 1, y + wheelRadius + 1, circleRadius * 2 - 2, circleRadius * 2 - 2);
+        } else if (type == Hex.Type.VARIABLE) {
+            if (game.getVariableColor() == null) return;
+
+            ordinal = game.getVariableColor().ordinal();
         }
         double angle = Math.PI * 1.5;
         for (int i = 0; i < 7; ++i) {
+            boolean unlocked = true;
+            final Hex.Type circleType = Hex.Type.values()[(ordinal - i + 7) % 7];
+            if (faction instanceof Riverwalkers && !unlockedTerrain[circleType.ordinal()]) {
+                unlocked = false;
+            }
             final int dx = (int) (Math.cos(angle) * wheelRadius + 0.5);
             final int dy = (int) (Math.sin(angle) * wheelRadius + 0.5);
             g.setColor(Color.BLACK);
+            if (!unlocked) g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), 50));
             g.fillOval(x + wheelRadius + dx, y + wheelRadius + dy, circleRadius * 2, circleRadius * 2);
-            final Hex.Type circleType = Hex.Type.values()[(ordinal - i + 7) % 7];
             g.setColor(circleType.getHexColor());
+            if (!unlocked) g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), 50));
             g.fillOval(x + wheelRadius + dx + 1, y + wheelRadius + dy + 1, circleRadius * 2 - 2, circleRadius * 2 - 2);
             angle += 2 * Math.PI / 7;
         }
