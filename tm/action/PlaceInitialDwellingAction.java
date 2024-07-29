@@ -2,6 +2,7 @@ package tm.action;
 
 import tm.Game;
 import tm.Hex;
+import tm.faction.Riverwalkers;
 
 public class PlaceInitialDwellingAction extends Action {
 
@@ -28,6 +29,11 @@ public class PlaceInitialDwellingAction extends Action {
         } else if (player.getHomeType() == Hex.Type.VOLCANO) {
             return game.getVolcanoColor() == hex.getType();
         } else {
+            if (player.getFaction() instanceof Riverwalkers) {
+                if (hex.getNeighbors().stream().noneMatch(h -> h.getType() == Hex.Type.WATER)) {
+                    return false;
+                }
+            }
             return hex.getType() == player.getHomeType();
         }
     }

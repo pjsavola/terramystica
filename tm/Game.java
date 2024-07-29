@@ -443,9 +443,12 @@ public class Game extends JPanel {
                         return getIceColor() == hex.getType();
                     } else if (player.getHomeType() == Hex.Type.VOLCANO) {
                         return getVolcanoColor() == hex.getType();
-                    } else if (player.getHomeType() == Hex.Type.VARIABLE) {
-                        return getVariableColor() == hex.getType();
                     } else {
+                        if (player.getFaction() instanceof Riverwalkers) {
+                            if (hex.getNeighbors().stream().noneMatch(h -> h.getType() == Hex.Type.WATER)) {
+                                return false;
+                            }
+                        }
                         return hex.getType() == player.getHomeType();
                     }
                 }).collect(Collectors.toSet());
@@ -783,7 +786,7 @@ public class Game extends JPanel {
                         if (cultIncome > 0 && cultIncome < 6) {
                             for (Player p : nextTurnOrder) {
                                 p.addCultIncome(gameData.getRounds().get(cultIncome - 1));
-                                if (p.getPendingSpades() > 0 || p.pendingCultSteps > 0) {
+                                if (p.getPendingSpades() > 0 || p.pendingCultSteps > 0 || p.pendingTerrainUnlock > 0) {
                                     turnOrder.add(p);
                                 }
                             }

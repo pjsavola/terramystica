@@ -1,5 +1,7 @@
 package tm;
 
+import tm.faction.Riverwalkers;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -54,7 +56,7 @@ public class TurnOrder extends JPanel {
                 drawPlayers(g, 0, topMargin, txt + "?", leechTurnOrder);
             }
             case CONFIRM_ACTION -> {
-                if (game.resolvingCultSpades()) {
+                if (game.resolvingCultSpades() && !(game.getCurrentPlayer().getFaction() instanceof Riverwalkers)) {
                     drawPlayers(g, 0, topMargin, "Cult Spades", turnOrder);
                 } else {
                     final String pending = game.getCurrentPlayer().getPendingActions().stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / "));

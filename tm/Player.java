@@ -619,12 +619,14 @@ public class Player extends JPanel {
         if (faction instanceof Riverwalkers) {
             int possibleCheapUnlocks = 0;
             int possibleExpensiveUnlocks = 0;
-            for (int i = 0; i < 7; ++i) {
-                if (!unlockedTerrain[i]) {
-                    if (game.isHomeType(Hex.Type.values()[i])) {
-                        ++possibleExpensiveUnlocks;
-                    } else {
-                        ++possibleCheapUnlocks;
+            if (unlockedTerrain != null) {
+                for (int i = 0; i < 7; ++i) {
+                    if (!unlockedTerrain[i]) {
+                        if (game.isHomeType(Hex.Type.values()[i])) {
+                            ++possibleExpensiveUnlocks;
+                        } else {
+                            ++possibleCheapUnlocks;
+                        }
                     }
                 }
             }
