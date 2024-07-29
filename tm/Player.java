@@ -1029,14 +1029,14 @@ public class Player extends JPanel {
             final boolean myTurn = game.isMyTurn(Player.this);
             final boolean passed = Player.this.passed && game.phase != Game.Phase.END;
             if (faction != null) {
-                Color factionColor = faction.getHomeType().getBuildingColor();
+                Color factionColor = getHomeType().getBuildingColor();
                 if (passed) {
                     factionColor = new Color(factionColor.getRed(), factionColor.getGreen(), factionColor.getBlue(), 50);
                 }
                 g.setColor(factionColor);
                 g.fillRect(dx, dy, 400, 16);
                 paintColorWheel(g, 335, 25);
-                g.setColor(faction.getHomeType().getFontColor());
+                g.setColor(getHomeType().getFontColor());
                 String factionName = faction.getName();
                 if (!name.isEmpty()) {
                     factionName += " (" + name + ")";
