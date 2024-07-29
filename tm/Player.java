@@ -25,7 +25,8 @@ public class Player extends JPanel {
         FREE_TP("Free TP", true),
         FREE_D("Free D", true),
         CHOOSE_CULTS("Choose Cults", true),
-        CULT_STEP("Cult Step", false);
+        CULT_STEP("Cult Step", false),
+        UNLOCK_TERRAIN("Unlock Terrain", false);
 
         private final String description;
         private final boolean skippable;
@@ -49,7 +50,7 @@ public class Player extends JPanel {
     private int coins;
     private int workers;
     private int priests;
-    private int maxPriests = 7;
+    public int maxPriests = 7;
     private final int[] power = new int[3];
     private int keys;
     private int points = 20;
@@ -73,6 +74,7 @@ public class Player extends JPanel {
     public boolean pendingFreeTradingPost;
     public boolean pendingFreeDwelling;
     public int pendingCultSteps;
+    public int pendingTerrainUnlock;
     public final boolean[] maxedCults = new boolean[4];
     private boolean rangeUsedForDigging;
     public boolean allowExtraSpades;
@@ -97,6 +99,7 @@ public class Player extends JPanel {
     private final PlayerInfo data;
     private final Pool pool;
     private final String name;
+    public boolean[] unlockedTerrain;
 
     public Player(Game game, String name) {
         super(new FlowLayout(FlowLayout.LEFT));
@@ -129,6 +132,7 @@ public class Player extends JPanel {
         pendingFreeTradingPost = false;
         pendingFreeDwelling = false;
         pendingCultSteps = 0;
+        pendingTerrainUnlock = 0;
         for (int i = 0; i < 4; ++i) maxedCults[i] = false;
         allowExtraSpades = false;
         rangeUsedForDigging = false;
@@ -145,10 +149,14 @@ public class Player extends JPanel {
         bons.clear();
         favs.clear();
         towns.clear();
+        Arrays.fill(unlockedTerrain, false);
         if (game.phase == Game.Phase.INITIAL_DWELLINGS) {
             selectFaction(faction);
             if (initialFav > 0) {
                 game.selectFav(this, initialFav);
+            }
+            if (game.getVariableColor() != null) {
+                unlockedTerrain[game.getVariableColor().ordinal()] = true;
             }
         } else {
             faction = null;
@@ -172,6 +180,9 @@ public class Player extends JPanel {
     }
 
     public Hex.Type getHomeType() {
+        if (faction.getHomeType() == Hex.Type.VARIABLE) {
+            return game.getVariableColor();
+        }
         return faction.getHomeType();
     }
 
@@ -209,6 +220,10 @@ public class Player extends JPanel {
         game.factionPicked(this, faction);
         if (faction instanceof IceMaidens) {
             ++pendingFavors;
+        } else if (faction instanceof Riverwalkers) {
+            maxPriests = 1;
+            unlockedTerrain = new boolean[7];
+            shipping = 1;
         }
     }
 
@@ -601,7 +616,11 @@ public class Player extends JPanel {
     public void addIncome(Resources income) {
         coins += income.coins;
         workers += income.workers;
-        priests = Math.min(priests + income.priests, maxPriests);
+        if (faction instanceof Riverwalkers) {
+            pendingTerrainUnlock += income.priests;
+        } else {
+            priests = Math.min(priests + income.priests, maxPriests);
+        }
         addPower(income.power);
         if (income == Resources.spade) {
             addSpades(1, false);
@@ -727,7 +746,7 @@ public class Player extends JPanel {
                 power[0] += amount;
             }
             points += amount * round.spade;
-        } else {
+        } else if (!(faction instanceof Riverwalkers)) {
             pendingSpades += amount;
             this.allowExtraSpades = allowExtraSpades;
         }
@@ -1084,6 +1103,7 @@ public class Player extends JPanel {
         if (pendingTowns > 0) result.add(PendingType.SELECT_TOWN);
         if (pendingFavors > 0) result.add(PendingType.SELECT_FAV);
         if (pendingCultSteps > 0) result.add(PendingType.CULT_STEP);
+        if (pendingTerrainUnlock > 0) result.add(PendingType.UNLOCK_TERRAIN);
         return result;
     }
 
@@ -1115,6 +1135,7 @@ public class Player extends JPanel {
                 case CHOOSE_CULTS -> {
                     for (int i = 0; i < 4; ++i) maxedCults[i] = false;
                 }
+                case UNLOCK_TERRAIN -> pendingTerrainUnlock = 0;
             }
         }
     }

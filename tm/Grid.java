@@ -1,6 +1,7 @@
 package tm;
 
 import tm.faction.Mermaids;
+import tm.faction.Riverwalkers;
 
 import javax.swing.*;
 import java.awt.*;
@@ -228,6 +229,11 @@ public class Grid extends JPanel {
         while (!work.isEmpty()) {
             final Hex hex = work.removeFirst();
             for (Hex neighbor : hex.getNeighbors()) {
+                if (player.getFaction() instanceof Riverwalkers) {
+                    if (neighbor.getType() != Hex.Type.WATER && hex.getType() != Hex.Type.WATER) {
+                        continue;
+                    }
+                }
                 if (!distances.containsKey(neighbor)) {
                     final int distance = distances.get(hex) + 1;
                     distances.put(neighbor, distance);

@@ -52,6 +52,7 @@ public class Game extends JPanel {
     private boolean doubleTurn;
     private Hex.Type iceColor;
     private Hex.Type volcanoColor;
+    private Hex.Type variableColor;
 
     public Phase phase;
     private boolean factionsPicked;
@@ -158,6 +159,7 @@ public class Game extends JPanel {
             } else {
                 iceColor = null;
                 volcanoColor = null;
+                variableColor = null;
                 turnOrder.clear();
                 nextTurnOrder.clear();
                 for (int i = 0; i < gameData.playerNames.size(); ++i) {
@@ -441,6 +443,8 @@ public class Game extends JPanel {
                         return getIceColor() == hex.getType();
                     } else if (player.getHomeType() == Hex.Type.VOLCANO) {
                         return getVolcanoColor() == hex.getType();
+                    } else if (player.getHomeType() == Hex.Type.VARIABLE) {
+                        return getVariableColor() == hex.getType();
                     } else {
                         return hex.getType() == player.getHomeType();
                     }
@@ -694,7 +698,7 @@ public class Game extends JPanel {
                 if (resolvingCultSpades()) {
                     selectPendingCultSteps();
                 }
-                if (!rewinding && !factionsPicked && iceColor == null && !turnOrder.isEmpty() && turnOrder.get(0).getFaction() != null && turnOrder.get(0).getFaction().getHomeType() == Hex.Type.ICE) {
+                if (!rewinding && !factionsPicked && !turnOrder.isEmpty() && turnOrder.get(0).getFaction() != null && ((turnOrder.get(0).getFaction().getHomeType() == Hex.Type.ICE && iceColor == null) || (turnOrder.get(0).getFaction().getHomeType() == Hex.Type.VARIABLE && variableColor == null))) {
                     Hex.Type type;
                     do {
                         type = FactionButton.pickReplacedColor(frame, this);
@@ -1076,6 +1080,7 @@ public class Game extends JPanel {
         private static final Pattern darklingPattern = Pattern.compile("\\+[1-9]? ?[Pp]");
         private static final Pattern pickColorPattern = Pattern.compile("[Pp][Ii][Cc][Kk]-[Cc][Oo][Ll][Oo][Rr] .*");
         private static final Pattern payCultPattern = Pattern.compile("-[34] ?" + cultRegex);
+        private static final Pattern unlockTerrainPattern = Pattern.compile("[Uu][Nn][Ll][Oo][Cc][Kk]-[Tt][Ee][Rr][Rr][Aa][Ii][Nn] .*");
 
         private int findCult(String cultName) {
             for (int i = 0; i < 4; ++i) {
@@ -1543,6 +1548,8 @@ public class Game extends JPanel {
                             iceColor = color;
                         } else if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
                             volcanoColor = color;
+                        } else if (player.getFaction().getHomeType() == Hex.Type.VARIABLE) {
+                            variableColor = color;
                         }
                     } else if (payCultPattern.matcher(action).matches()) {
                         if (acolyteDig != null) {
@@ -1557,6 +1564,10 @@ public class Game extends JPanel {
                             replayAction(postponedAction);
                         }
                         postponedAcolyteActions.clear();
+                    } else if (unlockTerrainPattern.matcher(action).matches()) {
+                        final String s = action.split(" ")[1].toUpperCase();
+                        final Hex.Type color = s.equals("GAIN-PRIEST") ? null : Hex.Type.valueOf(s);
+                        replayAction(new UnlockTerrainAction(color));
                     } else {
                         log("Unhandled action: " + action);
                         break;
@@ -1652,6 +1663,9 @@ public class Game extends JPanel {
         if (iceColor != null) {
             selectedOrdinals.add(iceColor.ordinal());
         }
+        if (variableColor != null) {
+            selectedOrdinals.add(variableColor.ordinal());
+        }
         return selectedOrdinals;
     }
 
@@ -1667,6 +1681,9 @@ public class Game extends JPanel {
         }
         if (selectedColors.contains(Hex.Type.VOLCANO)) {
             selectedColors.add(volcanoColor);
+        }
+        if (selectedColors.contains(Hex.Type.VARIABLE)) {
+            selectedColors.add(variableColor);
         }
         return GameData.allFactions.stream().filter(f -> !selectedColors.contains(f.getHomeType()));
     }
@@ -1817,22 +1834,24 @@ public class Game extends JPanel {
     }
 
     public int getVolcanoDigCost(Hex hex, Player player) {
-        boolean homeType = false;
-        for (Player p : players) {
-            if (hex.getType() == p.getFaction().getHomeType()) {
-                homeType = true;
-                break;
-            }
-        }
         final int cost;
         if (player.getFaction() instanceof Dragonlords) {
-            cost = homeType ? 2 : 1;
+            cost = isHomeType(hex.getType()) ? 2 : 1;
         } else if (player.getFaction() instanceof Acolytes) {
-            cost = homeType ? 4 : 3;
+            cost = isHomeType(hex.getType()) ? 4 : 3;
         } else {
             throw new RuntimeException("Unimplemented Volcano faction");
         }
         return cost;
+    }
+
+    public boolean isHomeType(Hex.Type type) {
+        for (Player p : players) {
+            if (type == p.getFaction().getHomeType()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int getPlayerCount() {
@@ -1847,12 +1866,20 @@ public class Game extends JPanel {
         volcanoColor = type;
     }
 
+    public void setVariableColor(Hex.Type type) {
+        variableColor = type;
+    }
+
     public Hex.Type getIceColor() {
         return iceColor;
     }
 
     public Hex.Type getVolcanoColor() {
         return volcanoColor;
+    }
+
+    public Hex.Type getVariableColor() {
+        return variableColor;
     }
 
     public void factionPicked(Player player, Faction faction) {

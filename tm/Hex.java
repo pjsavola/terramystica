@@ -17,7 +17,8 @@ public class Hex {
         BLUE(new Color(0x66BBFF), new Color(0x4499DD), 32),
         WATER(Color.WHITE),
         ICE(new Color(0xDDDDFF), new Color(0xBBBBDD), 32),
-        VOLCANO(new Color(0xFFAA44), new Color(0xDD8822), 40);
+        VOLCANO(new Color(0xFFAA44), new Color(0xDD8822), 40),
+        VARIABLE(new Color(0xCCDDCC), new Color(0xAABBAA), 32);
 
         private final Color color;
         private final Color buildingColor;

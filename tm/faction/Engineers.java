@@ -60,11 +60,6 @@ public class Engineers extends Faction {
     }
 
     @Override
-    public Resources getStrongholdIncome() {
-        return Resources.pw2;
-    }
-
-    @Override
     public String getPowerAction(boolean stronghold) {
         return "bridge";
     }
