@@ -617,7 +617,43 @@ public class Player extends JPanel {
         coins += income.coins;
         workers += income.workers;
         if (faction instanceof Riverwalkers) {
-            pendingTerrainUnlock += income.priests;
+            int possibleCheapUnlocks = 0;
+            int possibleExpensiveUnlocks = 0;
+            for (int i = 0; i < 7; ++i) {
+                if (!unlockedTerrain[i]) {
+                    if (game.isHomeType(Hex.Type.values()[i])) {
+                        ++possibleExpensiveUnlocks;
+                    } else {
+                        ++possibleCheapUnlocks;
+                    }
+                }
+            }
+            int coinsLeft = coins;
+            int priestsLeft = income.priests;
+            while (priestsLeft > 0) {
+                if (possibleCheapUnlocks > 0) {
+                    if (coinsLeft > 0) {
+                        --coinsLeft;
+                        --priestsLeft;
+                        --possibleCheapUnlocks;
+                        ++pendingTerrainUnlock;
+                    } else {
+                        break;
+                    }
+                } else if (possibleExpensiveUnlocks > 0) {
+                    if (coinsLeft > 1) {
+                        coinsLeft -= 2;
+                        --priestsLeft;
+                        --possibleExpensiveUnlocks;
+                        ++pendingTerrainUnlock;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            priests = Math.min(priests + priestsLeft, maxPriests);
         } else {
             priests = Math.min(priests + income.priests, maxPriests);
         }
@@ -820,6 +856,7 @@ public class Player extends JPanel {
         for (int i = 0; i < tradingPosts; ++i) {
             addIncome(faction.getTradingPostIncome(i));
         }
+        addIncome(Bons.getBonIncome(bons.get(0))); // Receive coins before any priests so Riverwalker terrain unlock would work correctly
         for (int i = 0; i < temples; ++i) {
             addIncome(faction.getTempleIncome(i));
         }
@@ -829,7 +866,6 @@ public class Player extends JPanel {
         if (sanctuaries > 0) {
             addIncome(faction.getSanctuaryIncome());
         }
-        addIncome(Bons.getBonIncome(bons.get(0)));
     }
 
     public void addCultIncome(Round round) {
