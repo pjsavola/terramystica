@@ -14,6 +14,11 @@ public class UnlockTerrainAction extends Action {
     }
 
     @Override
+    public boolean validatePhase() {
+        return game.resolvingTerrainUnlock || (game.resolvingCultSpades() && player.pendingTerrainUnlock > 0);
+    }
+
+    @Override
     public boolean canExecute() {
         if (!(player.getFaction() instanceof Riverwalkers)) return false;
         if (player.pendingTerrainUnlock == 0) return false;

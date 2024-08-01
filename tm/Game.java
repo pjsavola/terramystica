@@ -38,6 +38,7 @@ public class Game extends JPanel {
     private final Pool pool;
     private int round;
     private int cultIncome;
+    public boolean resolvingTerrainUnlock;
 
     private final List<Player> turnOrder = new ArrayList<>();
     private final List<Player> nextTurnOrder = new ArrayList<>();
@@ -128,6 +129,7 @@ public class Game extends JPanel {
         bridgeEnd = null;
         pendingTownPlacement = false;
         packNeeded = false;
+        resolvingTerrainUnlock = false;
 
         favs.clear();
         IntStream.range(1, 5).boxed().forEach(favs::add);
@@ -417,8 +419,9 @@ public class Game extends JPanel {
             players.addAll(turnOrder);
             for (Player player : players) {
                 player.startRound(gameData.getRounds().get(round - 1));
-                if (player.pendingTerrainUnlock > 0) {
-                    nextTurnOrder.add(0, player);
+                for (int i = 0; i < player.pendingTerrainUnlock; ++i) {
+                    turnOrder.add(0, player);
+                    resolvingTerrainUnlock = true;
                 }
             }
         }
@@ -666,7 +669,8 @@ public class Game extends JPanel {
         if (player == null) return false;
 
         action.setData(this, player);
-        if (action.validatePhase() && action.canExecute()) {
+        final boolean legal = (!resolvingTerrainUnlock && !(resolvingCultSpades() && player.pendingTerrainUnlock > 0)) || action instanceof UnlockTerrainAction;
+        if (legal && action.validatePhase() && action.canExecute()) {
             action.execute();
             newActions.add(action);
             if (!action.isFree()) {
@@ -736,7 +740,11 @@ public class Game extends JPanel {
 
         if (phase != Phase.LEECH) {
             final Player player = turnOrder.remove(0);
-            if (resolvingCultSpades()) {
+            if (resolvingTerrainUnlock) {
+                if (turnOrder.isEmpty() || turnOrder.get(0).pendingTerrainUnlock == 0) {
+                    resolvingTerrainUnlock = false;
+                }
+            } else if (resolvingCultSpades()) {
                 if (turnOrder.isEmpty()) {
                     nextRound();
                 }
@@ -792,7 +800,10 @@ public class Game extends JPanel {
                         if (cultIncome > 0 && cultIncome < 6) {
                             for (Player p : nextTurnOrder) {
                                 p.addCultIncome(gameData.getRounds().get(cultIncome - 1));
-                                if (p.getPendingSpades() > 0 || p.pendingCultSteps > 0 || p.pendingTerrainUnlock > 0) {
+                                if (p.getPendingSpades() > 0 || p.pendingCultSteps > 0) {
+                                    turnOrder.add(p);
+                                }
+                                for (int i = 0; i < p.pendingTerrainUnlock; ++i) {
                                     turnOrder.add(p);
                                 }
                             }
