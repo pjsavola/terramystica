@@ -30,13 +30,13 @@ public class UnlockTerrainAction extends Action {
     @Override
     public void execute() {
         if (type == null) {
-            player.addIncome(Resources.p1);
+            player.addPriests(1);
         } else {
             player.maxPriests = Math.min(7, player.maxPriests + 1);
             player.pay(game.isHomeType(type) ? Resources.c2 : Resources.c1);
             player.unlockedTerrain[type.ordinal()] = true;
-            --player.pendingTerrainUnlock;
         }
+        --player.pendingTerrainUnlock;
     }
 
     @Override

@@ -417,6 +417,9 @@ public class Game extends JPanel {
             players.addAll(turnOrder);
             for (Player player : players) {
                 player.startRound(gameData.getRounds().get(round - 1));
+                if (player.pendingTerrainUnlock > 0) {
+                    nextTurnOrder.add(0, player);
+                }
             }
         }
     }
@@ -491,6 +494,9 @@ public class Game extends JPanel {
 
         if (pendingTownPlacement) {
             resolveAction(new MermaidsTownAction(row, col));
+            return;
+        }
+        if (getCurrentPlayer().pendingTerrainUnlock > 0) {
             return;
         }
 

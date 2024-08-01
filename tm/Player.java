@@ -660,12 +660,16 @@ public class Player extends JPanel {
              */
             pendingTerrainUnlock += income.priests;
         } else {
-            priests = Math.min(priests + income.priests, maxPriests);
+            addPriests(income.priests);
         }
         addPower(income.power);
         if (income == Resources.spade) {
             addSpades(1, false);
         }
+    }
+
+    public void addPriests(int priests) {
+        this.priests = Math.min(this.priests + priests, maxPriests);
     }
 
     public boolean canConvert(int priests, int workers, int pointsToCoins, int pointsFromCoins) {
@@ -1028,7 +1032,7 @@ public class Player extends JPanel {
                             final int distX = px - x;
                             final int distY = py - y;
                             if (distX * distX + distY * distY <= circleRadius * circleRadius) {
-                                game.resolveAction(new UnlockTerrainAction(circleType));
+                                game.resolveAction(new UnlockTerrainAction((unlockedTerrain[circleType.ordinal()] ? null : circleType)));
                                 break;
                             }
                             angle += 2 * Math.PI / 7;

@@ -34,37 +34,41 @@ public class TurnOrder extends JPanel {
         g.setColor(Color.BLACK);
         g.setFont(font);
 
-        switch (game.phase) {
-            case PICK_FACTIONS -> {
-                if (game.getCurrentPlayer().getFaction() == null) {
-                    g.drawString("Select Faction, " + game.getCurrentPlayer(), 0, topMargin + 16);
-                } else {
-                    drawPlayers(g, 0, topMargin, "Pick Color", List.of(game.getCurrentPlayer()));
+        if (!turnOrder.isEmpty() && turnOrder.get(0).pendingTerrainUnlock > 0) {
+            drawPlayers(g, 0, topMargin, "Unlock Terrain", List.of(game.getCurrentPlayer()));
+        } else {
+            switch (game.phase) {
+                case PICK_FACTIONS -> {
+                    if (game.getCurrentPlayer().getFaction() == null) {
+                        g.drawString("Select Faction, " + game.getCurrentPlayer(), 0, topMargin + 16);
+                    } else {
+                        drawPlayers(g, 0, topMargin, "Pick Color", List.of(game.getCurrentPlayer()));
+                    }
                 }
-            }
-            case INITIAL_DWELLINGS -> drawPlayers(g, 0, topMargin, "Setup", turnOrder);
-            case INITIAL_BONS -> drawPlayers(g, 0, topMargin, "Pick Bon", turnOrder);
-            case ACTIONS -> {
-                int x = drawPlayers(g, 0, topMargin, "Active", turnOrder) + 10;
-                drawPlayers(g, x, topMargin, "Passed", nextTurnOrder);
-            }
-            case LEECH -> {
-                String txt = "Leech " + game.getCurrentPlayer().getPendingLeech();
-                if (game.leechTrigger != null) {
-                    txt += " from Cultists";
+                case INITIAL_DWELLINGS -> drawPlayers(g, 0, topMargin, "Setup", turnOrder);
+                case INITIAL_BONS -> drawPlayers(g, 0, topMargin, "Pick Bon", turnOrder);
+                case ACTIONS -> {
+                    int x = drawPlayers(g, 0, topMargin, "Active", turnOrder) + 10;
+                    drawPlayers(g, x, topMargin, "Passed", nextTurnOrder);
                 }
-                drawPlayers(g, 0, topMargin, txt + "?", leechTurnOrder);
-            }
-            case CONFIRM_ACTION -> {
-                if (game.resolvingCultSpades() && !(game.getCurrentPlayer().getFaction() instanceof Riverwalkers)) {
-                    drawPlayers(g, 0, topMargin, "Cult Spades", turnOrder);
-                } else {
-                    final String pending = game.getCurrentPlayer().getPendingActions().stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / "));
-                    final String txt = pending.isEmpty() ? "Confirm turn" : pending;
-                    drawPlayers(g, 0, topMargin, txt, List.of(game.getCurrentPlayer()));
+                case LEECH -> {
+                    String txt = "Leech " + game.getCurrentPlayer().getPendingLeech();
+                    if (game.leechTrigger != null) {
+                        txt += " from Cultists";
+                    }
+                    drawPlayers(g, 0, topMargin, txt + "?", leechTurnOrder);
                 }
-            }
-        };
+                case CONFIRM_ACTION -> {
+                    if (game.resolvingCultSpades()) {
+                        drawPlayers(g, 0, topMargin, "Cult Spades", turnOrder);
+                    } else {
+                        final String pending = game.getCurrentPlayer().getPendingActions().stream().map(Player.PendingType::getDescription).collect(Collectors.joining(" / "));
+                        final String txt = pending.isEmpty() ? "Confirm turn" : pending;
+                        drawPlayers(g, 0, topMargin, txt, List.of(game.getCurrentPlayer()));
+                    }
+                }
+            };
+        }
         g.setColor(oldColor);
         g2d.setStroke(oldStroke);
     }

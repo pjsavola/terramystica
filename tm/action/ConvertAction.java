@@ -26,6 +26,8 @@ public class ConvertAction extends Action {
 
     @Override
     public boolean canExecute() {
+        if (game.resolvingCultSpades()) return false;
+
         return powerConversions.power == 0 && player.canAffordPower(getPowerCost(powerConversions)) && player.canConvert(priestsToWorkers, workersToCoins, pointsToCoins, coinsToPoints);
     }
 
