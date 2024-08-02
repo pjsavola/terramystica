@@ -4,6 +4,7 @@ import tm.faction.Riverwalkers;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,11 @@ public class TurnOrder extends JPanel {
         g.setFont(font);
 
         if (!turnOrder.isEmpty() && turnOrder.get(0).pendingTerrainUnlock > 0) {
-            drawPlayers(g, 0, topMargin, "Unlock Terrain", List.of(game.getCurrentPlayer()));
+            final List<Player> shownPlayers = new ArrayList<>(turnOrder.get(0).pendingTerrainUnlock);
+            for (int i = 0; i < turnOrder.get(0).pendingTerrainUnlock; ++i) {
+                shownPlayers.add(game.getCurrentPlayer());
+            }
+            drawPlayers(g, 0, topMargin, "Unlock Terrain", shownPlayers);
         } else {
             switch (game.phase) {
                 case PICK_FACTIONS -> {

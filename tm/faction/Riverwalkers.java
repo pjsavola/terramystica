@@ -11,7 +11,7 @@ public class Riverwalkers extends Faction {
 
     @Override
     public Resources getInitialIncome() {
-        return new Resources(10, 3, 0, 2);
+        return new Resources(15, 3, 0, 2);
     }
 
     @Override

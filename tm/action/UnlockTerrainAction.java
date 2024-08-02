@@ -2,26 +2,38 @@ package tm.action;
 
 import tm.Game;
 import tm.Hex;
+import tm.Player;
 import tm.Resources;
 import tm.faction.Riverwalkers;
 
 public class UnlockTerrainAction extends Action {
 
     private final Hex.Type type;
+    private boolean resolvingCultSpades;
+    private boolean resolvingTerrainUnlock;
+    private int pendingTerrainUnlock;
 
     public UnlockTerrainAction(Hex.Type type) {
         this.type = type;
     }
 
     @Override
+    public void setData(Game game, Player player) {
+        super.setData(game, player);
+        resolvingCultSpades = game.resolvingCultSpades();
+        resolvingTerrainUnlock = game.resolvingTerrainUnlock;
+        pendingTerrainUnlock = player.pendingTerrainUnlock;
+    }
+
+    @Override
     public boolean validatePhase() {
-        return game.resolvingTerrainUnlock || (game.resolvingCultSpades() && player.pendingTerrainUnlock > 0);
+        return game.phase == (resolvingTerrainUnlock ? Game.Phase.ACTIONS : Game.Phase.CONFIRM_ACTION);
     }
 
     @Override
     public boolean canExecute() {
         if (!(player.getFaction() instanceof Riverwalkers)) return false;
-        if (player.pendingTerrainUnlock == 0) return false;
+        if (pendingTerrainUnlock == 0) return false;
         if (type != null) {
             final int ordinal = type.ordinal();
             if (ordinal >= 7) return false;
@@ -44,9 +56,13 @@ public class UnlockTerrainAction extends Action {
         --player.pendingTerrainUnlock;
     }
 
+    public boolean isFree() {
+        return pendingTerrainUnlock > 1 || (!resolvingTerrainUnlock && !resolvingCultSpades);
+    }
+
     @Override
     public boolean isPass() {
-        return true;
+        return (resolvingTerrainUnlock || resolvingCultSpades) && pendingTerrainUnlock == 0;
     }
 
     @Override
