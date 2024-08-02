@@ -57,12 +57,12 @@ public class UnlockTerrainAction extends Action {
     }
 
     public boolean isFree() {
-        return pendingTerrainUnlock > 1 || (!resolvingTerrainUnlock && !resolvingCultSpades);
+        return (!resolvingTerrainUnlock && !resolvingCultSpades) || pendingTerrainUnlock > 1;
     }
 
     @Override
     public boolean isPass() {
-        return (resolvingTerrainUnlock || resolvingCultSpades) && pendingTerrainUnlock == 0;
+        return (resolvingTerrainUnlock || resolvingCultSpades) && pendingTerrainUnlock == 1;
     }
 
     @Override
