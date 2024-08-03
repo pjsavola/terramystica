@@ -286,8 +286,6 @@ public class Game extends JPanel {
         reset();
         for (int i = 0; i < history.size(); ++i) {
             final Action action = history.get(i);
-            final int oldRound = round;
-            final int oldCultIncome = cultIncome;
             resolveAction(action);
             if (phase == Phase.CONFIRM_ACTION) {
                 boolean freeAction = action.isFree();
@@ -296,7 +294,10 @@ public class Game extends JPanel {
                     if (futureAction.getPlayer() != action.getPlayer()) {
                         break;
                     }
-                    final boolean futureActionFree = futureAction.isFree() && !(futureAction instanceof UnlockTerrainAction); // TODO: Fix this in some better way
+                    boolean futureActionFree = futureAction.isFree();
+                    if (futureActionFree && futureAction instanceof UnlockTerrainAction) { // TODO: Implement better fix
+                        futureActionFree = futureAction.getPlayer().pendingTerrainUnlock > 0;
+                    }
                     if (freeAction || futureActionFree) {
                         if (!futureActionFree) {
                             freeAction = false;
