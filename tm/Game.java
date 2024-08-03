@@ -424,6 +424,7 @@ public class Game extends JPanel {
                 player.startRound(gameData.getRounds().get(round - 1));
                 if (player.pendingTerrainUnlock > 0) {
                     turnOrder.add(0, player);
+                    phase = Phase.CONFIRM_ACTION;
                     resolvingTerrainUnlock = true;
                 }
             }

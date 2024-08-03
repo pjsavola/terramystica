@@ -1169,7 +1169,6 @@ public class Player extends JPanel {
         if (pendingTowns > 0) result.add(PendingType.SELECT_TOWN);
         if (pendingFavors > 0) result.add(PendingType.SELECT_FAV);
         if (pendingCultSteps > 0) result.add(PendingType.CULT_STEP);
-        if (pendingTerrainUnlock > 0) result.add(PendingType.UNLOCK_TERRAIN);
         return result;
     }
 
@@ -1183,6 +1182,7 @@ public class Player extends JPanel {
         if (pendingFreeTradingPost) result.add(PendingType.FREE_TP);
         if (pendingFreeDwelling) result.add(PendingType.FREE_D);
         if (ChooseMaxedCultsAction.actionNeeded(game) && pendingTowns == 0 && pendingFavors == 0) result.add(PendingType.CHOOSE_CULTS);
+        if (pendingTerrainUnlock > 0) result.add(PendingType.UNLOCK_TERRAIN);
         return result;
     }
 
@@ -1201,6 +1201,7 @@ public class Player extends JPanel {
                 case CHOOSE_CULTS -> {
                     for (int i = 0; i < 4; ++i) maxedCults[i] = false;
                 }
+                case CULT_STEP -> pendingCultSteps = 0;
                 case UNLOCK_TERRAIN -> pendingTerrainUnlock = 0;
             }
         }

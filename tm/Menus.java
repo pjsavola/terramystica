@@ -35,6 +35,11 @@ public abstract class Menus {
                     option = JOptionPane.showConfirmDialog(game, pending, "Skip Action?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
                 }
                 if (option == JOptionPane.OK_OPTION) {
+                    if (skippableActions.contains(Player.PendingType.UNLOCK_TERRAIN)) {
+                        while (game.getCurrentPlayer().pendingTerrainUnlock > 0) {
+                            game.resolveAction(new UnlockTerrainAction(null));
+                        }
+                    }
                     game.confirmTurn();
                 }
             }
