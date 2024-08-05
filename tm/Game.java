@@ -211,6 +211,11 @@ public class Game extends JPanel {
                             throw new RuntimeException("Internal error");
                         }
                     }
+                    case VARIABLE -> {
+                        if (turnOrder.remove(0).getFaction().getHomeType() != Hex.Type.VARIABLE) {
+                            throw new RuntimeException("Internal error");
+                        }
+                    }
                 }
                 factions.removeIf(f -> f.getHomeType() == faction.getHomeType());
                 players.add(player);
