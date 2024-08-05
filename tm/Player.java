@@ -100,6 +100,7 @@ public class Player extends JPanel {
     private final Pool pool;
     private final String name;
     public boolean[] unlockedTerrain;
+    public int initialUnlockedTerrainIndex = -1;
 
     public Player(Game game, String name) {
         super(new FlowLayout(FlowLayout.LEFT));
@@ -153,6 +154,9 @@ public class Player extends JPanel {
             selectFaction(faction);
             if (initialFav > 0) {
                 game.selectFav(this, initialFav);
+            }
+            if (initialUnlockedTerrainIndex != -1) {
+                unlockedTerrain[initialUnlockedTerrainIndex] = true;
             }
         } else {
             faction = null;

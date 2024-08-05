@@ -2,6 +2,7 @@ package tm.action;
 
 import tm.Game;
 import tm.Hex;
+import tm.faction.Riverwalkers;
 
 public class PickColorAction extends Action {
 
@@ -37,7 +38,10 @@ public class PickColorAction extends Action {
             case VOLCANO -> game.setVolcanoColor(type);
             case VARIABLE -> {
                 game.setVariableColor(type);
-                player.unlockedTerrain[type.ordinal()] = true;
+                if (player.getFaction() instanceof Riverwalkers) {
+                    player.initialUnlockedTerrainIndex = type.ordinal();
+                    player.unlockedTerrain[player.initialUnlockedTerrainIndex] = true;
+                }
             }
         }
     }

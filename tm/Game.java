@@ -1573,7 +1573,8 @@ public class Game extends JPanel {
                             volcanoColor = color;
                         } else if (player.getFaction().getHomeType() == Hex.Type.VARIABLE) {
                             variableColor = color;
-                            player.unlockedTerrain[color.ordinal()] = true;
+                            player.initialUnlockedTerrainIndex = color.ordinal();
+                            player.unlockedTerrain[player.initialUnlockedTerrainIndex] = true;
                         }
                     } else if (payCultPattern.matcher(action).matches()) {
                         if (acolyteDig != null) {
