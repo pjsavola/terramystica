@@ -511,7 +511,7 @@ public class Game extends JPanel {
             case INITIAL_DWELLINGS -> resolveAction(new PlaceInitialDwellingAction(row, col));
             case ACTIONS -> {
                 final Hex.Type homeType = getCurrentPlayer().getHomeType();
-                if (hex.getType() != homeType || button == MouseEvent.BUTTON3) {
+                if ((hex.getType() != homeType || button == MouseEvent.BUTTON3) && !(getCurrentPlayer().getFaction() instanceof Riverwalkers)) {
                     handleDigging(hex, row, col);
                     return;
                 }

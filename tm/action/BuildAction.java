@@ -5,6 +5,7 @@ import tm.Hex;
 import tm.Player;
 import tm.faction.ChaosMagicians;
 import tm.faction.Darklings;
+import tm.faction.Riverwalkers;
 
 import javax.swing.*;
 import java.util.HashMap;
@@ -64,7 +65,11 @@ public class BuildAction extends Action {
     @Override
     public boolean canExecute() {
         final Hex hex = game.getHex(row, col);
-        if (hex.getType() != player.getHomeType()) return false;
+        if (player.getFaction() instanceof Riverwalkers) {
+            if (!player.unlockedTerrain[hex.getType().ordinal()]) return false;
+        } else {
+            if (hex.getType() != player.getHomeType()) return false;
+        }
         if (structure.getParent() != hex.getStructure()) return false;
         if (structure == Hex.Structure.DWELLING) {
             if (player.getPendingActions().contains(Player.PendingType.FREE_D)) {
@@ -100,6 +105,9 @@ public class BuildAction extends Action {
                 player.clearPendingBuilds();
             } else if (!game.isReachable(hex, player) && !player.getPendingActions().contains(Player.PendingType.FREE_D)) {
                 player.useRange(false);
+            }
+            if (player.getFaction() instanceof Riverwalkers) {
+                hex.setType(player.getHomeType());
             }
         }
         hex.setStructure(structure);

@@ -365,6 +365,8 @@ public class Player extends JPanel {
                 ++shipping;
                 points += faction.getAdvanceShippingPoints(shipping);
             }
+        } else if (faction instanceof Riverwalkers) {
+            pendingBridges += Math.min(bridgesLeft, 2);
         }
     }
 
