@@ -247,6 +247,7 @@ public class GameData implements Serializable {
                     if (actionLine.equals("score_resources")) continue;
                     final String[] actions = actionLine.split("\\. ");
                     for (String action : actions) {
+                        if (action.equals("all_income_for_faction")) continue;
                         if (action.equals("other_income_for_faction")) continue;
                         if (action.equals("cult_income_for_faction")) continue;
                         if (action.equals("wait")) continue;
