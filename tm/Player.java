@@ -149,17 +149,14 @@ public class Player extends JPanel {
         bons.clear();
         favs.clear();
         towns.clear();
-        unlockedTerrain = null;
         if (game.phase == Game.Phase.INITIAL_DWELLINGS) {
             selectFaction(faction);
             if (initialFav > 0) {
                 game.selectFav(this, initialFav);
             }
-            if (game.getVariableColor() != null) {
-                unlockedTerrain[game.getVariableColor().ordinal()] = true;
-            }
         } else {
             faction = null;
+            unlockedTerrain = null;
         }
     }
 

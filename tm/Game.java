@@ -1573,6 +1573,7 @@ public class Game extends JPanel {
                             volcanoColor = color;
                         } else if (player.getFaction().getHomeType() == Hex.Type.VARIABLE) {
                             variableColor = color;
+                            player.unlockedTerrain[color.ordinal()] = true;
                         }
                     } else if (payCultPattern.matcher(action).matches()) {
                         if (acolyteDig != null) {
@@ -1603,7 +1604,7 @@ public class Game extends JPanel {
                         }
                     }
                 }
-                if (phase == Phase.CONFIRM_ACTION) {
+                if (phase == Phase.CONFIRM_ACTION && player == getCurrentPlayer()) {
                     final Faction faction = player.getFaction();
                     confirmTurn();
                     replayLeech(faction);
