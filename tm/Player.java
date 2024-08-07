@@ -885,7 +885,15 @@ public class Player extends JPanel {
         addIncomeFromCults(cultSteps[1], round.water, round.income);
         addIncomeFromCults(cultSteps[2], round.earth, round.income);
         addIncomeFromCults(cultSteps[3], round.air, round.income);
-        addIncomeFromCults(7 - maxPriests, round.priests, round.income);
+        int cultPriests = 7 - maxPriests;
+        if (unlockedTerrain != null) {
+            for (boolean b : unlockedTerrain) {
+                if (!b) {
+                    --cultPriests;
+                }
+            }
+        }
+        addIncomeFromCults(cultPriests, round.priests, round.income);
     }
 
     public void startRound(Round round) {
@@ -1281,10 +1289,10 @@ public class Player extends JPanel {
             final int dx = (int) (Math.cos(angle) * wheelRadius + 0.5);
             final int dy = (int) (Math.sin(angle) * wheelRadius + 0.5);
             g.setColor(Color.BLACK);
-            if (!unlocked) g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), 50));
+            if (!unlocked) g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), pendingTerrainUnlock > 0 ? 50 : 0));
             g.fillOval(x + wheelRadius + dx, y + wheelRadius + dy, circleRadius * 2, circleRadius * 2);
             g.setColor(circleType.getHexColor());
-            if (!unlocked) g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), 50));
+            if (!unlocked) g.setColor(new Color(g.getColor().getRed(), g.getColor().getGreen(), g.getColor().getBlue(), pendingTerrainUnlock > 0 ? 50 : 0));
             g.fillOval(x + wheelRadius + dx + 1, y + wheelRadius + dy + 1, circleRadius * 2 - 2, circleRadius * 2 - 2);
             angle += 2 * Math.PI / 7;
         }
