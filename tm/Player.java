@@ -1237,6 +1237,11 @@ public class Player extends JPanel {
         return strongholds > 0;
     }
 
+    public void addTokenToBowl3() {
+        ++power[2];
+        --points;
+    }
+
     @Override
     public String toString() {
         return faction == null ? name : faction.getName();

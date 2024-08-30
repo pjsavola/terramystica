@@ -15,8 +15,17 @@ public class Shapeshifters extends Faction {
     }
 
     @Override
+    public int[] getInitialCultSteps() {
+        return new int[] { 1, 1, 0, 0 };
+    }
+
+    @Override
     public Resources getStrongholdCost() {
         return Resources.c6w3;
     }
 
+    @Override
+    public int getMinDigging() {
+        return 3;
+    }
 }

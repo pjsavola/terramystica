@@ -318,8 +318,13 @@ public class Game extends JPanel {
         }
         rewinding = false;
         if (leechTrigger != null && leechTurnOrder.isEmpty()) {
-            final int cult = Cults.selectCult(this, 1, true);
-            resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+            if (leechTrigger.getFaction() instanceof Cultists) {
+                final int cult = Cults.selectCult(this, 1, true);
+                resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+            } else if (leechTrigger.getFaction() instanceof Shapeshifters) {
+                final int response = leechTrigger.getPoints() > 0 ? JOptionPane.showConfirmDialog(this, "Gain token to bowl 3 for 1vp?", "Leech accepted", JOptionPane.YES_NO_OPTION) : JOptionPane.NO_OPTION;
+                resolveAction(new ShapeshifterPowerAction(response == JOptionPane.YES_OPTION));
+            }
         }
         if (resolvingCultSpades()) {
             selectPendingCultSteps();
@@ -836,8 +841,13 @@ public class Game extends JPanel {
                         turnOrder.add(0, leechTrigger);
                         if (!rewinding && !importing) {
                             repaint();
-                            final int cult = Cults.selectCult(this, 1, true);
-                            resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+                            if (leechTrigger.getFaction() instanceof Cultists) {
+                                final int cult = Cults.selectCult(this, 1, true);
+                                resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+                            } else if (leechTrigger.getFaction() instanceof Shapeshifters) {
+                                final int response = leechTrigger.getPoints() > 0 ? JOptionPane.showConfirmDialog(this, "Gain token to bowl 3 for 1vp?", "Leech accepted", JOptionPane.YES_NO_OPTION) : JOptionPane.NO_OPTION;
+                                resolveAction(new ShapeshifterPowerAction(response == JOptionPane.YES_OPTION));
+                            }
                         }
                     } else {
                         leechTrigger.addIncome(Resources.pw1);
@@ -871,7 +881,7 @@ public class Game extends JPanel {
                 if (leechAmount > 0) {
                     otherPlayer.addPendingLeech(leechAmount);
                     leechTurnOrder.add(otherPlayer);
-                    if (activePlayer.getFaction() instanceof Cultists) {
+                    if (activePlayer.getFaction() instanceof Cultists || activePlayer.getFaction() instanceof Shapeshifters) {
                         leechTrigger = activePlayer;
                     }
                 }
