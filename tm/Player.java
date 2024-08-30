@@ -1000,6 +1000,8 @@ public class Player extends JPanel {
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
+                    if (game.phase != Game.Phase.ACTIONS) return;
+
                     if (faction.getPowerAction(strongholds > 0) != null) {
                         if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
                             if (faction instanceof Auren && game.getCurrentPlayer().getFaction() instanceof Auren) {

@@ -1902,6 +1902,11 @@ public class Game extends JPanel {
     }
 
     public void setVariableColor(Hex.Type type) {
+        mapPanel.getAllHexes().forEach(hex -> {
+            if (hex.getStructure() != null && hex.getType() == variableColor) {
+                hex.setType(type);
+            }
+        });
         variableColor = type;
     }
 
