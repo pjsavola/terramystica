@@ -5,6 +5,7 @@ import tm.Game;
 import tm.Player;
 import tm.faction.Acolytes;
 import tm.faction.Auren;
+import tm.faction.Shapeshifters;
 
 public class ShapeshifterPowerAction extends Action {
 
@@ -16,7 +17,7 @@ public class ShapeshifterPowerAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return !response || player.getPoints() > 0;
+        return player.getFaction() instanceof Shapeshifters && (!response || player.getPoints() > 0);
     }
 
     @Override

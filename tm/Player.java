@@ -1025,6 +1025,27 @@ public class Player extends JPanel {
                                 game.resolveAction(new SwarmlingsFreeTradingPostAction());
                             } else if (faction instanceof Witches && game.getCurrentPlayer().getFaction() instanceof Witches) {
                                 game.resolveAction(new WitchesFreeDwellingAction());
+                            } else if (faction instanceof Shapeshifters && game.getCurrentPlayer().getFaction() instanceof Shapeshifters) {
+                                final boolean canAffordPower = canAffordPower(5);
+                                final boolean canAffordTokens = power[0] + power[1] + power[2] >= 5;
+                                if (canAffordPower || canAffordTokens) {
+                                    final int response;
+                                    if (canAffordPower && canAffordTokens) {
+                                        final String[] choices = {"5 power", "5 tokens",};
+                                        response = JOptionPane.showOptionDialog(game, "Pay color change with...", "Choose payment method", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, null);
+                                    } else if (canAffordPower) {
+                                        response = 0;
+                                    } else {
+                                        response = 1;
+                                    }
+                                    if (response == 0 || response == 1) {
+                                        Hex.Type type;
+                                        do {
+                                            type = FactionButton.pickReplacedColor(null, game);
+                                        } while (type == null);
+                                        game.resolveAction(new ShapeshifterColorAction(response == 0, type));
+                                    }
+                                }
                             }
                         }
                     }
@@ -1240,6 +1261,20 @@ public class Player extends JPanel {
     public void addTokenToBowl3() {
         ++power[2];
         --points;
+    }
+
+    public int getPowerTokenCount() {
+        return power[0] + power[1] + power[2];
+    }
+
+    public void payTokens(int count) {
+        if (getPowerTokenCount() < count) throw new RuntimeException("Too few power tokens");
+
+        while (count-- > 0) {
+            if (power[0] > 0) --power[0];
+            else if (power[1] > 0) --power[1];
+            else --power[2];
+        }
     }
 
     @Override

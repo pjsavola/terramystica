@@ -59,7 +59,7 @@ public class TurnOrder extends JPanel {
                 case LEECH -> {
                     String txt = "Leech " + game.getCurrentPlayer().getPendingLeech();
                     if (game.leechTrigger != null) {
-                        txt += " from Cultists";
+                        txt += " from " + game.leechTrigger.getFaction().getName();
                     }
                     drawPlayers(g, 0, topMargin, txt + "?", leechTurnOrder);
                 }

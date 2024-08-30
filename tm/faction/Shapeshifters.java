@@ -28,4 +28,9 @@ public class Shapeshifters extends Faction {
     public int getMinDigging() {
         return 3;
     }
+
+    @Override
+    public String getPowerAction(boolean stronghold) {
+        return stronghold ? "color" : null;
+    }
 }
