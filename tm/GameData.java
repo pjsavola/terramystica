@@ -32,8 +32,8 @@ public class GameData implements Serializable {
         revisedStartingVPs.put("Dwarves", 20);
         revisedStartingVPs.put("Halflings", 20);
         revisedStartingVPs.put("IceMaidens", 20);
-        revisedStartingVPs.put("Riverwalkers", 20); // TODO: Check
-        revisedStartingVPs.put("Shapeshifters", 20); // TODO: Check
+        revisedStartingVPs.put("Riverwalkers", 21);
+        revisedStartingVPs.put("Shapeshifters", 22);
         revisedStartingVPs.put("Swarmlings", 22);
         revisedStartingVPs.put("Yetis", 22);
         revisedStartingVPs.put("Acolytes", 23);

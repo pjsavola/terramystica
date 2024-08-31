@@ -21,9 +21,9 @@ public class FactionButton extends JButton {
         });
     }
 
-    public static Hex.Type pickReplacedColor(JFrame parent, Game game) {
+    public static Hex.Type pickReplacedColor(JFrame parent, Game game, boolean colorChange) {
         final JDialog popup = new JDialog(parent, true);
-        final Set<Integer> selectedOrdinals = game.getSelectedOrdinals();
+        final Set<Integer> selectedOrdinals = colorChange ? game.getSelectedBaseOrdinals() : game.getSelectedOrdinals();
         final JPanel terraformPanel = new JPanel();
         final Hex.Type[] result = new Hex.Type[1];
         for (int i = 0; i < 7; ++i) {
@@ -31,7 +31,7 @@ public class FactionButton extends JButton {
                 terraformPanel.add(new TerrainButton(popup, "", Hex.Type.values()[i], 0, result));
             }
         }
-        popup.setTitle("Select replaced color");
+        popup.setTitle(colorChange ? "Select new color" : "Select replaced color");
         popup.setContentPane(terraformPanel);
         popup.setLocationRelativeTo(parent);
         popup.pack();

@@ -1043,7 +1043,7 @@ public class Player extends JPanel {
                                     if (response == 0 || response == 1) {
                                         Hex.Type type;
                                         do {
-                                            type = FactionButton.pickReplacedColor(null, game);
+                                            type = FactionButton.pickReplacedColor(null, game, true);
                                         } while (type == null);
                                         game.resolveAction(new ShapeshifterColorAction(response == 0, type));
                                     }

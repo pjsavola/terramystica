@@ -16,7 +16,7 @@ public class ShapeshifterColorAction extends Action {
 
     @Override
     public boolean canExecute() {
-        if (game.getSelectedOrdinals().contains(color.ordinal())) return false;
+        if (game.getSelectedBaseOrdinals().contains(color.ordinal())) return false;
         if (usePower && !player.canAffordPower(5)) return false;
         if (!usePower && player.getPowerTokenCount() < 5) return false;
 

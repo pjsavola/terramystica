@@ -335,7 +335,7 @@ public class Game extends JPanel {
             } else {
                 Hex.Type type;
                 do {
-                    type = FactionButton.pickReplacedColor(frame, this);
+                    type = FactionButton.pickReplacedColor(frame, this, false);
                 } while (type == null);
                 resolveAction(new PickColorAction(type));
             }
@@ -727,7 +727,7 @@ public class Game extends JPanel {
                 if (!rewinding && !factionsPicked && !turnOrder.isEmpty() && turnOrder.get(0).getFaction() != null && ((turnOrder.get(0).getFaction().getHomeType() == Hex.Type.ICE && iceColor == null) || (turnOrder.get(0).getFaction().getHomeType() == Hex.Type.VARIABLE && variableColor == null))) {
                     Hex.Type type;
                     do {
-                        type = FactionButton.pickReplacedColor(frame, this);
+                        type = FactionButton.pickReplacedColor(frame, this, false);
                     } while (type == null);
                     resolveAction(new PickColorAction(type));
                 }
@@ -801,7 +801,7 @@ public class Game extends JPanel {
                             repaint();
                             Hex.Type type;
                             do {
-                                type = FactionButton.pickReplacedColor(frame, this);
+                                type = FactionButton.pickReplacedColor(frame, this, false);
                             } while (type == null);
                             resolveAction(new PickColorAction(type));
                         }
@@ -1100,7 +1100,7 @@ public class Game extends JPanel {
         private static final Pattern passPattern = Pattern.compile("[Pp][Aa][Ss][Ss]( [Bb][Oo][Nn][1-9][0-9]*)*");
         private static final Pattern digPattern = Pattern.compile("[Dd][Ii][Gg] \\d");
         private static final Pattern upgradePattern = Pattern.compile("[Uu][Pp][Gg][Rr][Aa][Dd][Ee] " + hexRegex + " to ([Tt][Pp]|[Tt][Ee]|[Ss][Hh]|[Ss][Aa])");
-        private static final Pattern actionPattern = Pattern.compile("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6)");
+        private static final Pattern actionPattern = Pattern.compile("[Aa][Cc][Tt][Ii][Oo][Nn] ([Aa][Cc][Tt][1-6AaCcEeGgNnSsWw]|[Bb][Oo][Nn][1-2]|[Ff][Aa][Vv]6|[Aa][Cc][Tt][Hh][56])");
         private static final Pattern priestPattern = Pattern.compile("[Ss][Ee][Nn][Dd] [Pp] to " + cultRegex + "( for [1-3])*");
         private static final Pattern favorPattern = Pattern.compile("\\+[Ff][Aa][Vv][1-9][0-9]*");
         private static final Pattern townPattern = Pattern.compile("\\+[1-9]?[Tt][Ww][1-9]");
@@ -1114,6 +1114,7 @@ public class Game extends JPanel {
         private static final Pattern pickColorPattern = Pattern.compile("[Pp][Ii][Cc][Kk]-[Cc][Oo][Ll][Oo][Rr] .*");
         private static final Pattern payCultPattern = Pattern.compile("-[34] ?" + cultRegex);
         private static final Pattern unlockTerrainPattern = Pattern.compile("[Uu][Nn][Ll][Oo][Cc][Kk]-[Tt][Ee][Rr][Rr][Aa][Ii][Nn] .*");
+        private static final Pattern gainP3pattern = Pattern.compile("[Gg][Aa][Ii][Nn] [Pp]3 [Ff][Oo][Rr] 1?[Vv][Pp]");
 
         private int findCult(String cultName) {
             for (int i = 0; i < 4; ++i) {
@@ -1221,6 +1222,7 @@ public class Game extends JPanel {
             importing = true;
             final List<Action> postponedAcolyteActions = new ArrayList<>();
             Point acolyteDig = null;
+            Boolean shapeshifterSHAction = null;
             int setupCompleteCount = 0;
             while (getCurrentPlayer() != null) {
                 final Player player = getCurrentPlayer();
@@ -1392,6 +1394,14 @@ public class Game extends JPanel {
                                 case 'g':
                                     pendingDigging = 2;
                                     replayAction(new SpadeAction(SpadeAction.Source.ACTG));
+                                    break;
+                                case 'h':
+                                    final boolean usePower;
+                                    shapeshifterSHAction = switch (str.charAt(4)) {
+                                        case '5' -> true;
+                                        case '6' -> false;
+                                        default -> throw new RuntimeException("Invalid Shapeshifter SH action");
+                                    };
                                     break;
                                 case 'n':
                                     replayAction(new NomadsSandstormAction());
@@ -1577,14 +1587,21 @@ public class Game extends JPanel {
                         replayAction(new DarklingsConvertAction(count));
                     } else if (pickColorPattern.matcher(action).matches()) {
                         final Hex.Type color = Hex.Type.valueOf(action.split(" ")[1].toUpperCase());
-                        if (player.getFaction().getHomeType() == Hex.Type.ICE) {
-                            iceColor = color;
-                        } else if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
-                            volcanoColor = color;
-                        } else if (player.getFaction().getHomeType() == Hex.Type.VARIABLE) {
-                            variableColor = color;
-                            player.initialUnlockedTerrainIndex = color.ordinal();
-                            player.unlockedTerrain[player.initialUnlockedTerrainIndex] = true;
+                        if (shapeshifterSHAction != null) {
+                            resolveAction(new ShapeshifterColorAction(shapeshifterSHAction, color));
+                            shapeshifterSHAction = null;
+                        } else {
+                            if (player.getFaction().getHomeType() == Hex.Type.ICE) {
+                                iceColor = color;
+                            } else if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
+                                volcanoColor = color;
+                            } else if (player.getFaction().getHomeType() == Hex.Type.VARIABLE) {
+                                variableColor = color;
+                                if (player.unlockedTerrain != null) {
+                                    player.initialUnlockedTerrainIndex = color.ordinal();
+                                    player.unlockedTerrain[player.initialUnlockedTerrainIndex] = true;
+                                }
+                            }
                         }
                     } else if (payCultPattern.matcher(action).matches()) {
                         if (acolyteDig != null) {
@@ -1603,6 +1620,8 @@ public class Game extends JPanel {
                         final String s = action.split(" ")[1].toUpperCase();
                         final Hex.Type color = s.equals("GAIN-PRIEST") ? null : Hex.Type.valueOf(s);
                         replayAction(new UnlockTerrainAction(color));
+                    } else if (gainP3pattern.matcher(action).matches()) {
+                        replayAction(new ShapeshifterPowerAction(true));
                     } else {
                         log("Unhandled action: " + action);
                         break;
@@ -1689,14 +1708,22 @@ public class Game extends JPanel {
     }
 
     public Set<Integer> getSelectedOrdinals() {
+        final Set<Integer> selectedOrdinals = getSelectedBaseOrdinals();
+        if (iceColor != null) {
+            selectedOrdinals.add(iceColor.ordinal());
+        }
+        if (volcanoColor != null) {
+            selectedOrdinals.add(volcanoColor.ordinal());
+        }
+        return selectedOrdinals;
+    }
+
+    public Set<Integer> getSelectedBaseOrdinals() {
         final Set<Integer> selectedOrdinals = new HashSet<>();
         for (Player p : players) {
             if (p.getFaction() != null) {
                 selectedOrdinals.add(p.getFaction().getHomeType().ordinal());
             }
-        }
-        if (iceColor != null) {
-            selectedOrdinals.add(iceColor.ordinal());
         }
         if (variableColor != null) {
             selectedOrdinals.add(variableColor.ordinal());
