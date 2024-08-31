@@ -156,7 +156,11 @@ public class Player extends JPanel {
                 game.selectFav(this, initialFav);
             }
             if (initialUnlockedTerrainIndex != -1) {
-                unlockedTerrain[initialUnlockedTerrainIndex] = true;
+                if (faction instanceof Riverwalkers) {
+                    unlockedTerrain[initialUnlockedTerrainIndex] = true;
+                } else if (faction instanceof Shapeshifters) {
+                    game.setVariableColor(Hex.Type.values()[initialUnlockedTerrainIndex]);
+                }
             }
         } else {
             faction = null;

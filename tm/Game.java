@@ -1637,8 +1637,8 @@ public class Game extends JPanel {
                                 volcanoColor = color;
                             } else if (player.getFaction().getHomeType() == Hex.Type.VARIABLE) {
                                 variableColor = color;
+                                player.initialUnlockedTerrainIndex = color.ordinal();
                                 if (player.unlockedTerrain != null) {
-                                    player.initialUnlockedTerrainIndex = color.ordinal();
                                     player.unlockedTerrain[player.initialUnlockedTerrainIndex] = true;
                                 }
                             }

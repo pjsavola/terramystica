@@ -38,8 +38,8 @@ public class PickColorAction extends Action {
             case VOLCANO -> game.setVolcanoColor(type);
             case VARIABLE -> {
                 game.setVariableColor(type);
+                player.initialUnlockedTerrainIndex = type.ordinal();
                 if (player.getFaction() instanceof Riverwalkers) {
-                    player.initialUnlockedTerrainIndex = type.ordinal();
                     player.unlockedTerrain[player.initialUnlockedTerrainIndex] = true;
                 }
             }
