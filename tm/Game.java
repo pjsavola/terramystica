@@ -80,6 +80,7 @@ public class Game extends JPanel {
         frame.setContentPane(jsp);
         frame.pack();
         game.refresh();
+        game.queryLeechTriggerAction();
     }
 
     public Game(JFrame frame, GameData gameData) throws ReplayFailure {
@@ -317,15 +318,7 @@ public class Game extends JPanel {
             }
         }
         rewinding = false;
-        if (leechTrigger != null && leechTurnOrder.isEmpty()) {
-            if (leechTrigger.getFaction() instanceof Cultists) {
-                final int cult = Cults.selectCult(this, 1, true);
-                resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
-            } else if (leechTrigger.getFaction() instanceof Shapeshifters) {
-                final int response = leechTrigger.getPoints() > 0 ? JOptionPane.showConfirmDialog(this, "Gain token to bowl 3 for 1vp?", "Leech accepted", JOptionPane.YES_NO_OPTION) : JOptionPane.NO_OPTION;
-                resolveAction(new ShapeshifterPowerAction(response == JOptionPane.YES_OPTION));
-            }
-        }
+        queryLeechTriggerAction();
         if (resolvingCultSpades()) {
             selectPendingCultSteps();
         }
@@ -341,6 +334,18 @@ public class Game extends JPanel {
             }
         }
         refresh();
+    }
+
+    private void queryLeechTriggerAction() {
+        if (leechTrigger != null && leechTurnOrder.isEmpty()) {
+            if (leechTrigger.getFaction() instanceof Cultists) {
+                final int cult = Cults.selectCult(this, 1, true);
+                resolveAction(new CultStepAction(cult, 1, CultStepAction.Source.LEECH));
+            } else if (leechTrigger.getFaction() instanceof Shapeshifters) {
+                final int response = leechTrigger.getPoints() > 0 ? JOptionPane.showConfirmDialog(this, "Gain token to bowl 3 for 1vp?", "Leech accepted", JOptionPane.YES_NO_OPTION) : JOptionPane.NO_OPTION;
+                resolveAction(new ShapeshifterPowerAction(response == JOptionPane.YES_OPTION));
+            }
+        }
     }
 
     public boolean isValidBonIndex(int index) {
@@ -1227,6 +1232,41 @@ public class Game extends JPanel {
             while (getCurrentPlayer() != null) {
                 final Player player = getCurrentPlayer();
                 actions = new ArrayDeque<>();
+                if (player == leechTrigger) {
+                    if (player.getFaction() instanceof Cultists) {
+                        boolean found = false;
+                        final Iterator<GameData.Pair> it = actionFeed.iterator();
+                        while (it.hasNext()) {
+                            final GameData.Pair pair = it.next();
+                            if (pair.faction == player.getFaction() && cultStepPattern.matcher(pair.action).matches()) {
+                                it.remove();
+                                actionFeed.addFirst(pair);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            throw new RuntimeException("Cultist cult step for accepted leech not found");
+                        }
+                    } else if (player.getFaction() instanceof Shapeshifters) {
+                        boolean found = false;
+                        final Iterator<GameData.Pair> it = actionFeed.iterator();
+                        while (it.hasNext()) {
+                            final GameData.Pair pair = it.next();
+                            if (pair.faction == player.getFaction() && gainP3pattern.matcher(pair.action).matches()) {
+                                it.remove();
+                                actionFeed.addFirst(pair);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            throw new RuntimeException("Shapeshifter decision for accepted leech not found");
+                        }
+                    } else {
+                        throw new RuntimeException("Accepted leech triggering an action");
+                    }
+                }
                 final Iterator<GameData.Pair> it = actionFeed.iterator();
                 while (it.hasNext()) {
                     final GameData.Pair pair = it.next();

@@ -10,8 +10,13 @@ public class Shapeshifters extends Faction {
     }
 
     @Override
+    public int getInitialPowerTokenCount() {
+        return 8;
+    }
+
+    @Override
     public Resources getInitialIncome() {
-        return new Resources(15, 3, 0, 2);
+        return new Resources(15, 3, 0, 4);
     }
 
     @Override
@@ -22,6 +27,11 @@ public class Shapeshifters extends Faction {
     @Override
     public Resources getStrongholdCost() {
         return Resources.c6w3;
+    }
+
+    @Override
+    public Resources getStrongholdIncome() {
+        return Resources.pw3;
     }
 
     @Override
