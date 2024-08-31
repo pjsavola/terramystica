@@ -1436,7 +1436,6 @@ public class Game extends JPanel {
                                     replayAction(new SpadeAction(SpadeAction.Source.ACTG));
                                     break;
                                 case 'h':
-                                    final boolean usePower;
                                     shapeshifterSHAction = switch (str.charAt(4)) {
                                         case '5' -> true;
                                         case '6' -> false;
@@ -1628,7 +1627,7 @@ public class Game extends JPanel {
                     } else if (pickColorPattern.matcher(action).matches()) {
                         final Hex.Type color = Hex.Type.valueOf(action.split(" ")[1].toUpperCase());
                         if (shapeshifterSHAction != null) {
-                            resolveAction(new ShapeshifterColorAction(shapeshifterSHAction, color));
+                            replayAction(new ShapeshifterColorAction(shapeshifterSHAction, color));
                             shapeshifterSHAction = null;
                         } else {
                             if (player.getFaction().getHomeType() == Hex.Type.ICE) {

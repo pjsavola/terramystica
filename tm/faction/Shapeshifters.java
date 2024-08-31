@@ -31,7 +31,7 @@ public class Shapeshifters extends Faction {
 
     @Override
     public Resources getStrongholdIncome() {
-        return Resources.pw3;
+        return Resources.pw4;
     }
 
     @Override

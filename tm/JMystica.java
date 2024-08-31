@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class JMystica {
-    public static int maxReplayActionCount = 70;
+    public static int maxReplayActionCount = 2000;
     public static final String gameFileExtension = "jtm";
 
     public static Hex.Type getType(String type) {
