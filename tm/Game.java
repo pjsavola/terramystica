@@ -1120,6 +1120,7 @@ public class Game extends JPanel {
         private static final Pattern payCultPattern = Pattern.compile("-[34] ?" + cultRegex);
         private static final Pattern unlockTerrainPattern = Pattern.compile("[Uu][Nn][Ll][Oo][Cc][Kk]-[Tt][Ee][Rr][Rr][Aa][Ii][Nn] .*");
         private static final Pattern gainP3pattern = Pattern.compile("[Gg][Aa][Ii][Nn] [Pp]3 [Ff][Oo][Rr] 1?[Vv][Pp]");
+        private static final Pattern refuseP3pattern = Pattern.compile("-[Gg][Aa][Ii][Nn]_[Pp]3_[Ff][Oo][Rr]_[Vv][Pp]");
 
         private int findCult(String cultName) {
             for (int i = 0; i < 4; ++i) {
@@ -1253,11 +1254,13 @@ public class Game extends JPanel {
                         final Iterator<GameData.Pair> it = actionFeed.iterator();
                         while (it.hasNext()) {
                             final GameData.Pair pair = it.next();
-                            if (pair.faction == player.getFaction() && gainP3pattern.matcher(pair.action).matches()) {
-                                it.remove();
-                                actionFeed.addFirst(pair);
-                                found = true;
-                                break;
+                            if (pair.faction == player.getFaction()) {
+                                 if (gainP3pattern.matcher(pair.action).matches() || refuseP3pattern.matcher(pair.action).matches()) {
+                                     it.remove();
+                                     actionFeed.addFirst(pair);
+                                     found = true;
+                                     break;
+                                 }
                             }
                         }
                         if (!found) {
@@ -1661,6 +1664,8 @@ public class Game extends JPanel {
                         replayAction(new UnlockTerrainAction(color));
                     } else if (gainP3pattern.matcher(action).matches()) {
                         replayAction(new ShapeshifterPowerAction(true));
+                    } else if (refuseP3pattern.matcher(action).matches()) {
+                        replayAction(new ShapeshifterPowerAction(false));
                     } else {
                         log("Unhandled action: " + action);
                         break;
