@@ -769,7 +769,7 @@ public class Player extends JPanel {
         if (faction instanceof Darklings) {
             return priests >= amount;
         } else if (faction instanceof Dragonlords) {
-            return power[0] + power[1] + power[2] >= amount;
+            return getPowerTokenCount() >= amount;
         } else if (faction instanceof Acolytes) {
             for (int i = 0; i < 4; ++i) {
                 if (cultSteps[i] >= amount) {
@@ -1004,9 +1004,7 @@ public class Player extends JPanel {
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (game.phase != Game.Phase.ACTIONS) return;
-
-                    if (faction.getPowerAction(strongholds > 0) != null) {
+                    if (faction.getPowerAction(strongholds > 0) != null && game.phase == Game.Phase.ACTIONS) {
                         if (PowerActions.actionClicked(e.getX() - 250, e.getY() - 24)) {
                             if (faction instanceof Auren && game.getCurrentPlayer().getFaction() instanceof Auren) {
                                 if (CultStepAction.isSourceValid(CultStepAction.Source.ACTA, game, Player.this)) {

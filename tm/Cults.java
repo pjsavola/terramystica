@@ -188,6 +188,19 @@ public class Cults extends JPanel {
         return true;
     }
 
+    public int getFreeCultSpotCount(int cult, int amount) {
+        if (amount == 3) {
+            return cultPriests[cult][0] == null ? 1 : 0;
+        } else if (amount == 2) {
+            int count = 0;
+            for (int i = 1; i <= 3; ++i) {
+                if (cultPriests[cult][i] == null) ++count;
+            }
+            return count;
+        }
+        return Integer.MAX_VALUE;
+    }
+
     public void sendPriestToCult(Player player, int cult, int amount) {
         if (amount == 3 && cultPriests[cult][0] != null)
             throw new RuntimeException("Cult spot of 3 already occupied");

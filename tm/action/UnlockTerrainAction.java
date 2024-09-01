@@ -27,7 +27,7 @@ public class UnlockTerrainAction extends Action {
 
     @Override
     public boolean validatePhase() {
-        return game.phase == Game.Phase.CONFIRM_ACTION;
+        return game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION;
     }
 
     @Override
