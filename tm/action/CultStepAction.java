@@ -5,6 +5,7 @@ import tm.Game;
 import tm.Player;
 import tm.faction.Acolytes;
 import tm.faction.Auren;
+import tm.faction.Cultists;
 
 public class CultStepAction extends Action {
 
@@ -25,6 +26,7 @@ public class CultStepAction extends Action {
             case BON2 -> player.getBon() == 2 && !game.bonUsed[1];
             case FAV6 -> player.hasFavor(6) && !player.usedFav6[0];
             case ACTA -> player.getFaction() instanceof Auren && !player.usedFactionAction && player.hasStronghold();
+            case LEECH -> player.getFaction() instanceof Cultists && game.leechTrigger == player;
             case ACOLYTES -> player.getFaction() instanceof Acolytes && player.pendingCultSteps > 0;
             default -> true;
         };

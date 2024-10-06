@@ -58,7 +58,7 @@ public class Game extends JPanel {
     public Phase phase;
     private boolean factionsPicked;
 
-    private final String[] mapData;
+    final String[] mapData;
 
     boolean rewinding;
     boolean importing;
