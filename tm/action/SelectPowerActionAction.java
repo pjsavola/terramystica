@@ -25,6 +25,8 @@ public class SelectPowerActionAction extends Action {
 
     @Override
     public String toString() {
-        return "Action ACT" + act;
+        final int burn = player.getNeededBurn(PowerActions.getRequiredPower(player, act));
+        final String burnStr = burn > 0 ? ("Burn " + burn + ". ") : "";
+        return burnStr + "Action ACT" + act;
     }
 }
