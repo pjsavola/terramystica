@@ -436,7 +436,7 @@ public class Game extends JPanel {
             players.clear();
             players.addAll(turnOrder);
             for (Player player : players) {
-                player.startRound(gameData.getRounds().get(round - 1));
+                player.startRound(getRound(round));
                 if (player.pendingTerrainUnlock > 0) {
                     turnOrder.add(0, player);
                     phase = Phase.CONFIRM_ACTION;
@@ -815,7 +815,7 @@ public class Game extends JPanel {
                     if (cultIncome == round) {
                         if (cultIncome > 0 && cultIncome < 6) {
                             for (Player p : nextTurnOrder) {
-                                p.addCultIncome(gameData.getRounds().get(cultIncome - 1));
+                                p.addCultIncome(getRound(cultIncome));
                                 if (p.getPendingSpades() > 0 || p.pendingCultSteps > 0 || p.pendingTerrainUnlock > 0) {
                                     turnOrder.add(p);
                                 }
@@ -2008,5 +2008,9 @@ public class Game extends JPanel {
             }
         }
         return null;
+    }
+
+    public Round getRound(int round) {
+        return gameData.getRounds().get(round - 1);
     }
 }

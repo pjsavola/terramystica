@@ -82,4 +82,11 @@ public class Resources implements Serializable {
     public Resources combine(Resources income) {
         return new Resources(coins + income.coins, workers + income.workers, priests + income.priests, power + income.power);
     }
+
+    public void toArrays(int index, int[] coins, int[] workers, int[] priests, int[] power) {
+        coins[index] += this.coins;
+        workers[index] += this.workers;
+        priests[index] += this.priests;
+        power[index] += this.power;
+    }
 }

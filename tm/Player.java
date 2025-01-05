@@ -889,6 +889,10 @@ public class Player extends JPanel {
         addIncomeFromCults(cultSteps[1], round.water, round.income);
         addIncomeFromCults(cultSteps[2], round.earth, round.income);
         addIncomeFromCults(cultSteps[3], round.air, round.income);
+        addIncomeFromCults(getCultPriestCount(), round.priests, round.income);
+    }
+
+    public int getCultPriestCount() {
         int cultPriests = 7 - maxPriests;
         if (unlockedTerrain != null) {
             for (boolean b : unlockedTerrain) {
@@ -897,7 +901,7 @@ public class Player extends JPanel {
                 }
             }
         }
-        addIncomeFromCults(cultPriests, round.priests, round.income);
+        return cultPriests;
     }
 
     public void startRound(Round round) {
@@ -1340,5 +1344,68 @@ public class Player extends JPanel {
             g.fillOval(x + wheelRadius + dx + 1, y + wheelRadius + dy + 1, circleRadius * 2 - 2, circleRadius * 2 - 2);
             angle += 2 * Math.PI / 7;
         }
+    }
+
+    public int evaluate() {
+        final int round = game.getRound();
+        if (round > 0) {
+            int[] coinFlow = new int[7 - round];
+            int[] workerFlow = new int[7 - round];
+            int[] priestFlow = new int[7 - round];
+            int[] powerFlow = new int[7 - round];
+            int[] spadeFlow = new int[7 - round];
+            int[] vpFlow = new int[8 - round];
+            coinFlow[0] = coins;
+            workerFlow[0] = workers;
+            priestFlow[0] = priests;
+            powerFlow[0] = power[2] * 2 + power[1];
+            vpFlow[0] = points;
+            int delta = 0;
+            while (round + delta < 6) {
+                ++delta;
+                final Round r = game.getRound(round);
+                final int[] cultRequirements = { r.fire, r.water, r.earth, r.air, r.priests };
+                for (int cult = 0; cult < cultRequirements.length; ++cult) {
+                    if (cultRequirements[cult] > 0) {
+                        int rewardCount = (cult < 4 ? cultSteps[cult] : getCultPriestCount()) / cultRequirements[cult];
+                        while (rewardCount-- > 0) {
+                            r.income.toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
+                            spadeFlow[delta] += r.spade;
+                        }
+                    }
+                }
+                favorIncome.toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
+                faction.getBaseIncome().toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
+                for (int i = 0; i < dwellings; ++i) {
+                    faction.getDwellingIncome(i).toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
+                }
+                for (int i = 0; i < tradingPosts; ++i) {
+                    faction.getTradingPostIncome(i).toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
+                }
+                for (int i = 0; i < temples; ++i) {
+                    faction.getTempleIncome(i).toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
+                }
+                if (strongholds > 0) {
+                    faction.getStrongholdIncome().toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
+                }
+                if (sanctuaries > 0) {
+                    faction.getSanctuaryIncome().toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
+                }
+                priestFlow[delta] = Math.min(maxPriests, priestFlow[delta]);
+                powerFlow[delta] = Math.min(getPowerTokenCount() * 2, powerFlow[delta]);
+
+                if (ownedFavors[11]) {
+                    final int[] fav12 = { 0, 2, 3, 3, 4 };
+                    vpFlow[delta] += fav12[tradingPosts];
+                }
+                if (faction instanceof Engineers && strongholds > 0) {
+                    vpFlow[delta] += (3 - bridgesLeft) * 3;
+                }
+                if (faction instanceof IceMaidens && strongholds > 0) {
+                    vpFlow[delta] += 3 * temples;
+                }
+            }
+        }
+        return 0;
     }
 }
