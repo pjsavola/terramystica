@@ -1,13 +1,21 @@
 package tm.action;
 
 import tm.Game;
+import tm.Player;
 
 public class SelectBonAction extends Action {
 
     private final int bonIndex;
+    private String bon;
 
     public SelectBonAction(int bonIndex) {
         this.bonIndex = bonIndex;
+    }
+
+    @Override
+    public void setData(Game game, Player player) {
+        super.setData(game, player);
+        bon = Integer.toString(game.getBon(bonIndex));
     }
 
     @Override
@@ -40,6 +48,6 @@ public class SelectBonAction extends Action {
 
     @Override
     public String toString() {
-        return "Pass BON" + player.getBon();
+        return "Pass BON" + bon;
     }
 }

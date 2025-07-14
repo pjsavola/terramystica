@@ -352,6 +352,10 @@ public class Game extends JPanel {
         return index >= 0 && index < bons.size();
     }
 
+    public int getBon(int index) {
+        return isValidBonIndex(index) ? bons.get(index) : 0;
+    }
+
     public int getRound() {
         return round;
     }

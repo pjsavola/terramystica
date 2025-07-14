@@ -125,7 +125,7 @@ public class AIUtil {
                         // TODO: Acolyte & Dragonlord dig actions
                     } else {
                         for (Hex.Type type : Hex.Type.values()) {
-                            if (type == Hex.Type.VOLCANO) {
+                            if (type == Hex.Type.VOLCANO || type == Hex.Type.VARIABLE) {
                                 continue;
                             }
                             if (type == Hex.Type.ICE && (game.getIceColor() == null || player.getHomeType() != Hex.Type.ICE)) {

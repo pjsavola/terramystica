@@ -66,6 +66,9 @@ public class DigAction extends Action {
 
     @Override
     public boolean canExecute() {
+        if (type == Hex.Type.VARIABLE) {
+            return false;
+        }
         if (resolvingCultSpades) {
             if (jump || requiredDigging > 0) {
                 return false;
