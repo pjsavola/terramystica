@@ -233,5 +233,17 @@ public abstract class Menus {
                 game.save();
             }
         };
+
+        new ActionMenuItem(game, miscMenu, "List possible actions", KeyEvent.VK_L) {
+            @Override
+            public boolean canExecute(Game game) {
+                return true;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                AIUtil.getFeasibleActions(game, game.getCurrentPlayer());
+            }
+        };
     }
 }

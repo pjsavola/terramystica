@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AIUtil {
+
     public static int getPowerActionThreat(Player p, List<Player> turnOrder, int act) {
         int canTake = 0;
         for (Player player : turnOrder) {
@@ -75,6 +76,11 @@ public class AIUtil {
         return threatLevel;
     }
 
+    public static void updateReachableHexMap() {
+        final List<List<Hex>> reachableHexes = new ArrayList<>();
+
+    }
+
     private static void add(List<Action> possibleActions, Action action, Game game, Player player) {
         action.setData(game, player);
         if (action.validatePhase() && action.canExecute()) {
@@ -110,14 +116,24 @@ public class AIUtil {
         add(possibleActions, new LeechAction(true), game, player);
         for (int i = 0; i < game.mapData.length; ++i) {
             final String row = game.mapData[i];
-            for (int j = 0; j < row.length(); ++j) {
+            for (int j = 0; j < row.split(",").length; ++j) {
                 final Hex hex = game.getHex(i, j);
                 if (hex.getType() == Hex.Type.WATER) {
                     add(possibleActions, new MermaidsTownAction(i, j), game, player);
                 } else {
-                    for (Hex.Type type : Hex.Type.values()) {
-                        add(possibleActions, new DigAction(i, j, type, false), game, player);
-                        add(possibleActions, new DigAction(i, j, type, true), game, player);
+                    if (game.getVolcanoColor() != null && player.getHomeType() == Hex.Type.VOLCANO) {
+                        // TODO: Acolyte & Dragonlord dig actions
+                    } else {
+                        for (Hex.Type type : Hex.Type.values()) {
+                            if (type == Hex.Type.VOLCANO) {
+                                continue;
+                            }
+                            if (type == Hex.Type.ICE && (game.getIceColor() == null || player.getHomeType() != Hex.Type.ICE)) {
+                                continue;
+                            }
+                            add(possibleActions, new DigAction(i, j, type, false), game, player);
+                            add(possibleActions, new DigAction(i, j, type, true), game, player);
+                        }
                     }
                     for (Hex.Structure structure : Hex.Structure.values()) {
                         add(possibleActions, new BuildAction(i, j, structure), game, player);
@@ -127,7 +143,7 @@ public class AIUtil {
                 }
                 for (int k = 0; k < game.mapData.length; ++k) {
                     final String row2 = game.mapData[k];
-                    for (int l = 0; l < row2.length(); ++l) {
+                    for (int l = 0; l < row2.split(",").length; ++l) {
                         final Hex hex2 = game.getHex(k, l);
                         if (hex2.getType() != Hex.Type.WATER) {
                             add(possibleActions, new PlaceBridgeAction(i, j, k, l), game, player);
@@ -165,5 +181,11 @@ public class AIUtil {
         add(possibleActions, new SpadeAction(SpadeAction.Source.ACTG), game, player);
         add(possibleActions, new SwarmlingsFreeTradingPostAction(), game, player);
         add(possibleActions, new WitchesFreeDwellingAction(), game, player);
+
+        for (Action action : possibleActions) {
+            if (action.canExecute()) {
+                System.err.println(action.toString());
+            }
+        }
     }
 }

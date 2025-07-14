@@ -1405,6 +1405,10 @@ public class Player extends JPanel {
                     vpFlow[delta] += 3 * temples;
                 }
             }
+            int possibleNewDwellingCount = 0;
+            while (dwellings < 8) {
+                // TODO:
+            }
         }
         return 0;
     }

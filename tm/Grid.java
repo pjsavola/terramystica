@@ -9,7 +9,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Grid extends JPanel {
 
@@ -185,6 +188,10 @@ public class Grid extends JPanel {
         return allHexes;
     }
 
+    private Stream<Hex> getFilteredHexes(Predicate<Hex> filter) {
+        return allHexes.stream().filter(filter);
+    }
+
     @Override
     public void paint(Graphics g) {
         final Graphics2D g2d = (Graphics2D) g;
@@ -221,7 +228,7 @@ public class Grid extends JPanel {
         final Map<Hex, Integer> distances = new HashMap<>();
         final Deque<Hex> work = new ArrayDeque<>();
         final int shipping = player.getShipping();
-        getAllHexes().stream().filter(h -> h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
+        getFilteredHexes(h -> h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
             work.add(h);
             distances.put(h, 0);
         });
@@ -255,6 +262,18 @@ public class Grid extends JPanel {
             }
         }
         return distances.keySet().stream().filter(hex -> hex.getType() != Hex.Type.WATER).collect(Collectors.toSet());
+    }
+
+    public Set<Hex> getReachableTilesRecursive(Player player, int shippingDelta, int spadeDelta) {
+        final Set<Hex> allowed = new HashSet<>();
+        final Map<Hex, Integer> distances = new HashMap<>();
+        final Deque<Hex> work = new ArrayDeque<>();
+        final int shipping = player.getShipping();
+        getFilteredHexes(h -> (h.getStructure() != null && h.getType() == player.getHomeType()) || allowed.contains(h)).forEach(h -> {
+            work.add(h);
+            distances.put(h, 0);
+        });
+        return null;
     }
 
     public Set<Hex> getJumpableTiles(Player player) {
