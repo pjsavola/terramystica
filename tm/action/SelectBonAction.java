@@ -6,7 +6,7 @@ import tm.Player;
 public class SelectBonAction extends Action {
 
     private final int bonIndex;
-    private String bon;
+    private transient String bon;
 
     public SelectBonAction(int bonIndex) {
         this.bonIndex = bonIndex;
