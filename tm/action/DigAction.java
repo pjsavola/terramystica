@@ -66,7 +66,10 @@ public class DigAction extends Action {
 
     @Override
     public boolean canExecute() {
-        if (type == Hex.Type.VARIABLE) {
+        if (type == Hex.Type.VARIABLE || type == Hex.Type.WATER) {
+            return false;
+        }
+        if (target == null || target.getType() == type) {
             return false;
         }
         if (resolvingCultSpades) {
