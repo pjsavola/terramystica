@@ -95,6 +95,9 @@ public class AIUtil {
             for (int i = 0; i < GameData.allFactions.size(); ++i) {
                 add(possibleActions, new SelectFactionAction(i), game, player);
             }
+            for (Hex.Type type : Hex.Type.values()) {
+                add(possibleActions, new PickColorAction(type), game, player);
+            }
         } else {
             add(possibleActions, new AdvanceAction(false), game, player);
             add(possibleActions, new AdvanceAction(true), game, player);
@@ -168,7 +171,6 @@ public class AIUtil {
             add(possibleActions, new NomadsSandstormAction(), game, player);
             add(possibleActions, new PassAction(), game, player);
             for (Hex.Type type : Hex.Type.values()) {
-                add(possibleActions, new PickColorAction(type), game, player);
                 add(possibleActions, new ShapeshifterColorAction(false, type), game, player);
                 add(possibleActions, new ShapeshifterColorAction(true, type), game, player);
                 add(possibleActions, new UnlockTerrainAction(type), game, player);
