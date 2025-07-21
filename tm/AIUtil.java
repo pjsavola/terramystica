@@ -101,7 +101,13 @@ public class AIUtil {
         } else {
             add(possibleActions, new AdvanceAction(false), game, player);
             add(possibleActions, new AdvanceAction(true), game, player);
-            // BurnAction, ConvertAction
+            add(possibleActions, new BurnAction(1), game, player);
+            add(possibleActions, new ConvertAction(Resources.c1, 0, 0, 0, 0), game, player);
+            add(possibleActions, new ConvertAction(Resources.w1, 0, 0, 0, 0), game, player);
+            add(possibleActions, new ConvertAction(Resources.p1, 0, 0, 0, 0), game, player);
+            add(possibleActions, new ConvertAction(Resources.zero, 1, 0, 0, 0), game, player);
+            add(possibleActions, new ConvertAction(Resources.zero, 0, 1, 0, 0), game, player);
+            add(possibleActions, new ConvertAction(Resources.zero, 0, 0, 1, 0), game, player);
             add(possibleActions, new ChaosMagiciansDoubleAction(), game, player);
             for (int i = 1; i < 16; ++i) {
                 final boolean[] cultsToMax = {i % 2 == 1, (i >> 1) % 2 == 1, (i >> 2) % 2 == 1, (i >> 3) % 2 == 1};
