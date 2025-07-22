@@ -538,11 +538,11 @@ public class Grid extends JPanel {
     }
 
     public int getNetworkSize(Player player) {
-        return getConnectedSets(player).stream().map(List::size).max(Integer::compareTo).orElse(0);
+        return getConnectedSets(player, true).stream().map(List::size).max(Integer::compareTo).orElse(0);
     }
 
     public int getMaxDistance(Player player) {
-        return getConnectedSets(player).stream().map(s -> {
+        return getConnectedSets(player, true).stream().map(s -> {
             int maxDistance = 0;
             for (int i = 0; i < s.size(); ++i) {
                 for (int j = i + 1; j < s.size(); ++j) {
@@ -557,7 +557,7 @@ public class Grid extends JPanel {
     }
 
     public int getSASHDistance(Player player) {
-        return getConnectedSets(player).stream().map(s -> {
+        return getConnectedSets(player, true).stream().map(s -> {
             final Hex saHex = s.stream().filter(h -> h.getStructure() == Hex.Structure.SANCTUARY).findAny().orElse(null);
             final Hex shHex = s.stream().filter(h -> h.getStructure() == Hex.Structure.STRONGHOLD).findAny().orElse(null);
             if (saHex != null && shHex != null) {
@@ -568,7 +568,7 @@ public class Grid extends JPanel {
     }
 
     public int getEdgeCount(Player player) {
-        return getConnectedSets(player).stream().map(s -> {
+        return getConnectedSets(player, true).stream().map(s -> {
             int edgeCount = (int) s.stream().filter(hex -> {
                 // Sides
                 for (Hex[] hexes : map) {
@@ -599,7 +599,7 @@ public class Grid extends JPanel {
         if (player.getFaction() instanceof Mermaids) {
             getAllHexes().stream().filter(h -> h.getType() == Hex.Type.WATER && h.town).forEach(mermaidTowns::add);
         }
-        return getConnectedSets(player).stream().map(s -> {
+        return getConnectedSets(player, true).stream().map(s -> {
             int clusters = 0;
             final Set<Hex> remaining = new HashSet<>(s);
             remaining.addAll(mermaidTowns);
@@ -630,7 +630,7 @@ public class Grid extends JPanel {
         }).max(Integer::compareTo).orElse(0);
     }
 
-    private List<List<Hex>> getConnectedSets(Player player) {
+    List<List<Hex>> getConnectedSets(Player player, boolean excludeEmpty) {
         final List<List<Hex>> connectedSets = new ArrayList<>();
         final Deque<Hex> work = new ArrayDeque<>();
         final int shipping = player.getShipping();
@@ -638,14 +638,14 @@ public class Grid extends JPanel {
         final Set<Hex> visited = new HashSet<>();
 
         if (range == 1) {
-            Hex a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).findAny().orElse(null);
+            Hex a = allHexes.stream().filter(h -> (!h.isEmpty() || !excludeEmpty) && h.getType() == player.getHomeType()).findAny().orElse(null);
             while (a != null) {
                 final List<Hex> connectedSet = new ArrayList<>();
                 work.add(a);
                 visited.add(a);
                 while (!work.isEmpty()) {
                     final Hex hex = work.removeFirst();
-                    if (!hex.isEmpty() && hex.getType() == player.getHomeType()) {
+                    if ((!hex.isEmpty() || !excludeEmpty) && hex.getType() == player.getHomeType()) {
                         connectedSet.add(hex);
                     }
                     final Deque<Hex> water = new ArrayDeque<>();
@@ -663,7 +663,7 @@ public class Grid extends JPanel {
                                 water.add(n);
                             }
                         });
-                        waterHex.getNeighbors().stream().filter(n -> n.getType() == player.getHomeType() && !n.isEmpty()).forEach(n -> {
+                        waterHex.getNeighbors().stream().filter(n -> n.getType() == player.getHomeType() && (!n.isEmpty() || !excludeEmpty)).forEach(n -> {
                             if (shipping >= distance - 1) {
                                 if (visited.add(n)) {
                                     work.add(n);
@@ -671,7 +671,7 @@ public class Grid extends JPanel {
                             }
                         });
                     }
-                    hex.getNeighbors().stream().filter(n -> n.getType() == player.getHomeType() && !n.isEmpty()).forEach(n -> {
+                    hex.getNeighbors().stream().filter(n -> n.getType() == player.getHomeType() && (!n.isEmpty() || !excludeEmpty)).forEach(n -> {
                         if (visited.add(n)) {
                             work.add(n);
                         }
@@ -686,23 +686,23 @@ public class Grid extends JPanel {
                     }
                 }
                 connectedSets.add(connectedSet);
-                a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
+                a = allHexes.stream().filter(h -> (!h.isEmpty() || !excludeEmpty) && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
             }
         } else {
-            Hex a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).findAny().orElse(null);
+            Hex a = allHexes.stream().filter(h -> (!h.isEmpty() || !excludeEmpty) && h.getType() == player.getHomeType()).findAny().orElse(null);
             while (a != null) {
                 final List<Hex> connectedSet = new ArrayList<>();
                 work.add(a);
                 visited.add(a);
                 while (!work.isEmpty()) {
                     final Hex hex = work.removeFirst();
-                    if (!hex.isEmpty() && hex.getType() == player.getHomeType()) {
+                    if ((!hex.isEmpty() || !excludeEmpty) && hex.getType() == player.getHomeType()) {
                         connectedSet.add(hex);
                     }
                     final Deque<Hex> other = new ArrayDeque<>();
                     final Map<Hex, Integer> otherDistances = new HashMap<>();
                     for (Hex n : hex.getNeighbors()) {
-                        if (n.getType() == player.getHomeType() && !n.isEmpty()) {
+                        if (n.getType() == player.getHomeType() && (!n.isEmpty() || !excludeEmpty)) {
                             if (visited.add(n)) {
                                 work.add(n);
                             }
@@ -717,7 +717,7 @@ public class Grid extends JPanel {
                         final Hex otherHex = other.removeFirst();
                         final int distance = otherDistances.get(otherHex) + 1;
                         for (Hex n : otherHex.getNeighbors()) {
-                            if (n.getType() == player.getHomeType() && !n.isEmpty()) {
+                            if (n.getType() == player.getHomeType() && (!n.isEmpty() || !excludeEmpty)) {
                                 if (visited.add(n)) {
                                     work.add(n);
                                 }
@@ -733,7 +733,7 @@ public class Grid extends JPanel {
                     }
                 }
                 connectedSets.add(connectedSet);
-                a = allHexes.stream().filter(h -> !h.isEmpty() && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
+                a = allHexes.stream().filter(h -> (!h.isEmpty() || !excludeEmpty) && h.getType() == player.getHomeType()).filter(h -> !visited.contains(h)).findAny().orElse(null);
             }
         }
         return connectedSets;

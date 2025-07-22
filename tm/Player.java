@@ -1406,7 +1406,24 @@ public class Player extends JPanel {
                 }
             }
             int possibleNewDwellingCount = 0;
+            final List<List<Hex>> tiles = game.getConnectedAreas(this);
+            for (List<Hex> cluster : tiles) {
+                boolean hasAccess = false;
+                int emptyTiles = 0;
+                for (Hex h : cluster) {
+                    if (!h.isEmpty()) {
+                        hasAccess = true;
+                    } else {
+                        ++emptyTiles;
+                    }
+                }
+                if (hasAccess) {
+                    possibleNewDwellingCount += emptyTiles;
+                }
+            }
+
             while (dwellings < 8) {
+
                 // TODO:
             }
         }

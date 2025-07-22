@@ -2017,4 +2017,8 @@ public class Game extends JPanel {
     public Round getRound(int round) {
         return gameData.getRounds().get(round - 1);
     }
+
+    public List<List<Hex>> getConnectedAreas(Player player) {
+        return mapPanel.getConnectedSets(player, false);
+    }
 }
