@@ -2018,11 +2018,7 @@ public class Game extends JPanel {
         return gameData.getRounds().get(round - 1);
     }
 
-    public List<List<Hex>> getConnectedAreas(Player player) {
-        return mapPanel.getConnectedSets(player, false);
-    }
-
-    public void getSpadeCosts(Player player) {
-        mapPanel.getSpadeDistances(player, this);
+    public List<Integer> getSpadeDistanceCounts(Player player) {
+        return mapPanel.getSpadeDistanceCounts(player, this);
     }
 }

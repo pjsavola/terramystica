@@ -1429,21 +1429,7 @@ public class Player extends JPanel {
 
     private int getDwellingSpotCount() {
         int possibleNewDwellingCount = 0;
-        final List<List<Hex>> tiles = game.getConnectedAreas(this);
-        for (List<Hex> cluster : tiles) {
-            boolean hasAccess = false;
-            int emptyTiles = 0;
-            for (Hex h : cluster) {
-                if (!h.isEmpty()) {
-                    hasAccess = true;
-                } else {
-                    ++emptyTiles;
-                }
-            }
-            if (hasAccess) {
-                possibleNewDwellingCount += emptyTiles;
-            }
-        }
-        return possibleNewDwellingCount;
+        final List<Integer> costs = game.getSpadeDistanceCounts(this);
+        return costs.isEmpty() ? 0 : costs.get(0);
     }
 }
