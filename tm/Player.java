@@ -1405,28 +1405,45 @@ public class Player extends JPanel {
                     vpFlow[delta] += 3 * temples;
                 }
             }
-            int possibleNewDwellingCount = 0;
-            final List<List<Hex>> tiles = game.getConnectedAreas(this);
-            for (List<Hex> cluster : tiles) {
-                boolean hasAccess = false;
-                int emptyTiles = 0;
-                for (Hex h : cluster) {
-                    if (!h.isEmpty()) {
-                        hasAccess = true;
-                    } else {
-                        ++emptyTiles;
-                    }
-                }
-                if (hasAccess) {
-                    possibleNewDwellingCount += emptyTiles;
-                }
-            }
 
-            while (dwellings < 8) {
-
-                // TODO:
+            // Analyze dwelling spots
+            int possibleNewDwellingCount = getDwellingSpotCount();
+            if (faction.getMaxShipping() == 0) {
+                final int originalRange = range;
+                if (faction instanceof Fakirs && range < 4) {
+                    ++range;
+                    int cnt = getDwellingSpotCount();
+                }
+                range = originalRange;
+            } else {
+                final int originalShipping = shipping;
+                while (shipping < faction.getMaxShipping()) {
+                    ++shipping;
+                    int cnt = getDwellingSpotCount();
+                }
+                shipping = originalShipping;
             }
         }
         return 0;
+    }
+
+    private int getDwellingSpotCount() {
+        int possibleNewDwellingCount = 0;
+        final List<List<Hex>> tiles = game.getConnectedAreas(this);
+        for (List<Hex> cluster : tiles) {
+            boolean hasAccess = false;
+            int emptyTiles = 0;
+            for (Hex h : cluster) {
+                if (!h.isEmpty()) {
+                    hasAccess = true;
+                } else {
+                    ++emptyTiles;
+                }
+            }
+            if (hasAccess) {
+                possibleNewDwellingCount += emptyTiles;
+            }
+        }
+        return possibleNewDwellingCount;
     }
 }
