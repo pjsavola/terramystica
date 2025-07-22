@@ -2021,4 +2021,8 @@ public class Game extends JPanel {
     public List<List<Hex>> getConnectedAreas(Player player) {
         return mapPanel.getConnectedSets(player, false);
     }
+
+    public void getSpadeCosts(Player player) {
+        mapPanel.getSpadeDistances(player, this);
+    }
 }

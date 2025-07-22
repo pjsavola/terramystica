@@ -1,5 +1,7 @@
 package tm;
 
+import tm.action.DigAction;
+import tm.faction.Giants;
 import tm.faction.Mermaids;
 import tm.faction.Riverwalkers;
 
@@ -737,5 +739,122 @@ public class Grid extends JPanel {
             }
         }
         return connectedSets;
+    }
+
+    private static int getDigCost(Hex hex, Player player, Game game) {
+        if (!hex.isEmpty()) {
+            throw new RuntimeException("Check isEmpty() before trying to dig an occupied hex");
+        } else if (hex.getType() == player.getHomeType()) {
+            return 0;
+        } else if (player.getHomeType() == Hex.Type.VOLCANO) {
+            return game.getVolcanoDigCost(hex, player);
+        } else {
+            final Hex.Type effectiveType = player.getHomeType() == Hex.Type.ICE ? game.getIceColor() : player.getHomeType();
+            return Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, effectiveType));
+        }
+    }
+
+    List<Integer> getSpadeDistances(Player player, Game game) {
+        final List<Integer> result = new ArrayList<>();
+        final Map<Hex, Integer> distanceMap = new HashMap<>();
+        final PriorityQueue<Hex> work = new PriorityQueue<>(Comparator.comparingInt(distanceMap::get));
+        final int shipping = player.getShipping();
+        final int range = player.getRange();
+
+        allHexes.stream().filter(h -> (!h.isEmpty()) && h.getType() == player.getHomeType()).forEach(h -> {
+            distanceMap.put(h, 0);
+            work.add(h);
+        });
+        while (!work.isEmpty()) {
+            final Hex hex = work.remove();
+            final int spadeCost = distanceMap.get(hex);
+            hex.getNeighbors().forEach(n -> {
+                if (n.isEmpty() && n.isDiggable()) {
+                    if (!distanceMap.containsKey(n)) {
+                        distanceMap.put(n, spadeCost + getDigCost(n, player, game));
+                        work.add(n);
+                    }
+                }
+            });
+            for (Bridge bridge : bridges) {
+                final Hex neighbor = bridge.getOtherEnd(hex);
+                if (neighbor != null) {
+                    if (neighbor.isEmpty() && neighbor.isDiggable()) {
+                        if (!distanceMap.containsKey(neighbor)) {
+                            distanceMap.put(neighbor, spadeCost + getDigCost(neighbor, player, game));
+                            work.add(neighbor);
+                        }
+                    }
+                }
+            }
+            if (range == 1) {
+                final Deque<Hex> water = new ArrayDeque<>();
+                final Map<Hex, Integer> waterDistances = new HashMap<>();
+                hex.getNeighbors().stream().filter(n -> n.getType() == Hex.Type.WATER).forEach(n -> {
+                    waterDistances.put(n, 1);
+                    water.add(n);
+                });
+                while (!water.isEmpty()) {
+                    final Hex waterHex = water.removeFirst();
+                    final int distance = waterDistances.get(waterHex) + 1;
+                    waterHex.getNeighbors().stream().filter(n -> n.getType() == Hex.Type.WATER && !waterDistances.containsKey(n)).forEach(n -> {
+                        waterDistances.put(n, distance);
+                        if (shipping >= distance) {
+                            water.add(n);
+                        }
+                    });
+                    waterHex.getNeighbors().forEach(n -> {
+                        if (shipping >= distance - 1) {
+                            if (n.isEmpty() && n.isDiggable()) {
+                                if (!distanceMap.containsKey(n)) {
+                                    distanceMap.put(n, spadeCost + getDigCost(n, player, game));
+                                    work.add(n);
+                                }
+                            }
+                        }
+                    });
+                }
+            } else {
+                final Deque<Hex> other = new ArrayDeque<>();
+                final Map<Hex, Integer> otherDistances = new HashMap<>();
+                for (Hex n : hex.getNeighbors()) {
+                    if (!otherDistances.containsKey(n)) {
+                        otherDistances.put(n, 1);
+                        other.add(n);
+                    }
+                }
+                while (!other.isEmpty()) {
+                    final Hex otherHex = other.removeFirst();
+                    final int distance = otherDistances.get(otherHex) + 1;
+                    for (Hex n : otherHex.getNeighbors()) {
+                        if (!otherDistances.containsKey(n)) {
+                            otherDistances.put(n, distance);
+                            if (range > distance) {
+                                other.add(n);
+                            }
+                            if (n.isEmpty() && n.isDiggable()) {
+                                if (!distanceMap.containsKey(n)) {
+                                    distanceMap.put(n, spadeCost + getDigCost(n, player, game));
+                                    work.add(n);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /*
+        distanceMap.forEach((hex, distance) -> {
+            System.err.println(hex + ": " + distance);
+        });
+         */
+        distanceMap.values().forEach(i -> {
+            while (result.size() < i + 1) {
+                result.add(0);
+            }
+            result.set(i, result.get(i) + 1);
+        });
+        System.err.println(result);
+        return result;
     }
 }

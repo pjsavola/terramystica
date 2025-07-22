@@ -245,5 +245,17 @@ public abstract class Menus {
                 AIUtil.getFeasibleActions(game, game.getCurrentPlayer());
             }
         };
+
+        new ActionMenuItem(game, miscMenu, "Spade cost to reach hex", KeyEvent.VK_S) {
+            @Override
+            public boolean canExecute(Game game) {
+                return true;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.getSpadeCosts(game.getCurrentPlayer());
+            }
+        };
     }
 }

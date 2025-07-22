@@ -66,6 +66,9 @@ public class DigAction extends Action {
 
     @Override
     public boolean canExecute() {
+        if (!target.isDiggable()) {
+            return false;
+        }
         if (type == Hex.Type.VARIABLE || type == Hex.Type.WATER) {
             return false;
         }

@@ -262,6 +262,10 @@ public class Hex {
         g.setStroke(oldStroke);
     }
 
+    public boolean isDiggable() {
+        return type.ordinal() < Type.WATER.ordinal();
+    }
+
     @Override
     public String toString() {
         return getId();
