@@ -280,7 +280,7 @@ public abstract class Menus {
         new ActionMenuItem(game, miscMenu, "Auto Move", KeyEvent.VK_Q) {
             @Override
             public boolean canExecute(Game game) {
-                return true;
+                return game.phase != Game.Phase.CONFIRM_ACTION;
             }
 
             @Override
@@ -294,20 +294,39 @@ public abstract class Menus {
                 int bestScore = Integer.MIN_VALUE;
                 final List<Action> bestActions = new ArrayList<>();
                 for (Action action : possibleActions) {
-                    game.resolveAction(action);
-                    final int score = player.evaluate();
-                    if (score > bestScore) {
-                        bestActions.clear();
-                        bestScore = score;
-                    }
-                    if (score == bestScore) {
+                    if (action instanceof SelectFactionAction) {
                         bestActions.add(action);
+                    } else if (action.needsConfirm()) {
+                        game.resolveAction(action);
+                        final int score = player.evaluate();
+                        if (score > bestScore) {
+                            bestActions.clear();
+                            bestScore = score;
+                        }
+                        if (score == bestScore) {
+                            bestActions.add(action);
+                        }
+                        // TODO: Chains of actions
+                        game.rewind();
+                    } else {
+                        // TODO: Evaluate these
+                        if (action instanceof PickColorAction) {
+                            bestActions.add(action);
+                        } else if (action instanceof LeechAction) {
+                            bestActions.add(action);
+                        } else if (action instanceof SelectBonAction) {
+                            bestActions.add(action);
+                        } else if (action instanceof PlaceInitialDwellingAction) {
+                            bestActions.add(action);
+                        }
                     }
-                    // TODO: Chains of actions
-                    game.rewind();
                 }
                 final Action action = bestActions.get(r.nextInt(bestActions.size()));
                 game.resolveAction(action);
+                if (game.factionPopup != null) {
+                    game.factionPopup.setVisible(false);
+                    game.factionPopup = null;
+                }
             }
         };
     }

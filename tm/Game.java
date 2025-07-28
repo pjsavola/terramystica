@@ -67,6 +67,7 @@ public class Game extends JPanel {
     boolean packNeeded;
 
     private final JFrame frame;
+    JDialog factionPopup;
 
     public static void open(JFrame frame, Scanner inputScanner) throws ReplayFailure {
         open(frame, new GameData(inputScanner));
@@ -1803,15 +1804,15 @@ public class Game extends JPanel {
     }
 
     private void showFactionPopup() {
-        final JDialog factionPopup = new JDialog(frame);
+        factionPopup = new JDialog(frame);
         final JPanel factionPanel = new JPanel();
         final List<Faction> selectableFactions = getSelectableFactions().sorted(Comparator.comparingInt(f -> f.getHomeType().ordinal())).toList();
         selectableFactions.forEach(f -> {
             final int count = factionPanel.getComponentCount();
             if (count % 2 == 0) {
-                factionPanel.add(new FactionButton(factionPopup, this, f), count / 2);
+                factionPanel.add(new FactionButton(this, f), count / 2);
             } else {
-                factionPanel.add(new FactionButton(factionPopup, this, f));
+                factionPanel.add(new FactionButton(this, f));
             }
         });
         factionPanel.setLayout(new GridLayout(2, selectableFactions.size() / 2));

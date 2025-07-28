@@ -12,12 +12,13 @@ public class FactionButton extends JButton {
     private final Faction faction;
     private final Hex hex;
 
-    public FactionButton(JDialog dialog, Game game, Faction faction) {
+    public FactionButton(Game game, Faction faction) {
         this.faction = faction;
         hex = new Hex("", faction.getHomeType());
         addActionListener(e -> {
             game.resolveAction(new SelectFactionAction(GameData.allFactions.indexOf(faction)));
-            dialog.setVisible(false);
+            game.factionPopup.setVisible(false);
+            game.factionPopup = null;
         });
     }
 
