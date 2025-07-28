@@ -2,6 +2,7 @@ package tm.action;
 
 import tm.Game;
 import tm.Hex;
+import tm.faction.Faction;
 import tm.faction.Riverwalkers;
 
 public class PickColorAction extends Action {
@@ -22,9 +23,10 @@ public class PickColorAction extends Action {
         if (type == null || game.getSelectedOrdinals().contains(type.ordinal())) return false;
         if (type == Hex.Type.ICE || type == Hex.Type.VARIABLE || type == Hex.Type.VOLCANO) return false;
 
-        final boolean ice = player.getFaction().getHomeType() == Hex.Type.ICE;
-        final boolean volcano = player.getFaction().getHomeType() == Hex.Type.VOLCANO;
-        final boolean variable = player.getFaction().getHomeType() == Hex.Type.VARIABLE;
+        final Faction faction = player.getFaction();
+        final boolean ice = faction != null && faction.getHomeType() == Hex.Type.ICE;
+        final boolean volcano = faction != null && faction.getHomeType() == Hex.Type.VOLCANO;
+        final boolean variable = faction != null && faction.getHomeType() == Hex.Type.VARIABLE;
         if (ice && game.getIceColor() != null) return false;
         if (volcano && game.getVolcanoColor() != null) return false;
         if (variable && game.getVariableColor() != null) return false;

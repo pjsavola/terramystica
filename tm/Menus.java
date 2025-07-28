@@ -1,16 +1,18 @@
 package tm;
 
 import tm.action.*;
+import tm.action.Action;
 import tm.faction.Alchemists;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class Menus {
+
+    private final static Random r = new Random();
 
     public static void initializeMenus(Game game) {
         final JMenu actionMenu = new JMenu("Actions");
@@ -242,7 +244,12 @@ public abstract class Menus {
 
             @Override
             protected void execute(Game game) {
-                AIUtil.getFeasibleActions(game, game.getCurrentPlayer());
+                final List<Action> possibleActions = AIUtil.getFeasibleActions(game, game.getCurrentPlayer());
+                for (Action action : possibleActions) {
+                    if (action.canExecute()) {
+                        System.err.println(action);
+                    }
+                }
             }
         };
 
@@ -254,7 +261,53 @@ public abstract class Menus {
 
             @Override
             protected void execute(Game game) {
-                game.getSpadeCosts(game.getCurrentPlayer());
+                game.getSpadeDistanceCounts(game.getCurrentPlayer());
+            }
+        };
+
+        new ActionMenuItem(game, miscMenu, "Evaluate", KeyEvent.VK_E) {
+            @Override
+            public boolean canExecute(Game game) {
+                return true;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                game.getCurrentPlayer().evaluate();
+            }
+        };
+
+        new ActionMenuItem(game, miscMenu, "Auto Move", KeyEvent.VK_Q) {
+            @Override
+            public boolean canExecute(Game game) {
+                return true;
+            }
+
+            @Override
+            protected void execute(Game game) {
+                final Player player = game.getCurrentPlayer();
+                final List<Action> possibleActions = AIUtil.getFeasibleActions(game, player);
+                if (possibleActions.isEmpty()) {
+                    System.err.println("NO ACTIONS");
+                    return;
+                }
+                int bestScore = Integer.MIN_VALUE;
+                final List<Action> bestActions = new ArrayList<>();
+                for (Action action : possibleActions) {
+                    game.resolveAction(action);
+                    final int score = player.evaluate();
+                    if (score > bestScore) {
+                        bestActions.clear();
+                        bestScore = score;
+                    }
+                    if (score == bestScore) {
+                        bestActions.add(action);
+                    }
+                    // TODO: Chains of actions
+                    game.rewind();
+                }
+                final Action action = bestActions.get(r.nextInt(bestActions.size()));
+                game.resolveAction(action);
             }
         };
     }

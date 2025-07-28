@@ -856,7 +856,7 @@ public class Grid extends JPanel {
                 result.set(i, result.get(i) + 1);
             }
         });
-        System.err.println(result);
+        //System.err.println(result);
         return result;
     }
 }

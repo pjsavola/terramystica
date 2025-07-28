@@ -1346,7 +1346,30 @@ public class Player extends JPanel {
         }
     }
 
+    public Resources getSink(boolean sh, boolean sa, boolean ship, boolean dig) {
+        int shCount = sh && strongholds == 0 ? 1 : 0;
+        int saCount = sa && sanctuaries == 0 ? 1 : 0;
+        int teCount = 3 - temples + saCount;
+        int tpCount = 4 - tradingPosts + shCount + teCount;
+        int dCount = 8 - dwellings + tpCount;
+        int shipCount = ship && shipping < faction.getMaxShipping() ? faction.getMaxShipping() - shipping : 0;
+        int digCount = dig && digging > faction.getMinDigging() ? digging - faction.getMinDigging() : 0;
+        Resources r = Resources.zero;
+        while (shCount-- > 0) r = r.combine(faction.getStrongholdCost());
+        while (saCount-- > 0) r = r.combine(faction.getSanctuaryCost());
+        while (teCount-- > 0) r = r.combine(faction.getTempleCost());
+        while (tpCount-- > 0) r = r.combine(faction.getTradingPostCost());
+        while (dCount -- > 0) r = r.combine(faction.getDwellingCost());
+        while (shipCount-- > 0) r = r.combine(faction.getAdvanceShippingCost());
+        while (digCount-- > 0) r = r.combine(faction.getAdvanceDiggingCost());
+        return r;
+    }
+
     public int evaluate() {
+        Resources sinks = getSink(true, true, true, true);
+        //System.err.println("Coins: " + sinks.coins);
+        //System.err.println("Workers: " + sinks.workers);
+        //System.err.println("Priest: " + sinks.priests);
         final int round = game.getRound();
         if (round > 0) {
             int[] coinFlow = new int[7 - round];
@@ -1405,6 +1428,8 @@ public class Player extends JPanel {
                     vpFlow[delta] += 3 * temples;
                 }
             }
+
+
 
             // Analyze dwelling spots
             int possibleNewDwellingCount = getDwellingSpotCount();

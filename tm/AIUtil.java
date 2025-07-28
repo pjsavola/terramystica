@@ -89,7 +89,7 @@ public class AIUtil {
         }
     }
 
-    public static void getFeasibleActions(Game game, Player player) {
+    public static List<Action> getFeasibleActions(Game game, Player player) {
         final List<Action> possibleActions = new ArrayList<>();
         if (game.phase == Game.Phase.PICK_FACTIONS) {
             for (int i = 0; i < GameData.allFactions.size(); ++i) {
@@ -200,10 +200,6 @@ public class AIUtil {
             add(possibleActions, new SwarmlingsFreeTradingPostAction(), game, player);
             add(possibleActions, new WitchesFreeDwellingAction(), game, player);
         }
-        for (Action action : possibleActions) {
-            if (action.canExecute()) {
-                System.err.println(action.toString());
-            }
-        }
+        return possibleActions;
     }
 }
