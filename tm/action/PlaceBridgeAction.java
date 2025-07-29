@@ -30,6 +30,8 @@ public class PlaceBridgeAction extends PendingAction {
     @Override
     public boolean canExecute() {
         if (hex1 == null || hex2 == null || hex1 == hex2) return false;
+        if (hex1.getType() == Hex.Type.WATER || hex2.getType() == Hex.Type.WATER) return false;
+        if (hex1.getType() == Hex.Type.VARIABLE || hex2.getType() == Hex.Type.VARIABLE) return false;
         if (player.getBridgesLeft() <= 0 || !player.getPendingActions().contains(Player.PendingType.PLACE_BRIDGE)) return false;
 
         final Hex.Type homeType = player.getHomeType();
