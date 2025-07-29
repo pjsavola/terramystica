@@ -2022,4 +2022,64 @@ public class Game extends JPanel {
     public List<Integer> getSpadeDistanceCounts(Player player) {
         return mapPanel.getSpadeDistanceCounts(player, this);
     }
+
+    private final static Random r = new Random();
+
+    private void createDecisionNodes(DecisionNode node) {
+        final Player player = getCurrentPlayer();
+        final List<Action> possibleActions = AIUtil.getFeasibleActions(this, player);
+        if (possibleActions.isEmpty()) {
+            System.err.println("NO ACTIONS");
+            return;
+        }
+        for (Action action : possibleActions) {
+            final DecisionNode child = new DecisionNode(action);
+            node.addChild(child);
+            if (action instanceof SelectFactionAction) {
+                child.setScore(0);
+            } else if (action.needsConfirm()) {
+                resolveAction(action);
+                final Set<Player.PendingType> pendingTypes = player.getPendingActions();
+                if (pendingTypes.size() == player.getSkippablePendingActions().size()) {
+                    child.setScore(player.evaluate());
+                }
+                if (!pendingTypes.isEmpty()) {
+                    createDecisionNodes(child);
+                }
+                rewind();
+            } else {
+                // TODO: Evaluate these
+                if (action instanceof PickColorAction) {
+                    child.setScore(0);
+                } else if (action instanceof LeechAction) {
+                    child.setScore(0);
+                } else if (action instanceof SelectBonAction) {
+                    child.setScore(0);
+                } else if (action instanceof PlaceInitialDwellingAction) {
+                    child.setScore(0);
+                }
+            }
+        }
+    }
+
+    public void executeAI() {
+        final Player player = getCurrentPlayer();
+        final DecisionNode root = new DecisionNode(null);
+        //root.setScore(0); //player.evaluate());
+        createDecisionNodes(root);
+        final int[] bestScore = new int[1];
+        final List<List<Action>> results = new ArrayList<>();
+        final List<Action> stack = new ArrayList<>();
+        root.getBestActions(stack, bestScore, results);
+        final List<Action> actions = results.get(r.nextInt(results.size()));
+        System.err.println(actions);
+        for (Action action : actions) {
+            resolveAction(action);
+        }
+        if (factionPopup != null) {
+            factionPopup.setVisible(false);
+            factionPopup = null;
+        }
+        confirmTurn();
+    }
 }

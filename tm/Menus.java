@@ -12,8 +12,6 @@ import java.util.stream.IntStream;
 
 public abstract class Menus {
 
-    private final static Random r = new Random();
-
     public static void initializeMenus(Game game) {
         final JMenu actionMenu = new JMenu("Actions");
         final JMenu leechMenu = new JMenu("Leech");
@@ -285,48 +283,7 @@ public abstract class Menus {
 
             @Override
             protected void execute(Game game) {
-                final Player player = game.getCurrentPlayer();
-                final List<Action> possibleActions = AIUtil.getFeasibleActions(game, player);
-                if (possibleActions.isEmpty()) {
-                    System.err.println("NO ACTIONS");
-                    return;
-                }
-                int bestScore = Integer.MIN_VALUE;
-                final List<Action> bestActions = new ArrayList<>();
-                for (Action action : possibleActions) {
-                    if (action instanceof SelectFactionAction) {
-                        bestActions.add(action);
-                    } else if (action.needsConfirm()) {
-                        game.resolveAction(action);
-                        final int score = player.evaluate();
-                        if (score > bestScore) {
-                            bestActions.clear();
-                            bestScore = score;
-                        }
-                        if (score == bestScore) {
-                            bestActions.add(action);
-                        }
-                        // TODO: Chains of actions
-                        game.rewind();
-                    } else {
-                        // TODO: Evaluate these
-                        if (action instanceof PickColorAction) {
-                            bestActions.add(action);
-                        } else if (action instanceof LeechAction) {
-                            bestActions.add(action);
-                        } else if (action instanceof SelectBonAction) {
-                            bestActions.add(action);
-                        } else if (action instanceof PlaceInitialDwellingAction) {
-                            bestActions.add(action);
-                        }
-                    }
-                }
-                final Action action = bestActions.get(r.nextInt(bestActions.size()));
-                game.resolveAction(action);
-                if (game.factionPopup != null) {
-                    game.factionPopup.setVisible(false);
-                    game.factionPopup = null;
-                }
+                game.executeAI();
             }
         };
     }
