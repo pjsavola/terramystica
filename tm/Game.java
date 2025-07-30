@@ -201,22 +201,10 @@ public class Game extends JPanel {
                 final Player player = new Player(this, name);
                 final Faction faction = factions.remove(factions.size() - 1);
                 player.selectFaction(faction);
-                // Ice and Volcano colors are already selected, so we'll need to remove the color selection turn.
-                switch (faction.getHomeType()) {
-                    case ICE -> {
-                        if (turnOrder.remove(0).getHomeType() != Hex.Type.ICE) {
-                            throw new RuntimeException("Internal error");
-                        }
-                    }
-                    case VOLCANO -> {
-                        if (turnOrder.remove(turnOrder.size() - 1).getHomeType() != Hex.Type.VOLCANO) {
-                            throw new RuntimeException("Internal error");
-                        }
-                    }
-                    case VARIABLE -> {
-                        if (turnOrder.remove(0).getFaction().getHomeType() != Hex.Type.VARIABLE) {
-                            throw new RuntimeException("Internal error");
-                        }
+                // Volcano color is already selected, so we'll need to remove the color selection turn.
+                if (faction.getHomeType() == Hex.Type.VOLCANO) {
+                    if (turnOrder.remove(turnOrder.size() - 1).getHomeType() != Hex.Type.VOLCANO) {
+                        throw new RuntimeException("Internal error");
                     }
                 }
                 factions.removeIf(f -> f.getHomeType() == faction.getHomeType());
@@ -715,6 +703,7 @@ public class Game extends JPanel {
             refresh();
             chooseCultToMax();
             selectPendingCultSteps();
+            selectPendingColor();
             return true;
         }
         if (rewinding || importing) {
@@ -742,13 +731,14 @@ public class Game extends JPanel {
                 if (resolvingCultSpades()) {
                     selectPendingCultSteps();
                 }
+                /*
                 if (!rewinding && !factionsPicked && !turnOrder.isEmpty() && turnOrder.get(0).getFaction() != null && ((turnOrder.get(0).getFaction().getHomeType() == Hex.Type.ICE && iceColor == null) || (turnOrder.get(0).getFaction().getHomeType() == Hex.Type.VARIABLE && variableColor == null))) {
                     Hex.Type type;
                     do {
                         type = FactionButton.pickReplacedColor(frame, this, false);
                     } while (type == null);
                     resolveAction(new PickColorAction(type));
-                }
+                }*/
             }
         }
     }
@@ -1896,6 +1886,23 @@ public class Game extends JPanel {
         }
     }
 
+    public boolean hasPendingColorPick() {
+        return !turnOrder.isEmpty() && turnOrder.get(0).pendingColorPick;
+    }
+
+    public void selectPendingColor() {
+        if (!rewinding && !importing && phase == Phase.CONFIRM_ACTION) {
+            if (hasPendingColorPick()) {
+                repaint();
+                Hex.Type type;
+                do {
+                    type = FactionButton.pickReplacedColor(frame, this, false);
+                } while (type == null);
+                resolveAction(new PickColorAction(type));
+            }
+        }
+    }
+
     public void chooseCultToMax() {
         if (!rewinding && !importing && phase == Phase.CONFIRM_ACTION) {
             final Player player = getCurrentPlayer();
@@ -2007,10 +2014,8 @@ public class Game extends JPanel {
     }
 
     public void factionPicked(Player player, Faction faction) {
-        switch (faction.getHomeType()) {
-            case ICE -> turnOrder.add(0, player);
-            case VOLCANO -> turnOrder.add(player);
-            case VARIABLE -> turnOrder.add(0, player);
+        if (faction.getHomeType() == Hex.Type.VOLCANO) {
+            turnOrder.add(player);
         }
     }
 
@@ -2033,7 +2038,7 @@ public class Game extends JPanel {
 
     private final static Random r = new Random();
 
-    private boolean createDecisionNodes(DecisionNode node, List<Action> actionStack, Player player) {
+    private boolean createDecisionNodes(DecisionNode node, List<Action> actionStack, int baseStackSize, Player player) {
         final List<Action> possibleActions = AIUtil.getFeasibleActions(this, player);
         if (possibleActions.isEmpty()) {
             return true;
@@ -2042,10 +2047,10 @@ public class Game extends JPanel {
             final DecisionNode child = new DecisionNode(action);
             node.addChild(child);
             resolveAction(action);
-            for (int i = 0; i < actionStack.size(); ++i) System.err.print("  ");
+            for (int i = baseStackSize; i < actionStack.size(); ++i) System.err.print("  ");
             System.err.println(action);
             actionStack.add(action);
-            if (createDecisionNodes(child, actionStack, player)) {
+            if (createDecisionNodes(child, actionStack, baseStackSize, player)) {
                 child.setScore(player.evaluate());
             }
             actionStack.remove(actionStack.size() - 1);
@@ -2059,7 +2064,7 @@ public class Game extends JPanel {
         final Player player = getCurrentPlayer();
         final DecisionNode root = new DecisionNode(null);
         //root.setScore(0); //player.evaluate());
-        createDecisionNodes(root, actionStack, getCurrentPlayer());
+        createDecisionNodes(root, actionStack, actionStack.size(), getCurrentPlayer());
         final int[] bestScore = new int[1];
         final List<List<Action>> results = new ArrayList<>();
         final List<Action> stack = new ArrayList<>();

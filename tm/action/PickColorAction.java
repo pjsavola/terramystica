@@ -15,7 +15,7 @@ public class PickColorAction extends Action {
 
     @Override
     public boolean validatePhase() {
-        return game.phase == Game.Phase.PICK_FACTIONS;
+        return !game.factionsPicked();
     }
 
     @Override
@@ -37,9 +37,13 @@ public class PickColorAction extends Action {
     @Override
     public void execute() {
         switch (player.getFaction().getHomeType()) {
-            case ICE -> game.setIceColor(type);
+            case ICE -> {
+                player.pendingColorPick = false;
+                game.setIceColor(type);
+            }
             case VOLCANO -> game.setVolcanoColor(type);
             case VARIABLE -> {
+                player.pendingColorPick = false;
                 game.setVariableColor(type);
                 player.initialUnlockedTerrainIndex = type.ordinal();
                 if (player.getFaction() instanceof Riverwalkers) {

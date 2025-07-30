@@ -26,7 +26,8 @@ public class Player extends JPanel {
         FREE_D("Free D", true),
         CHOOSE_CULTS("Choose Cults", true),
         CULT_STEP("Cult Step", false),
-        UNLOCK_TERRAIN("Unlock Terrain", false);
+        UNLOCK_TERRAIN("Unlock Terrain", false),
+        PICK_COLOR("Pick Color", false);
 
         private final String description;
         private final boolean skippable;
@@ -75,6 +76,7 @@ public class Player extends JPanel {
     public boolean pendingFreeDwelling;
     public int pendingCultSteps;
     public int pendingTerrainUnlock;
+    public boolean pendingColorPick;
     public final boolean[] maxedCults = new boolean[4];
     private boolean rangeUsedForDigging;
     public boolean allowExtraSpades;
@@ -134,6 +136,7 @@ public class Player extends JPanel {
         pendingFreeDwelling = false;
         pendingCultSteps = 0;
         pendingTerrainUnlock = 0;
+        pendingColorPick = false;
         for (int i = 0; i < 4; ++i) maxedCults[i] = false;
         allowExtraSpades = false;
         rangeUsedForDigging = false;
@@ -229,6 +232,9 @@ public class Player extends JPanel {
             maxPriests = 1;
             unlockedTerrain = new boolean[7];
             shipping = 1;
+        }
+        if (faction.getHomeType() == Hex.Type.ICE || faction.getHomeType() == Hex.Type.VARIABLE) {
+            pendingColorPick = true;
         }
     }
 
@@ -1243,6 +1249,7 @@ public class Player extends JPanel {
                 }
                 case CULT_STEP -> pendingCultSteps = 0;
                 case UNLOCK_TERRAIN -> pendingTerrainUnlock = 0;
+                case PICK_COLOR -> pendingColorPick = false;
             }
         }
     }

@@ -16,9 +16,9 @@ public class FactionButton extends JButton {
         this.faction = faction;
         hex = new Hex("", faction.getHomeType());
         addActionListener(e -> {
-            game.resolveAction(new SelectFactionAction(GameData.allFactions.indexOf(faction)));
             game.factionPopup.setVisible(false);
             game.factionPopup = null;
+            game.resolveAction(new SelectFactionAction(GameData.allFactions.indexOf(faction)));
         });
     }
 
