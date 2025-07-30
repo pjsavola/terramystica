@@ -158,6 +158,7 @@ public class Player extends JPanel {
             if (initialFav > 0) {
                 game.selectFav(this, initialFav);
             }
+            pendingColorPick = false;
             if (initialUnlockedTerrainIndex != -1) {
                 if (faction instanceof Riverwalkers) {
                     unlockedTerrain[initialUnlockedTerrainIndex] = true;
@@ -1215,6 +1216,7 @@ public class Player extends JPanel {
         if (pendingTowns > 0) result.add(PendingType.SELECT_TOWN);
         if (pendingFavors > 0) result.add(PendingType.SELECT_FAV);
         if (pendingCultSteps > 0) result.add(PendingType.CULT_STEP);
+        if (pendingColorPick) result.add(PendingType.PICK_COLOR);
         return result;
     }
 

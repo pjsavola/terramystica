@@ -15,7 +15,7 @@ public class PickColorAction extends Action {
 
     @Override
     public boolean validatePhase() {
-        return !game.factionsPicked();
+        return game.phase == Game.Phase.PICK_FACTIONS || game.hasPendingColorPick();
     }
 
     @Override
@@ -54,8 +54,13 @@ public class PickColorAction extends Action {
     }
 
     @Override
+    public boolean isFree() {
+        return player.getFaction().getHomeType() != Hex.Type.VOLCANO;
+    }
+
+    @Override
     public boolean isPass() {
-        return true;
+        return player.getFaction().getHomeType() == Hex.Type.VOLCANO;
     }
 
     @Override

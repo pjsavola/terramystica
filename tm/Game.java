@@ -201,6 +201,7 @@ public class Game extends JPanel {
                 final Player player = new Player(this, name);
                 final Faction faction = factions.remove(factions.size() - 1);
                 player.selectFaction(faction);
+                player.pendingColorPick = false; // Color is already picked for ice and variable colors.
                 // Volcano color is already selected, so we'll need to remove the color selection turn.
                 if (faction.getHomeType() == Hex.Type.VOLCANO) {
                     if (turnOrder.remove(turnOrder.size() - 1).getHomeType() != Hex.Type.VOLCANO) {
@@ -2044,6 +2045,7 @@ public class Game extends JPanel {
             return true;
         }
         for (Action action : possibleActions) {
+            rewinding = true;
             final DecisionNode child = new DecisionNode(action);
             node.addChild(child);
             resolveAction(action);
@@ -2065,6 +2067,7 @@ public class Game extends JPanel {
         final DecisionNode root = new DecisionNode(null);
         //root.setScore(0); //player.evaluate());
         createDecisionNodes(root, actionStack, actionStack.size(), getCurrentPlayer());
+        rewinding = false;
         final int[] bestScore = new int[1];
         final List<List<Action>> results = new ArrayList<>();
         final List<Action> stack = new ArrayList<>();
