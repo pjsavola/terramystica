@@ -189,6 +189,9 @@ public class Player extends JPanel {
     }
 
     public Hex.Type getHomeType() {
+        if (faction == null) {
+            return null;
+        }
         if (faction.getHomeType() == Hex.Type.VARIABLE && game.getVariableColor() != null) {
             return game.getVariableColor();
         }

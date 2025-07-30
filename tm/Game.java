@@ -45,7 +45,7 @@ public class Game extends JPanel {
     private final List<Player> leechTurnOrder = new ArrayList<>();
     private final List<Action> history = new ArrayList<>();
     private final List<Action> newActions = new ArrayList<>();
-    private boolean pendingPass;
+    boolean pendingPass;
     private boolean leechAccepted;
     public Player leechTrigger;
     private Hex bridgeEnd;
