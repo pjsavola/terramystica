@@ -1966,7 +1966,7 @@ public class Game extends JPanel {
 
     public boolean isHomeType(Hex.Type type) {
         for (Player p : players) {
-            if (type == p.getFaction().getHomeType()) {
+            if (p.getFaction() != null && type == p.getFaction().getHomeType()) {
                 return true;
             }
         }
@@ -2033,41 +2033,25 @@ public class Game extends JPanel {
 
     private final static Random r = new Random();
 
-    private void createDecisionNodes(DecisionNode node, List<Action> actionStack) {
-        final Player player = getCurrentPlayer();
+    private boolean createDecisionNodes(DecisionNode node, List<Action> actionStack, Player player) {
         final List<Action> possibleActions = AIUtil.getFeasibleActions(this, player);
         if (possibleActions.isEmpty()) {
-            System.err.println("NO ACTIONS");
-            return;
+            return true;
         }
         for (Action action : possibleActions) {
             final DecisionNode child = new DecisionNode(action);
             node.addChild(child);
-            if (action.needsConfirm()) {
-                resolveAction(action);
-                actionStack.add(action);
-                final Set<Player.PendingType> pendingTypes = player.getPendingActions();
-                if (pendingTypes.size() == player.getSkippablePendingActions().size()) {
-                    child.setScore(player.evaluate());
-                }
-                if (!pendingTypes.isEmpty()) {
-                    createDecisionNodes(child, actionStack);
-                }
-                actionStack.remove(actionStack.size() - 1);
-                doRewind(actionStack);
-            } else {
-                // TODO: Evaluate these
-                if (action instanceof PickColorAction) {
-                    child.setScore(0);
-                } else if (action instanceof LeechAction) {
-                    child.setScore(0);
-                } else if (action instanceof SelectBonAction) {
-                    child.setScore(0);
-                } else if (action instanceof PlaceInitialDwellingAction) {
-                    child.setScore(0);
-                }
+            resolveAction(action);
+            for (int i = 0; i < actionStack.size(); ++i) System.err.print("  ");
+            System.err.println(action);
+            actionStack.add(action);
+            if (createDecisionNodes(child, actionStack, player)) {
+                child.setScore(player.evaluate());
             }
+            actionStack.remove(actionStack.size() - 1);
+            doRewind(actionStack);
         }
+        return false;
     }
 
     public void executeAI() {
@@ -2075,7 +2059,7 @@ public class Game extends JPanel {
         final Player player = getCurrentPlayer();
         final DecisionNode root = new DecisionNode(null);
         //root.setScore(0); //player.evaluate());
-        createDecisionNodes(root, actionStack);
+        createDecisionNodes(root, actionStack, getCurrentPlayer());
         final int[] bestScore = new int[1];
         final List<List<Action>> results = new ArrayList<>();
         final List<Action> stack = new ArrayList<>();

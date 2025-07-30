@@ -39,15 +39,17 @@ public class DigAction extends Action {
     public void setData(Game game, Player player) {
         super.setData(game, player);
         target = game.getHex(row, col);
-        if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
-            requiredSpades = 1;
-            requiredDigging = game.getVolcanoDigCost(target, player);
-        } else {
-            final Hex.Type effectiveType = type == Hex.Type.ICE ? game.getIceColor() : type;
-            requiredSpades = Math.max(1, player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, effectiveType));
-            pendingSpades = player.getPendingSpades();
-            requiredDigging = Math.max(0, requiredSpades - pendingSpades);
-            resolvingCultSpades = game.resolvingCultSpades();
+        if (player.getFaction() != null) {
+            if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
+                requiredSpades = 1;
+                requiredDigging = game.getVolcanoDigCost(target, player);
+            } else {
+                final Hex.Type effectiveType = type == Hex.Type.ICE ? game.getIceColor() : type;
+                requiredSpades = Math.max(1, player.getFaction() instanceof Giants ? 2 : getSpadeCost(target, effectiveType));
+                pendingSpades = player.getPendingSpades();
+                requiredDigging = Math.max(0, requiredSpades - pendingSpades);
+                resolvingCultSpades = game.resolvingCultSpades();
+            }
         }
     }
 
