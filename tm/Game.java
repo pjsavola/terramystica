@@ -284,12 +284,8 @@ public class Game extends JPanel {
         return !newActions.isEmpty();
     }
 
-    public void rewind() {
-        if (!newActions.isEmpty()) {
-            log("Undoing following moves: " + newActions);
-        }
+    private void doRewind(List<Action> history) {
         rewinding = true;
-        final List<Action> history = new ArrayList<>(this.history);
         reset();
         for (int i = 0; i < history.size(); ++i) {
             final Action action = history.get(i);
@@ -319,6 +315,14 @@ public class Game extends JPanel {
             }
         }
         rewinding = false;
+    }
+
+    public void rewind() {
+        if (!newActions.isEmpty()) {
+            log("Undoing following moves: " + newActions);
+        }
+        final List<Action> history = new ArrayList<>(this.history);
+        doRewind(history);
         queryLeechTriggerAction();
         if (resolvingCultSpades()) {
             selectPendingCultSteps();
@@ -2025,7 +2029,7 @@ public class Game extends JPanel {
 
     private final static Random r = new Random();
 
-    private void createDecisionNodes(DecisionNode node) {
+    private void createDecisionNodes(DecisionNode node, List<Action> actionStack) {
         final Player player = getCurrentPlayer();
         final List<Action> possibleActions = AIUtil.getFeasibleActions(this, player);
         if (possibleActions.isEmpty()) {
@@ -2039,14 +2043,16 @@ public class Game extends JPanel {
                 child.setScore(0);
             } else if (action.needsConfirm()) {
                 resolveAction(action);
+                actionStack.add(action);
                 final Set<Player.PendingType> pendingTypes = player.getPendingActions();
                 if (pendingTypes.size() == player.getSkippablePendingActions().size()) {
                     child.setScore(player.evaluate());
                 }
                 if (!pendingTypes.isEmpty()) {
-                    createDecisionNodes(child);
+                    createDecisionNodes(child, actionStack);
                 }
-                rewind();
+                actionStack.remove(actionStack.size() - 1);
+                doRewind(actionStack);
             } else {
                 // TODO: Evaluate these
                 if (action instanceof PickColorAction) {
@@ -2063,10 +2069,11 @@ public class Game extends JPanel {
     }
 
     public void executeAI() {
+        final List<Action> actionStack = new ArrayList<>(history);
         final Player player = getCurrentPlayer();
         final DecisionNode root = new DecisionNode(null);
         //root.setScore(0); //player.evaluate());
-        createDecisionNodes(root);
+        createDecisionNodes(root, actionStack);
         final int[] bestScore = new int[1];
         final List<List<Action>> results = new ArrayList<>();
         final List<Action> stack = new ArrayList<>();
