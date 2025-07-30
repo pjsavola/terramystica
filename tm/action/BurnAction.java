@@ -11,7 +11,7 @@ public class BurnAction extends Action {
     }
 
     public boolean validatePhase() {
-        return game.phase == Game.Phase.ACTIONS || game.phase == Game.Phase.CONFIRM_ACTION;
+        return game.phase == Game.Phase.ACTIONS || (game.phase == Game.Phase.CONFIRM_ACTION && game.factionsPicked());
     }
 
     @Override

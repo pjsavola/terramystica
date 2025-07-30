@@ -280,6 +280,10 @@ public class Game extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
 
+    public boolean factionsPicked() {
+        return factionsPicked;
+    }
+
     public boolean canRewind() {
         return !newActions.isEmpty();
     }
@@ -2039,9 +2043,7 @@ public class Game extends JPanel {
         for (Action action : possibleActions) {
             final DecisionNode child = new DecisionNode(action);
             node.addChild(child);
-            if (action instanceof SelectFactionAction) {
-                child.setScore(0);
-            } else if (action.needsConfirm()) {
+            if (action.needsConfirm()) {
                 resolveAction(action);
                 actionStack.add(action);
                 final Set<Player.PendingType> pendingTypes = player.getPendingActions();
