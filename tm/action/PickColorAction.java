@@ -22,6 +22,7 @@ public class PickColorAction extends Action {
     public boolean canExecute() {
         if (type == null || game.getSelectedOrdinals().contains(type.ordinal())) return false;
         if (type == Hex.Type.ICE || type == Hex.Type.VARIABLE || type == Hex.Type.VOLCANO) return false;
+        if (type == Hex.Type.WATER) return false;
 
         final Faction faction = player.getFaction();
         final boolean ice = faction != null && faction.getHomeType() == Hex.Type.ICE;

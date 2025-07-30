@@ -278,7 +278,6 @@ public class Game extends JPanel {
     }
 
     private void doRewind(List<Action> history) {
-        rewinding = true;
         reset();
         for (int i = 0; i < history.size(); ++i) {
             final Action action = history.get(i);
@@ -307,7 +306,6 @@ public class Game extends JPanel {
                 confirmTurn();
             }
         }
-        rewinding = false;
     }
 
     public void rewind() {
@@ -315,7 +313,9 @@ public class Game extends JPanel {
             log("Undoing following moves: " + newActions);
         }
         final List<Action> history = new ArrayList<>(this.history);
+        rewinding = true;
         doRewind(history);
+        rewinding = false;
         queryLeechTriggerAction();
         if (resolvingCultSpades()) {
             selectPendingCultSteps();
@@ -2045,7 +2045,6 @@ public class Game extends JPanel {
             return true;
         }
         for (Action action : possibleActions) {
-            rewinding = true;
             final DecisionNode child = new DecisionNode(action);
             node.addChild(child);
             resolveAction(action);
@@ -2062,12 +2061,15 @@ public class Game extends JPanel {
     }
 
     public void executeAI() {
+        if (factionPopup != null) {
+            factionPopup.setVisible(false);
+            factionPopup = null;
+        }
+        rewinding = true;
         final List<Action> actionStack = new ArrayList<>(history);
-        final Player player = getCurrentPlayer();
         final DecisionNode root = new DecisionNode(null);
         //root.setScore(0); //player.evaluate());
         createDecisionNodes(root, actionStack, actionStack.size(), getCurrentPlayer());
-        rewinding = false;
         final int[] bestScore = new int[1];
         final List<List<Action>> results = new ArrayList<>();
         final List<Action> stack = new ArrayList<>();
@@ -2077,10 +2079,7 @@ public class Game extends JPanel {
         for (Action action : actions) {
             resolveAction(action);
         }
-        if (factionPopup != null) {
-            factionPopup.setVisible(false);
-            factionPopup = null;
-        }
+        rewinding = false;
         confirmTurn();
     }
 }
