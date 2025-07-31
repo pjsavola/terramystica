@@ -1,8 +1,6 @@
 package tm.action;
 
-import tm.Game;
-import tm.Hex;
-import tm.Player;
+import tm.*;
 import tm.faction.ChaosMagicians;
 import tm.faction.Darklings;
 import tm.faction.Riverwalkers;
@@ -20,6 +18,8 @@ public class BuildAction extends Action {
     private final Hex.Structure structure;
     private transient boolean expensive;
     private transient boolean pendingBuild;
+    private transient Resources powerConversions;
+    private transient int burn;
 
     public BuildAction(int row, int col, Hex.Structure structure) {
         this.row = row;
@@ -33,9 +33,14 @@ public class BuildAction extends Action {
         final Hex hex = game.getHex(row, col);
         if (hex == null) throw new RuntimeException("Invalid hex");
 
+        boolean useAltCost = false;
+        boolean free = false;
         if (structure == Hex.Structure.DWELLING) {
             pendingBuild = player.getPendingActions().contains(Player.PendingType.BUILD);
+            free = player.getPendingActions().contains(Player.PendingType.FREE_D);
+            useAltCost = !pendingBuild && !game.isReachable(hex, player) && game.isJumpable(hex, player);
         } else if (structure == Hex.Structure.TRADING_POST) {
+            free = player.getPendingActions().contains(Player.PendingType.FREE_TP);
             expensive = true;
             for (Hex n : hex.getNeighbors()) {
                 if (n.getStructure() != null && n.getType() != player.getHomeType()) {
@@ -48,6 +53,19 @@ public class BuildAction extends Action {
                     expensive = false;
                     break;
                 }
+            }
+            useAltCost = expensive;
+        }
+        if (!free) {
+            final Resources cost = player.getStructureCost(structure, useAltCost);
+            final Resources resources = player.getResources();
+            final int coinsNeeded = Math.max(0, cost.coins - resources.coins);
+            final int workersNeeded = Math.max(0, cost.workers - resources.workers);
+            final int priestsNeeded = Math.max(0, cost.priests - resources.priests);
+            if (coinsNeeded > 0 || workersNeeded > 0 || priestsNeeded > 0) {
+                powerConversions = new Resources(coinsNeeded, workersNeeded, priestsNeeded, 0);
+                final int powerNeeded = ConvertAction.getPowerCost(powerConversions);
+                burn = player.getNeededBurn(powerNeeded);
             }
         }
     }
@@ -71,6 +89,8 @@ public class BuildAction extends Action {
             if (hex.getType() != player.getHomeType()) return false;
         }
         if (structure.getParent() != hex.getStructure()) return false;
+        if (burn > 0 && player.getMaxBurn() > burn) return false;
+        if (powerConversions != null && !player.canAffordPower(ConvertAction.getPowerCost(powerConversions))) return false;
         if (structure == Hex.Structure.DWELLING) {
             if (player.getPendingActions().contains(Player.PendingType.FREE_D)) {
                 return player.canBuildDwelling(false);
@@ -99,6 +119,12 @@ public class BuildAction extends Action {
 
     @Override
     public void execute() {
+        if (powerConversions != null) {
+            if (burn > 0) {
+                player.burn(burn);
+            }
+            player.convert(powerConversions);
+        }
         final Hex hex = game.getHex(row, col);
         if (structure == Hex.Structure.DWELLING) {
             if (pendingBuild) {
@@ -147,6 +173,7 @@ public class BuildAction extends Action {
 
     @Override
     public String toString() {
+        String result = powerConversions == null ? "" : ConvertAction.getConversionString(burn, powerConversions);
         final Hex hex = game.getHex(row, col);
         final String id = hex.getId();
 
@@ -159,7 +186,7 @@ public class BuildAction extends Action {
                 favOptions.forEach(fav -> autoPicks.append(". +FAV").append(fav));
             }
         }
-
-        return structure == Hex.Structure.DWELLING ? ("Build " + id) : ("Upgrade " + id + " to " + structure.getAbbrevation() + autoPicks);
+        final String buildStr = structure == Hex.Structure.DWELLING ? ("Build " + id) : ("Upgrade " + id + " to " + structure.getAbbrevation() + autoPicks);
+        return result.isEmpty() ? buildStr : result + ". " + buildStr;
     }
 }

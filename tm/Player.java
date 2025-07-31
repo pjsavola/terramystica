@@ -279,6 +279,16 @@ public class Player extends JPanel {
         return dwellings < 8 && (canAfford(useRange ? jumpCost.combine(faction.getDwellingCost()) : faction.getDwellingCost()) || pendingFreeDwelling);
     }
 
+    public Resources getStructureCost(Hex.Structure structure, boolean useAltCost) {
+        return switch (structure) {
+            case DWELLING -> pendingFreeDwelling ? Resources.zero : (useAltCost ? jumpCost.combine(faction.getDwellingCost()) : faction.getDwellingCost());
+            case TRADING_POST -> pendingFreeTradingPost ? Resources.zero : (useAltCost ? faction.getExpensiveTradingPostCost() : faction.getTradingPostCost());
+            case TEMPLE -> faction.getTempleCost();
+            case STRONGHOLD -> faction.getStrongholdCost();
+            case SANCTUARY -> faction.getSanctuaryCost();
+        };
+    }
+
     public void buildDwelling() {
         if (!canBuildDwelling(false))
             throw new RuntimeException("Unable to build more dwellings");
@@ -942,7 +952,23 @@ public class Player extends JPanel {
         return Math.max(0, powerCost - power[2]);
     }
 
+    public Resources getResources() {
+        return new Resources(coins, workers, priests, 0);
+    }
+
     public boolean canAfford(Resources r) {
+        final int neededPriests = Math.max(0, r.priests - priests);
+        if (neededPriests > maxPriests) {
+            return false;
+        }
+        final int neededWorkers = Math.max(0, r.workers - workers);
+        final int neededCoins = Math.max(0, r.coins - coins);
+        int requiredPower = r.power;
+        if (neededPriests > 0 || neededWorkers > 0 || neededCoins > 0) requiredPower += ConvertAction.getPowerCost(new Resources(neededCoins, neededWorkers, neededPriests, 0));
+        return canAffordPower(requiredPower);
+    }
+
+    public boolean canAffordWithoutConversions(Resources r) {
         return coins >= r.coins && workers >= r.workers && priests >= r.priests && canAffordPower(r.power);
     }
 

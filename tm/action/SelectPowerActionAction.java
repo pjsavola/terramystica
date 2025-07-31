@@ -1,14 +1,23 @@
 package tm.action;
 
+import tm.Game;
+import tm.Player;
 import tm.PowerActions;
 import tm.faction.Yetis;
 
 public class SelectPowerActionAction extends Action {
 
     private final int act;
+    private transient int burn;
 
     public SelectPowerActionAction(int act) {
         this.act = act;
+    }
+
+    @Override
+    public void setData(Game game, Player player) {
+        super.setData(game, player);
+        burn = player.getNeededBurn(PowerActions.getRequiredPower(player, act));
     }
 
     @Override
@@ -25,7 +34,6 @@ public class SelectPowerActionAction extends Action {
 
     @Override
     public String toString() {
-        final int burn = player.getNeededBurn(PowerActions.getRequiredPower(player, act));
         final String burnStr = burn > 0 ? ("Burn " + burn + ". ") : "";
         return burnStr + "Action ACT" + act;
     }

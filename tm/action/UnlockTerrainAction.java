@@ -39,7 +39,7 @@ public class UnlockTerrainAction extends Action {
             if (ordinal >= 7) return false;
             if (player.unlockedTerrain[ordinal]) return false;
 
-            return player.canAfford(game.isHomeType(type) ? Resources.c2 : Resources.c1);
+            return player.canAffordWithoutConversions(game.isHomeType(type) ? Resources.c2 : Resources.c1);
         }
         return true;
     }

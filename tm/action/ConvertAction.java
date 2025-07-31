@@ -45,13 +45,7 @@ public class ConvertAction extends Action {
     @Override
     public String toString() {
         final int burn = player.getNeededBurn(getPowerCost(powerConversions));
-        String result = burn > 0 ? ("Burn " + burn) : "";
-        final int coins = powerConversions.coins;
-        final int workers = powerConversions.workers;
-        final int priests = powerConversions.priests;
-        if (coins > 0) result += (result.isEmpty() ? "" : ". ") + "Convert " + coins + "pw to " + coins + "c";
-        if (workers > 0) result += (result.isEmpty() ? "" : ". ") + "Convert " + (workers * 3) + "pw to " + workers + "w";
-        if (priests > 0) result += (result.isEmpty() ? "" : ". ") + "Convert " + (priests * 5) + "pw to " + priests +"p";
+        String result = getConversionString(burn, powerConversions);
         final int priestsToCoins = Math.min(priestsToWorkers, workersToCoins);
         final int priestsToWorkers = this.priestsToWorkers - priestsToCoins;
         final int workersToCoins = this.workersToCoins - priestsToCoins;
@@ -64,6 +58,17 @@ public class ConvertAction extends Action {
     }
 
     public static int getPowerCost(Resources resources) {
-        return resources.coins + 3 * (resources.workers) + 5 * resources.priests;
+        return resources.coins + 3 * resources.workers + 5 * resources.priests;
+    }
+
+    public static String getConversionString(int burn, Resources powerConversions) {
+        String result = burn > 0 ? ("Burn " + burn) : "";
+        final int coins = powerConversions.coins;
+        final int workers = powerConversions.workers;
+        final int priests = powerConversions.priests;
+        if (coins > 0) result += (result.isEmpty() ? "" : ". ") + "Convert " + coins + "pw to " + coins + "c";
+        if (workers > 0) result += (result.isEmpty() ? "" : ". ") + "Convert " + (workers * 3) + "pw to " + workers + "w";
+        if (priests > 0) result += (result.isEmpty() ? "" : ". ") + "Convert " + (priests * 5) + "pw to " + priests +"p";
+        return result;
     }
 }

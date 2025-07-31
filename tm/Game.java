@@ -532,7 +532,16 @@ public class Game extends JPanel {
                     handleDigging(hex, row, col);
                     return;
                 }
-                final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values()).filter(s -> s.getParent() == hex.getStructure()).toList();
+                final List<Hex.Structure> options = Arrays.stream(Hex.Structure.values())
+                        .filter(s -> s.getParent() == hex.getStructure())
+                        .filter(s -> {
+                            final Player p = getCurrentPlayer();
+                            return switch(s) {
+                                case STRONGHOLD -> p.canBuildStronghold();
+                                case TEMPLE -> p.canBuildTemple();
+                                default -> true;
+                            };
+                        }).toList();
                 Hex.Structure choice = null;
                 if (options.size() == 1) {
                     choice = options.get(0);
