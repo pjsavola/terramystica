@@ -104,7 +104,7 @@ public class AIUtil {
         add(possibleActions, new AdvanceAction(false), game, player);
         add(possibleActions, new AdvanceAction(true), game, player);
         if (!game.pendingPass) {
-            add(possibleActions, new BurnAction(1), game, player);
+            //add(possibleActions, new BurnAction(1), game, player); no need for this because burn is automatic when paying stuff
             add(possibleActions, new ConvertAction(Resources.c1, 0, 0, 0, 0), game, player);
             add(possibleActions, new ConvertAction(Resources.w1, 0, 0, 0, 0), game, player);
             add(possibleActions, new ConvertAction(Resources.p1, 0, 0, 0, 0), game, player);

@@ -203,6 +203,10 @@ public class Player extends JPanel {
         return shipping + tmp;
     }
 
+    public int getDigging() {
+        return digging;
+    }
+
     public int getRange() {
         return range;
     }
@@ -287,6 +291,10 @@ public class Player extends JPanel {
             case STRONGHOLD -> faction.getStrongholdCost();
             case SANCTUARY -> faction.getSanctuaryCost();
         };
+    }
+
+    public Resources getJumpCost() {
+        return jumpCost;
     }
 
     public void buildDwelling() {
@@ -600,7 +608,7 @@ public class Player extends JPanel {
     }
 
     public boolean canSendPriestToCult() {
-        return priests > 0;
+        return canAfford(Resources.p1);
     }
 
     public void sendPriestToCult(int cult, int amount) {
@@ -787,7 +795,7 @@ public class Player extends JPanel {
             throw new RuntimeException("Cannot use range to dig");
         }
         if (faction instanceof Darklings) {
-            return priests >= amount;
+            return canAfford(Resources.fromPriests(amount));
         } else if (faction instanceof Dragonlords) {
             return getPowerTokenCount() >= amount;
         } else if (faction instanceof Acolytes) {
@@ -806,7 +814,7 @@ public class Player extends JPanel {
                 final Resources totalCost = jumpCost.combine(Resources.fromWorkers(digging * amount));
                 return canAfford(totalCost);
             }
-            return workers >= digging * amount;
+            return canAfford(Resources.fromWorkers(digging * amount));
         }
     }
 

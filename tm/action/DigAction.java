@@ -1,9 +1,7 @@
 package tm.action;
 
-import tm.Cults;
-import tm.Game;
-import tm.Hex;
-import tm.Player;
+import tm.*;
+import tm.faction.Darklings;
 import tm.faction.Giants;
 
 public class DigAction extends Action {
@@ -18,6 +16,8 @@ public class DigAction extends Action {
     private transient int requiredDigging;
     private transient int pendingSpades;
     private transient boolean resolvingCultSpades;
+    private transient Resources powerConversions;
+    private transient int burn;
 
     public DigAction(int row, int col, Hex.Type type, boolean jump) {
         this.row = row;
@@ -49,6 +49,27 @@ public class DigAction extends Action {
                 pendingSpades = player.getPendingSpades();
                 requiredDigging = Math.max(0, requiredSpades - pendingSpades);
                 resolvingCultSpades = game.resolvingCultSpades();
+                if (!resolvingCultSpades && (requiredDigging > 0 || jump)) {
+                    final Resources resources = player.getResources();
+                    if (player.getFaction() instanceof Darklings) {
+                        final int priestsNeeded = Math.max(0, requiredDigging - resources.priests);
+                        if (priestsNeeded > 0) {
+                            powerConversions = Resources.fromPriests(priestsNeeded);
+                        }
+                    } else {
+                        final Resources digCost = Resources.fromWorkers(requiredDigging * player.getDigging());
+                        final Resources cost = jump ? player.getJumpCost().combine(digCost) : digCost;
+                        final int priestsNeeded = Math.max(0, cost.priests - resources.priests);
+                        final int workersNeeded = Math.max(0, cost.workers - resources.workers);
+                        if (priestsNeeded > 0 || workersNeeded > 0) {
+                            powerConversions = new Resources(0, workersNeeded, priestsNeeded, 0);
+                        }
+                    }
+                    if (powerConversions != null) {
+                        final int powerNeeded = ConvertAction.getPowerCost(powerConversions);
+                        burn = player.getNeededBurn(powerNeeded);
+                    }
+                }
             }
         }
     }
@@ -98,6 +119,12 @@ public class DigAction extends Action {
 
     @Override
     public void execute() {
+        if (powerConversions != null) {
+            if (burn > 0) {
+                player.burn(burn);
+            }
+            player.convert(powerConversions);
+        }
         if (jump) {
             player.useRange(true);
         }
@@ -123,6 +150,7 @@ public class DigAction extends Action {
 
     @Override
     public String toString() {
+        String result = powerConversions == null ? "" : ConvertAction.getConversionString(burn, powerConversions);
         String txt = "Transform " + target.getId() + " to " + type;
         if (requiredDigging > 0) {
             txt = "Dig " + (player.getHomeType() == Hex.Type.VOLCANO ? requiredSpades : requiredDigging) + ". " + txt;
@@ -130,6 +158,6 @@ public class DigAction extends Action {
                 txt += ". -" + requiredDigging + Cults.getCultName(cult);
             }
         }
-        return txt;
+        return result.isEmpty() ? txt : result + ". " + txt;
     }
 }
