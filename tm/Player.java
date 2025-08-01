@@ -1312,6 +1312,22 @@ public class Player extends JPanel {
         return strongholds > 0;
     }
 
+    public boolean hasSanctuary() {
+        return sanctuaries > 0;
+    }
+
+    public int getTempleCount() {
+        return temples;
+    }
+
+    public int getTradingPostCount() {
+        return tradingPosts;
+    }
+
+    public int getDwellingCount() {
+        return dwellings;
+    }
+
     public void addTokenToBowl3() {
         ++power[2];
         --points;

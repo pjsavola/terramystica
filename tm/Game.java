@@ -2049,7 +2049,19 @@ public class Game extends JPanel {
     private final static Random r = new Random();
 
     private boolean createDecisionNodes(DecisionNode node, List<Action> actionStack, int baseStackSize, Player player) {
-        final List<Action> possibleActions = AIUtil.getFeasibleActions(this, player);
+        boolean allowPriestsToWorkers = true;
+        boolean allowWorkersToCoins = true;
+        boolean allowPointsToCoins = true;
+        for (int i = baseStackSize; i < actionStack.size(); ++i) {
+            final Action action = actionStack.get(i);
+            if (action instanceof ConvertAction) {
+                final ConvertAction convert = (ConvertAction) action;
+                if (convert.convertsPriestsToWorkers()) allowPriestsToWorkers = false;
+                if (convert.convertsWorkersToCoins()) allowWorkersToCoins = false;
+                if (convert.convertsPointsToCoins()) allowPointsToCoins = false;
+            }
+        }
+        final List<Action> possibleActions = AIUtil.getFeasibleActions(this, player, allowPriestsToWorkers, allowWorkersToCoins, allowPointsToCoins);
         if (possibleActions.isEmpty()) {
             return true;
         }

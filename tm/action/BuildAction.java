@@ -56,7 +56,7 @@ public class BuildAction extends Action {
             }
             useAltCost = expensive;
         }
-        if (!free) {
+        if (!free && player.getFaction() != null) {
             final Resources cost = player.getStructureCost(structure, useAltCost);
             final Resources resources = player.getResources();
             final int coinsNeeded = Math.max(0, cost.coins - resources.coins);

@@ -57,6 +57,18 @@ public class ConvertAction extends Action {
         return result;
     }
 
+    public boolean convertsPriestsToWorkers() {
+        return priestsToWorkers > 0;
+    }
+
+    public boolean convertsWorkersToCoins() {
+        return workersToCoins > 0;
+    }
+
+    public boolean convertsPointsToCoins() {
+        return pointsToCoins > 0;
+    }
+
     public static int getPowerCost(Resources resources) {
         return resources.coins + 3 * resources.workers + 5 * resources.priests;
     }

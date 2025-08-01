@@ -89,7 +89,7 @@ public class AIUtil {
         }
     }
 
-    public static List<Action> getFeasibleActions(Game game, Player player) {
+    public static List<Action> getFeasibleActions(Game game, Player player, boolean allowPriestsToWorkers, boolean allowWorkersToCoins, boolean allowPointsToCoins) {
         final List<Action> possibleActions = new ArrayList<>();
         if (game.getCurrentPlayer() != player) {
             return possibleActions;
@@ -103,14 +103,32 @@ public class AIUtil {
         }
         add(possibleActions, new AdvanceAction(false), game, player);
         add(possibleActions, new AdvanceAction(true), game, player);
-        if (!game.pendingPass) {
+        if (!game.pendingPass && player.getFaction() != null) {
             //add(possibleActions, new BurnAction(1), game, player); no need for this because burn is automatic when paying stuff
-            add(possibleActions, new ConvertAction(Resources.c1, 0, 0, 0, 0), game, player);
-            add(possibleActions, new ConvertAction(Resources.w1, 0, 0, 0, 0), game, player);
-            add(possibleActions, new ConvertAction(Resources.p1, 0, 0, 0, 0), game, player);
-            add(possibleActions, new ConvertAction(Resources.zero, 1, 0, 0, 0), game, player);
-            add(possibleActions, new ConvertAction(Resources.zero, 0, 1, 0, 0), game, player);
-            add(possibleActions, new ConvertAction(Resources.zero, 0, 0, 1, 0), game, player);
+            //add(possibleActions, new ConvertAction(Resources.c1, 0, 0, 0, 0), game, player);
+            //add(possibleActions, new ConvertAction(Resources.w1, 0, 0, 0, 0), game, player);
+            //add(possibleActions, new ConvertAction(Resources.p1, 0, 0, 0, 0), game, player);
+            final Resources r = player.getResources();
+            if (allowPriestsToWorkers) {
+                for (int i = 1; i <= r.priests; ++i) {
+                    add(possibleActions, new ConvertAction(Resources.zero, i, 0, 0, 0), game, player);
+                }
+            }
+            if (allowWorkersToCoins || allowPointsToCoins) {
+                int mostExpensive = 0;
+                mostExpensive = Math.max(mostExpensive, player.hasStronghold() ? 0 : player.getFaction().getStrongholdCost().coins);
+                mostExpensive = Math.max(mostExpensive, player.hasSanctuary() ? 0 : player.getFaction().getSanctuaryCost().coins);
+                mostExpensive = Math.max(mostExpensive, player.getTempleCount() == 3 ? 0 : player.getFaction().getTempleCost().coins);
+                mostExpensive = Math.max(mostExpensive, player.getTradingPostCount() == 4 ? 0 : player.getFaction().getExpensiveTradingPostCost().coins);
+                mostExpensive = Math.max(mostExpensive, player.getDwellingCount() == 8 ? 0 : player.getFaction().getDwellingCost().coins);
+                mostExpensive = Math.max(mostExpensive, player.getShipping() == player.getFaction().getMaxShipping() ? 0 : player.getFaction().getAdvanceShippingCost().coins);
+                mostExpensive = Math.max(mostExpensive, player.getDigging() == player.getFaction().getMinDigging() ? 0 : player.getFaction().getAdvanceDiggingCost().coins);
+                final int maxCoinsNeeded = mostExpensive - r.coins;
+                for (int i = 1; i <= maxCoinsNeeded; ++i) {
+                    if (allowWorkersToCoins) add(possibleActions, new ConvertAction(Resources.zero, 0, i, 0, 0), game, player);
+                    if (allowPointsToCoins) add(possibleActions, new ConvertAction(Resources.zero, 0, 0, i, 0), game, player);
+                }
+            }
         }
         add(possibleActions, new ChaosMagiciansDoubleAction(), game, player);
         for (int i = 1; i < 16; ++i) {

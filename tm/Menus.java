@@ -242,7 +242,7 @@ public abstract class Menus {
 
             @Override
             protected void execute(Game game) {
-                final List<Action> possibleActions = AIUtil.getFeasibleActions(game, game.getCurrentPlayer());
+                final List<Action> possibleActions = AIUtil.getFeasibleActions(game, game.getCurrentPlayer(), true, true, true);
                 for (Action action : possibleActions) {
                     if (action.canExecute()) {
                         System.err.println(action);

@@ -17,15 +17,17 @@ public class AdvanceAction extends Action {
     @Override
     public void setData(Game game, Player player) {
         super.setData(game, player);
-        final Resources cost = dig ? player.getFaction().getAdvanceDiggingCost() : player.getFaction().getAdvanceShippingCost();
-        final Resources resources = player.getResources();
-        final int coinsNeeded = Math.max(0, cost.coins - resources.coins);
-        final int workersNeeded = Math.max(0, cost.workers - resources.workers);
-        final int priestsNeeded = Math.max(0, cost.priests - resources.priests);
-        if (coinsNeeded > 0 || workersNeeded > 0 || priestsNeeded > 0) {
-            powerConversions = new Resources(coinsNeeded, workersNeeded, priestsNeeded, 0);
-            final int powerNeeded = ConvertAction.getPowerCost(powerConversions);
-            burn = player.getNeededBurn(powerNeeded);
+        if (player.getFaction() != null) {
+            final Resources cost = dig ? player.getFaction().getAdvanceDiggingCost() : player.getFaction().getAdvanceShippingCost();
+            final Resources resources = player.getResources();
+            final int coinsNeeded = Math.max(0, cost.coins - resources.coins);
+            final int workersNeeded = Math.max(0, cost.workers - resources.workers);
+            final int priestsNeeded = Math.max(0, cost.priests - resources.priests);
+            if (coinsNeeded > 0 || workersNeeded > 0 || priestsNeeded > 0) {
+                powerConversions = new Resources(coinsNeeded, workersNeeded, priestsNeeded, 0);
+                final int powerNeeded = ConvertAction.getPowerCost(powerConversions);
+                burn = player.getNeededBurn(powerNeeded);
+            }
         }
     }
 

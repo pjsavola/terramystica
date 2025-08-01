@@ -222,12 +222,12 @@ public class JMystica {
                 gameData.useRevisedStartingVPs = startingVPsChooser.getSelectedIndex() == 1;
                 gameData.useAuction = startingVPsChooser.getSelectedIndex() == 2;
                 gameData.chooseFactions = factionPickChooser.getSelectedIndex() == 0;
+                dialog.setVisible(false);
                 try {
                     Game.open(frame, gameData);
                 } catch (ReplayFailure e) {
                     throw new RuntimeException(e);
                 }
-                dialog.setVisible(false);
             });
             cancel.addActionListener(el -> dialog.setVisible(false));
             panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
