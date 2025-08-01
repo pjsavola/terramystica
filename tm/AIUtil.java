@@ -7,6 +7,7 @@ import tm.faction.Giants;
 import tm.faction.Riverwalkers;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class AIUtil {
@@ -98,13 +99,16 @@ public class AIUtil {
         for (int i = 0; i < GameData.allFactions.size(); ++i) {
             add(possibleActions, new SelectFactionAction(i), game, player);
         }
-        for (Hex.Type type : Hex.Type.values()) {
-            add(possibleActions, new PickColorAction(type), game, player);
+        if (game.phase == Game.Phase.PICK_FACTIONS || player.getPendingActions().stream().min(Comparator.comparingInt(Enum::ordinal)).filter(type -> type == Player.PendingType.PICK_COLOR).isPresent()) {
+            for (Hex.Type type : Hex.Type.values()) {
+                add(possibleActions, new PickColorAction(type), game, player);
+            }
         }
         add(possibleActions, new AdvanceAction(false), game, player);
         add(possibleActions, new AdvanceAction(true), game, player);
         if (!game.pendingPass && player.getFaction() != null) {
             //add(possibleActions, new BurnAction(1), game, player); no need for this because burn is automatic when paying stuff
+            // TODO: Allow conversions
             //add(possibleActions, new ConvertAction(Resources.c1, 0, 0, 0, 0), game, player);
             //add(possibleActions, new ConvertAction(Resources.w1, 0, 0, 0, 0), game, player);
             //add(possibleActions, new ConvertAction(Resources.p1, 0, 0, 0, 0), game, player);
@@ -125,8 +129,10 @@ public class AIUtil {
                 mostExpensive = Math.max(mostExpensive, player.getDigging() == player.getFaction().getMinDigging() ? 0 : player.getFaction().getAdvanceDiggingCost().coins);
                 final int maxCoinsNeeded = mostExpensive - r.coins;
                 for (int i = 1; i <= maxCoinsNeeded; ++i) {
-                    if (allowWorkersToCoins) add(possibleActions, new ConvertAction(Resources.zero, 0, i, 0, 0), game, player);
-                    if (allowPointsToCoins) add(possibleActions, new ConvertAction(Resources.zero, 0, 0, i, 0), game, player);
+                    if (allowWorkersToCoins)
+                        add(possibleActions, new ConvertAction(Resources.zero, 0, i, 0, 0), game, player);
+                    if (allowPointsToCoins)
+                        add(possibleActions, new ConvertAction(Resources.zero, 0, 0, i, 0), game, player);
                 }
             }
         }
@@ -145,8 +151,12 @@ public class AIUtil {
             for (int amount = 1; amount <= 3; ++amount) {
                 add(possibleActions, new PriestToCultAction(i, amount), game, player);
             }
-            add(possibleActions, new DarklingsConvertAction(i), game, player);
         }
+        player.getPendingActions().stream().min(Comparator.comparingInt(Enum::ordinal)).filter(type -> type == Player.PendingType.CONVERT_W2P).ifPresent(type -> {
+            for (int i = 1; i <= 3; ++i) {
+                add(possibleActions, new DarklingsConvertAction(i), game, player);
+            }
+        });
         add(possibleActions, new EngineersBridgeAction(), game, player);
         add(possibleActions, new ForfeitAction(), game, player);
         add(possibleActions, new LeechAction(false), game, player);
@@ -206,15 +216,19 @@ public class AIUtil {
         for (int i = 0; i < 3 + game.getPlayerCount(); ++i) {
             add(possibleActions, new SelectBonAction(i), game, player);
         }
-        for (int i = 1; i <= 12; ++i) {
-            add(possibleActions, new SelectFavAction(i), game, player);
-        }
+        player.getPendingActions().stream().min(Comparator.comparingInt(Enum::ordinal)).filter(type -> type == Player.PendingType.SELECT_FAV).ifPresent(type -> {
+            for (int i = 1; i <= 12; ++i) {
+                add(possibleActions, new SelectFavAction(i), game, player);
+            }
+        });
         for (int i = 1; i <= 6; ++i) {
             add(possibleActions, new SelectPowerActionAction(i), game, player);
         }
-        for (int i = 1; i <= 8; ++i) {
-            add(possibleActions, new SelectTownAction(i), game, player);
-        }
+        player.getPendingActions().stream().min(Comparator.comparingInt(Enum::ordinal)).filter(type -> type == Player.PendingType.SELECT_TOWN).ifPresent(type -> {
+            for (int i = 1; i <= 8; ++i) {
+                add(possibleActions, new SelectTownAction(i), game, player);
+            }
+        });
         add(possibleActions, new ShapeshifterPowerAction(false), game, player);
         add(possibleActions, new ShapeshifterPowerAction(true), game, player);
         add(possibleActions, new SpadeAction(SpadeAction.Source.BON1), game, player);
