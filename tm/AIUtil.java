@@ -1,10 +1,7 @@
 package tm;
 
 import tm.action.*;
-import tm.faction.Acolytes;
-import tm.faction.Faction;
-import tm.faction.Giants;
-import tm.faction.Riverwalkers;
+import tm.faction.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -176,6 +173,9 @@ public class AIUtil {
                 if (hex.getType() == Hex.Type.WATER) {
                     add(possibleActions, new MermaidsTownAction(i, j), game, player);
                 } else {
+                    add(possibleActions, new PlaceInitialDwellingAction(i, j), game, player);
+                    if (player.getCachedReachableTiles() != null && !player.getCachedReachableTiles().contains(hex)) continue;
+
                     if (game.getVolcanoColor() != null && player.getHomeType() == Hex.Type.VOLCANO) {
                         if (player.getFaction() instanceof Acolytes) {
                             for (int cult = 0; cult < 4; ++cult) {
@@ -183,7 +183,7 @@ public class AIUtil {
                             }
                         } else {
                             add(possibleActions, new DigAction(i, j, Hex.Type.VOLCANO, false), game, player);
-                            add(possibleActions, new DigAction(i, j, Hex.Type.VOLCANO, true), game, player);
+                            //add(possibleActions, new DigAction(i, j, Hex.Type.VOLCANO, true), game, player);
                         }
                     } else {
                         for (Hex.Type type : Hex.Type.values()) {
@@ -194,13 +194,14 @@ public class AIUtil {
                                 continue;
                             }
                             add(possibleActions, new DigAction(i, j, type, false), game, player);
-                            add(possibleActions, new DigAction(i, j, type, true), game, player);
+                            if (player.getFaction() instanceof Dwarves || player.getFaction() instanceof Fakirs) {
+                                add(possibleActions, new DigAction(i, j, type, true), game, player);
+                            }
                         }
                     }
                     for (Hex.Structure structure : Hex.Structure.values()) {
                         add(possibleActions, new BuildAction(i, j, structure), game, player);
                     }
-                    add(possibleActions, new PlaceInitialDwellingAction(i, j), game, player);
                     add(possibleActions, new SandstormAction(i, j), game, player);
                 }
             }
