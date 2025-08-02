@@ -2061,16 +2061,22 @@ public class Game extends JPanel {
                 if (convert.convertsPointsToCoins()) allowPointsToCoins = false;
             }
         }
+        final long startFeasibleActions = System.currentTimeMillis();
         final List<Action> possibleActions = AIUtil.getFeasibleActions(this, player, allowPriestsToWorkers, allowWorkersToCoins, allowPointsToCoins);
+        timerFeasibleActions += System.currentTimeMillis() - startFeasibleActions;
         if (possibleActions.isEmpty()) {
             return true;
         }
         for (Action action : possibleActions) {
             final DecisionNode child = new DecisionNode(action);
             node.addChild(child);
+            final long startAction = System.currentTimeMillis();
             resolveAction(action);
+            timerAction += System.currentTimeMillis() - startAction;
+            /*
             for (int i = baseStackSize; i < actionStack.size(); ++i) System.err.print("  ");
             System.err.println(action);
+             */
             actionStack.add(action);
             if (createDecisionNodes(child, actionStack, baseStackSize, player)) {
                 child.setScore(player.evaluate());
@@ -2081,7 +2087,15 @@ public class Game extends JPanel {
         return false;
     }
 
+    public static long timerAI;
+    public static long timerDecisionTree;
+    public static long timerFeasibleActions;
+    public static long timerEvaluate;
+    public static long timerAction;
+    public static long timerMapIteration;
+
     public void executeAI() {
+        final long startAI = System.currentTimeMillis();
         if (factionPopup != null) {
             factionPopup.setVisible(false);
             factionPopup = null;
@@ -2090,7 +2104,9 @@ public class Game extends JPanel {
         final List<Action> actionStack = new ArrayList<>(history);
         final DecisionNode root = new DecisionNode(null);
         //root.setScore(0); //player.evaluate());
+        final long startDecisionTree = System.currentTimeMillis();
         createDecisionNodes(root, actionStack, actionStack.size(), getCurrentPlayer());
+        timerDecisionTree += System.currentTimeMillis() - startDecisionTree;
         final int[] bestScore = new int[1];
         final List<List<Action>> results = new ArrayList<>();
         final List<Action> stack = new ArrayList<>();
@@ -2102,5 +2118,12 @@ public class Game extends JPanel {
         }
         rewinding = false;
         confirmTurn();
+        timerAI += System.currentTimeMillis() - startAI;
+        System.err.println("executeAI - " + timerAI);
+        System.err.println("createDecisionNodes - " + timerDecisionTree);
+        System.err.println("getPossibleActions - " + timerFeasibleActions);
+        System.err.println("mapIteration - " + timerMapIteration);
+        System.err.println("actionExecution - " + timerAction);
+        System.err.println("evaluate - " + timerEvaluate);
     }
 }

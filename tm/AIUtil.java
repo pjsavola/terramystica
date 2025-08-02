@@ -161,6 +161,7 @@ public class AIUtil {
         add(possibleActions, new ForfeitAction(), game, player);
         add(possibleActions, new LeechAction(false), game, player);
         add(possibleActions, new LeechAction(true), game, player);
+        final long mapIterationStart = System.currentTimeMillis();
         for (int i = 0; i < game.mapData.length; ++i) {
             final String row = game.mapData[i];
             for (int j = 0; j < row.split(",").length; ++j) {
@@ -206,6 +207,7 @@ public class AIUtil {
                 }
             }
         }
+        Game.timerMapIteration += System.currentTimeMillis() - mapIterationStart;
         add(possibleActions, new NomadsSandstormAction(), game, player);
         add(possibleActions, new PassAction(), game, player);
         for (Hex.Type type : Hex.Type.values()) {

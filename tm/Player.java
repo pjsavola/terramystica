@@ -301,6 +301,7 @@ public class Player extends JPanel {
         if (!canBuildDwelling(false))
             throw new RuntimeException("Unable to build more dwellings");
 
+        cachedReachableTiles = null;
         ++dwellings;
         points += round.d;
         if (ownedFavors[10]) {
@@ -321,6 +322,7 @@ public class Player extends JPanel {
         if (!canBuildTradingPost(expensive))
             throw new RuntimeException("Unable to build more trading posts");
 
+        cachedReachableTiles = null;
         ++tradingPosts;
         --dwellings;
         points += round.tp;
@@ -390,11 +392,13 @@ public class Player extends JPanel {
         } else if (faction instanceof Dwarves) {
             jumpCost = Resources.w1;
         } else if (faction instanceof Fakirs) {
+            cachedReachableTiles = null;
             ++range;
         } else if (faction instanceof Halflings) {
             addSpades(3, false);
         } else if (faction instanceof Mermaids) {
             if (faction.getMaxShipping() > shipping) {
+                cachedReachableTiles = null;
                 ++shipping;
                 points += faction.getAdvanceShippingPoints(shipping);
             }
@@ -439,9 +443,11 @@ public class Player extends JPanel {
             }
             case 7 -> {
                 if (faction.getMaxShipping() > shipping) {
+                    cachedReachableTiles = null;
                     ++shipping;
                     points += faction.getAdvanceShippingPoints(shipping);
                 } else if (faction instanceof Fakirs) {
+                    cachedReachableTiles = null;
                     ++range;
                 }
             }
@@ -511,6 +517,7 @@ public class Player extends JPanel {
         if (!canAdvanceShipping())
             throw new RuntimeException("Trying to advance shipping too much");
 
+        cachedReachableTiles = null;
         ++shipping;
         points += faction.getAdvanceShippingPoints(shipping);
         pay(faction.getAdvanceShippingCost());
@@ -860,6 +867,7 @@ public class Player extends JPanel {
         if (!canAfford(jumpCost))
             throw new RuntimeException("Unable to afford range usage");
 
+
         if (dig) {
             rangeUsedForDigging = true;
         }
@@ -1025,12 +1033,18 @@ public class Player extends JPanel {
         }
         final int oldBon = bons.set(0, newBon);
         this.coins += coins;
+        if (newBon == 4 || oldBon == 4) {
+            cachedReachableTiles = null;
+        }
         return oldBon;
     }
 
     public int removeBon() {
         final int bon = bons.remove(0);
         refreshSize();
+        if (bon == 4) {
+            cachedReachableTiles = null;
+        }
         return bon;
     }
 
@@ -1428,6 +1442,7 @@ public class Player extends JPanel {
     }
 
     public int evaluate() {
+        final long startEvaluate = System.currentTimeMillis();
         Resources sinks = getSink(true, true, true, true);
         //System.err.println("Coins: " + sinks.coins);
         //System.err.println("Workers: " + sinks.workers);
@@ -1498,6 +1513,7 @@ public class Player extends JPanel {
             if (faction.getMaxShipping() == 0) {
                 final int originalRange = range;
                 if (faction instanceof Fakirs && range < 4) {
+                    cachedReachableTiles = null;
                     ++range;
                     int cnt = getDwellingSpotCount();
                 }
@@ -1505,18 +1521,33 @@ public class Player extends JPanel {
             } else {
                 final int originalShipping = shipping;
                 while (shipping < faction.getMaxShipping()) {
+                    cachedReachableTiles = null;
                     ++shipping;
                     int cnt = getDwellingSpotCount();
                 }
                 shipping = originalShipping;
             }
         }
-        return 0;
+        Game.timerEvaluate += System.currentTimeMillis() - startEvaluate;
+        return getPoints();
     }
 
     private int getDwellingSpotCount() {
         int possibleNewDwellingCount = 0;
         final List<Integer> costs = game.getSpadeDistanceCounts(this);
         return costs.isEmpty() ? 0 : costs.get(0);
+    }
+
+    private Set<Hex> cachedReachableTiles;
+    public void cacheReachableTiles(Set<Hex> hexes) {
+        cachedReachableTiles = hexes;
+    }
+
+    public void clearReachableTileCache() {
+        cachedReachableTiles = null;
+    }
+
+    public Set<Hex> getCachedReachableTiles() {
+        return cachedReachableTiles;
     }
 }

@@ -224,9 +224,14 @@ public class Grid extends JPanel {
 
     public void addBridge(Bridge bridge) {
         bridges.add(bridge);
+        bridge.getOwner().clearReachableTileCache();
     }
 
     public Set<Hex> getReachableTiles(Player player) {
+        final Set<Hex> cachedResult = player.getCachedReachableTiles();
+        if (cachedResult != null) {
+            return cachedResult;
+        }
         final Map<Hex, Integer> distances = new HashMap<>();
         final Deque<Hex> work = new ArrayDeque<>();
         final int shipping = player.getShipping();
@@ -263,7 +268,9 @@ public class Grid extends JPanel {
                 }
             }
         }
-        return distances.keySet().stream().filter(hex -> hex.getType() != Hex.Type.WATER).collect(Collectors.toSet());
+        final Set<Hex> result = distances.keySet().stream().filter(hex -> hex.getType() != Hex.Type.WATER).collect(Collectors.toSet());
+        player.cacheReachableTiles(result);
+        return result;
     }
 
     public Set<Hex> getReachableTilesRecursive(Player player, int shippingDelta, int spadeDelta) {
