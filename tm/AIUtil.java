@@ -84,10 +84,14 @@ public class AIUtil {
     }
 
     private static void add(List<Action> possibleActions, Action action, Game game, Player player) {
+        final long startAction = System.currentTimeMillis();
         action.setData(game, player);
         if (action.validatePhase() && action.canExecute()) {
             possibleActions.add(action);
         }
+        final long duration = System.currentTimeMillis() - startAction;
+        final long oldTime = Game.timerActionMap.getOrDefault(action.getClass(), 0L);
+        Game.timerActionMap.put(action.getClass(), oldTime + duration);
     }
 
     public static List<Action> getFeasibleActions(Game game, Player player, boolean allowPriestsToWorkers, boolean allowWorkersToCoins, boolean allowPointsToCoins) {
@@ -162,9 +166,12 @@ public class AIUtil {
         add(possibleActions, new LeechAction(false), game, player);
         add(possibleActions, new LeechAction(true), game, player);
         final long mapIterationStart = System.currentTimeMillis();
+        String[][] cols = new String[game.mapData.length][];
         for (int i = 0; i < game.mapData.length; ++i) {
-            final String row = game.mapData[i];
-            for (int j = 0; j < row.split(",").length; ++j) {
+            cols[i] = game.mapData[i].split(",");
+        }
+        for (int i = 0; i < game.mapData.length; ++i) {
+            for (int j = 0; j < cols[i].length; ++j) {
                 final Hex hex = game.getHex(i, j);
                 if (hex.getType() == Hex.Type.WATER) {
                     add(possibleActions, new MermaidsTownAction(i, j), game, player);
@@ -197,8 +204,7 @@ public class AIUtil {
                     add(possibleActions, new SandstormAction(i, j), game, player);
                 }
                 for (int k = 0; k < game.mapData.length; ++k) {
-                    final String row2 = game.mapData[k];
-                    for (int l = 0; l < row2.split(",").length; ++l) {
+                    for (int l = 0; l < cols[k].length; ++l) {
                         final Hex hex2 = game.getHex(k, l);
                         if (hex2.getType() != Hex.Type.WATER) {
                             add(possibleActions, new PlaceBridgeAction(i, j, k, l), game, player);

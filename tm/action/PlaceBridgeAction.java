@@ -38,16 +38,7 @@ public class PlaceBridgeAction extends PendingAction {
         if (hex1.getType() != homeType && hex2.getType() != homeType) return false;
         if ((hex1.getType() != homeType || hex1.getStructure() == null) && (hex2.getType() != homeType || hex2.getStructure() == null)) return false;
 
-        int requiredCommonWaterNeighbors = 2;
-        if (hex1.getNeighbors().size() <= 3 && hex2.getNeighbors().size() <= 3) {
-            --requiredCommonWaterNeighbors;
-        }
-        for (Hex neighbor : hex1.getNeighbors()) {
-            if (hex2.getNeighbors().contains(neighbor) && neighbor.getType() == Hex.Type.WATER) {
-                --requiredCommonWaterNeighbors;
-            }
-        }
-        return requiredCommonWaterNeighbors <= 0;
+        return game.isValidBridgeLocation(hex1, hex2);
     }
 
     @Override

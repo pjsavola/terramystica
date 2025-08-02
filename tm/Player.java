@@ -301,7 +301,7 @@ public class Player extends JPanel {
         if (!canBuildDwelling(false))
             throw new RuntimeException("Unable to build more dwellings");
 
-        cachedReachableTiles = null;
+        clearCaches();
         ++dwellings;
         points += round.d;
         if (ownedFavors[10]) {
@@ -322,7 +322,6 @@ public class Player extends JPanel {
         if (!canBuildTradingPost(expensive))
             throw new RuntimeException("Unable to build more trading posts");
 
-        cachedReachableTiles = null;
         ++tradingPosts;
         --dwellings;
         points += round.tp;
@@ -392,13 +391,13 @@ public class Player extends JPanel {
         } else if (faction instanceof Dwarves) {
             jumpCost = Resources.w1;
         } else if (faction instanceof Fakirs) {
-            cachedReachableTiles = null;
+            clearCaches();
             ++range;
         } else if (faction instanceof Halflings) {
             addSpades(3, false);
         } else if (faction instanceof Mermaids) {
             if (faction.getMaxShipping() > shipping) {
-                cachedReachableTiles = null;
+                clearCaches();
                 ++shipping;
                 points += faction.getAdvanceShippingPoints(shipping);
             }
@@ -443,11 +442,11 @@ public class Player extends JPanel {
             }
             case 7 -> {
                 if (faction.getMaxShipping() > shipping) {
-                    cachedReachableTiles = null;
+                    clearCaches();
                     ++shipping;
                     points += faction.getAdvanceShippingPoints(shipping);
                 } else if (faction instanceof Fakirs) {
-                    cachedReachableTiles = null;
+                    clearCaches();
                     ++range;
                 }
             }
@@ -517,7 +516,7 @@ public class Player extends JPanel {
         if (!canAdvanceShipping())
             throw new RuntimeException("Trying to advance shipping too much");
 
-        cachedReachableTiles = null;
+        clearCaches();
         ++shipping;
         points += faction.getAdvanceShippingPoints(shipping);
         pay(faction.getAdvanceShippingCost());
@@ -1034,7 +1033,7 @@ public class Player extends JPanel {
         final int oldBon = bons.set(0, newBon);
         this.coins += coins;
         if (newBon == 4 || oldBon == 4) {
-            cachedReachableTiles = null;
+            clearCaches();
         }
         return oldBon;
     }
@@ -1043,7 +1042,7 @@ public class Player extends JPanel {
         final int bon = bons.remove(0);
         refreshSize();
         if (bon == 4) {
-            cachedReachableTiles = null;
+            clearCaches();
         }
         return bon;
     }
@@ -1513,7 +1512,7 @@ public class Player extends JPanel {
             if (faction.getMaxShipping() == 0) {
                 final int originalRange = range;
                 if (faction instanceof Fakirs && range < 4) {
-                    cachedReachableTiles = null;
+                    clearCaches();
                     ++range;
                     int cnt = getDwellingSpotCount();
                 }
@@ -1521,7 +1520,7 @@ public class Player extends JPanel {
             } else {
                 final int originalShipping = shipping;
                 while (shipping < faction.getMaxShipping()) {
-                    cachedReachableTiles = null;
+                    clearCaches();
                     ++shipping;
                     int cnt = getDwellingSpotCount();
                 }
@@ -1539,15 +1538,26 @@ public class Player extends JPanel {
     }
 
     private Set<Hex> cachedReachableTiles;
+    private Set<Hex> cachedJumpableTiles;
+
+    public void clearCaches() {
+        cachedReachableTiles = null;
+        cachedJumpableTiles = null;
+    }
+
     public void cacheReachableTiles(Set<Hex> hexes) {
         cachedReachableTiles = hexes;
     }
 
-    public void clearReachableTileCache() {
-        cachedReachableTiles = null;
+    public void cacheJumpableTiles(Set<Hex> hexes) {
+        cachedJumpableTiles = hexes;
     }
 
     public Set<Hex> getCachedReachableTiles() {
         return cachedReachableTiles;
+    }
+
+    public Set<Hex> getCachedJumpableTiles() {
+        return cachedJumpableTiles;
     }
 }

@@ -2093,6 +2093,7 @@ public class Game extends JPanel {
     public static long timerEvaluate;
     public static long timerAction;
     public static long timerMapIteration;
+    public static Map<Class<? extends Action>, Long> timerActionMap = new HashMap<>();
 
     public void executeAI() {
         final long startAI = System.currentTimeMillis();
@@ -2125,5 +2126,10 @@ public class Game extends JPanel {
         System.err.println("mapIteration - " + timerMapIteration);
         System.err.println("actionExecution - " + timerAction);
         System.err.println("evaluate - " + timerEvaluate);
+        timerActionMap.forEach((c, t) -> System.err.println("ACTION " + c.getSimpleName() + " - " + t));
+    }
+
+    public boolean isValidBridgeLocation(Hex hex1, Hex hex2) {
+        return mapPanel.validBridgeLocations.contains(hex1.getId() + ":" + hex2.getId());
     }
 }

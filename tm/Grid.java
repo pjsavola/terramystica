@@ -24,6 +24,7 @@ public class Grid extends JPanel {
     private final Dimension size;
     private final List<Bridge> bridges = new ArrayList<>();
     private final List<Hex> allHexes = new ArrayList<>();
+    final Set<String> validBridgeLocations = new HashSet<>();
 
     public Grid(Game game, String[] mapData) {
         final double halfWidth = Math.sqrt(3) / 2 * radius;
@@ -84,6 +85,31 @@ public class Grid extends JPanel {
                     }
                 }
                 map[row][col].setNeighbors(neighbors);
+            }
+        }
+
+        for (Hex[] value : map) {
+            for (final Hex hex1 : value) {
+                if (hex1.getType() == Hex.Type.WATER) continue;
+
+                for (Hex[] hexes : map) {
+                    for (final Hex hex2 : hexes) {
+                        if (hex2.getType() == Hex.Type.WATER) continue;
+
+                        int requiredCommonWaterNeighbors = 2;
+                        if (hex1.getNeighbors().size() <= 3 && hex2.getNeighbors().size() <= 3) {
+                            --requiredCommonWaterNeighbors;
+                        }
+                        for (Hex neighbor : hex1.getNeighbors()) {
+                            if (hex2.getNeighbors().contains(neighbor) && neighbor.getType() == Hex.Type.WATER) {
+                                --requiredCommonWaterNeighbors;
+                            }
+                        }
+                        if (requiredCommonWaterNeighbors <= 0) {
+                            validBridgeLocations.add(hex1.getId() + ":" + hex2.getId());
+                        }
+                    }
+                }
             }
         }
 
@@ -224,7 +250,7 @@ public class Grid extends JPanel {
 
     public void addBridge(Bridge bridge) {
         bridges.add(bridge);
-        bridge.getOwner().clearReachableTileCache();
+        bridge.getOwner().clearCaches();
     }
 
     public Set<Hex> getReachableTiles(Player player) {
@@ -289,6 +315,10 @@ public class Grid extends JPanel {
         final int range = player.getRange();
         if (range < 2) return Collections.emptySet();
 
+        final Set<Hex> cachedResult = player.getCachedJumpableTiles();
+        if (cachedResult != null) {
+            return cachedResult;
+        }
         final Map<Hex, Integer> distances = new HashMap<>();
         final Deque<Hex> work = new ArrayDeque<>();
         getAllHexes().stream().filter(h -> h.getStructure() != null && h.getType() == player.getHomeType()).forEach(h -> {
@@ -323,6 +353,7 @@ public class Grid extends JPanel {
                 jumpables.remove(bridge.getHex1());
             }
         }
+        player.cacheJumpableTiles(jumpables);
         return jumpables;
     }
 
