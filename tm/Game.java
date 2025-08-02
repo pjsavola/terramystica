@@ -2132,4 +2132,8 @@ public class Game extends JPanel {
     public boolean isValidBridgeLocation(Hex hex1, Hex hex2) {
         return mapPanel.validBridgeLocations.contains(hex1.getId() + ":" + hex2.getId()) || mapPanel.validBridgeLocations.contains(hex2.getId() + ":" + hex1.getId());
     }
+
+    public List<List<Integer>> getValidBridgeLocations() {
+        return mapPanel.getAllValidBridgeLocations();
+    }
 }

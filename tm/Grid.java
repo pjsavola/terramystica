@@ -25,6 +25,7 @@ public class Grid extends JPanel {
     private final List<Bridge> bridges = new ArrayList<>();
     private final List<Hex> allHexes = new ArrayList<>();
     final Set<String> validBridgeLocations = new HashSet<>();
+    private final int rowDelta;
 
     public Grid(Game game, String[] mapData) {
         final double halfWidth = Math.sqrt(3) / 2 * radius;
@@ -33,7 +34,7 @@ public class Grid extends JPanel {
         int waterCount = 0;
         final int firstRowLength = mapData[0].length() - (mapData[0].endsWith(",N") ? 2 : 0);
         final int secondRowLength = mapData[1].length() - (mapData[1].endsWith(",N") ? 2 : 0);
-        final int rowDelta = firstRowLength > secondRowLength ? 0 : 1;
+        rowDelta = firstRowLength > secondRowLength ? 0 : 1;
         for (int row = 0; row < mapData.length; ++row) {
             String usedRow = mapData[row];
             if (usedRow.endsWith(",N")) usedRow = usedRow.substring(0, usedRow.length() - 2);
@@ -900,6 +901,19 @@ public class Grid extends JPanel {
             }
         });
         //System.err.println(result);
+        return result;
+    }
+
+    List<List<Integer>> getAllValidBridgeLocations() {
+        final List<List<Integer>> result = new ArrayList<>();
+        for (String bridge : validBridgeLocations) {
+            final String[] ids = bridge.split(":");
+            final int row1 = ids[0].charAt(0) - 'A' - rowDelta;
+            final int col1 = Integer.parseInt(ids[0].substring(1)) - 1;
+            final int row2 = ids[1].charAt(0) - 'A' - rowDelta;
+            final int col2 = Integer.parseInt(ids[1].substring(1)) - 1;
+            result.add(List.of(row1, col1, row2, col2));
+        }
         return result;
     }
 }

@@ -203,15 +203,12 @@ public class AIUtil {
                     add(possibleActions, new PlaceInitialDwellingAction(i, j), game, player);
                     add(possibleActions, new SandstormAction(i, j), game, player);
                 }
-                for (int k = 0; k < game.mapData.length; ++k) {
-                    for (int l = 0; l < cols[k].length; ++l) {
-                        final Hex hex2 = game.getHex(k, l);
-                        if (hex2.getType() != Hex.Type.WATER) {
-                            add(possibleActions, new PlaceBridgeAction(i, j, k, l), game, player);
-                        }
-                    }
-                }
             }
+        }
+
+        final List<List<Integer>> bridges = game.getValidBridgeLocations();
+        for (List<Integer> indices : bridges) {
+            add(possibleActions, new PlaceBridgeAction(indices.get(0), indices.get(1), indices.get(2), indices.get(3)), game, player);
         }
         Game.timerMapIteration += System.currentTimeMillis() - mapIterationStart;
         add(possibleActions, new NomadsSandstormAction(), game, player);
