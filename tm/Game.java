@@ -2046,7 +2046,7 @@ public class Game extends JPanel {
         return mapPanel.getSpadeDistanceCounts(player, this);
     }
 
-    private final static Random r = new Random();
+    private final static Random r = new Random(1);
 
     private boolean createDecisionNodes(DecisionNode node, List<Action> actionStack, int baseStackSize, Player player) {
         boolean allowPriestsToWorkers = true;
@@ -2082,7 +2082,13 @@ public class Game extends JPanel {
                 child.setScore(player.evaluate());
             }
             actionStack.remove(actionStack.size() - 1);
-            doRewind(actionStack);
+
+            // Rewinding whole actionStack doesn't seem to work due to subtle differences between rewind and resolveAction.
+            doRewind(actionStack.subList(0, baseStackSize));
+            for (int i = baseStackSize; i < actionStack.size(); ++i) {
+                resolveAction(actionStack.get(i));
+            }
+
         }
         return false;
     }
@@ -2120,6 +2126,7 @@ public class Game extends JPanel {
         rewinding = false;
         confirmTurn();
         timerAI += System.currentTimeMillis() - startAI;
+        /*
         System.err.println("executeAI - " + timerAI);
         System.err.println("createDecisionNodes - " + timerDecisionTree);
         System.err.println("getPossibleActions - " + timerFeasibleActions);
@@ -2127,6 +2134,7 @@ public class Game extends JPanel {
         System.err.println("actionExecution - " + timerAction);
         System.err.println("evaluate - " + timerEvaluate);
         timerActionMap.forEach((c, t) -> System.err.println("ACTION " + c.getSimpleName() + " - " + t));
+         */
     }
 
     public boolean isValidBridgeLocation(Hex hex1, Hex hex2) {
