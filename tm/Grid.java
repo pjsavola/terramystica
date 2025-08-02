@@ -94,7 +94,9 @@ public class Grid extends JPanel {
 
                 for (Hex[] hexes : map) {
                     for (final Hex hex2 : hexes) {
+                        if (hex1 == hex2) continue;
                         if (hex2.getType() == Hex.Type.WATER) continue;
+                        if (hex1.getNeighbors().contains(hex2)) continue;
 
                         int requiredCommonWaterNeighbors = 2;
                         if (hex1.getNeighbors().size() <= 3 && hex2.getNeighbors().size() <= 3) {
@@ -106,12 +108,15 @@ public class Grid extends JPanel {
                             }
                         }
                         if (requiredCommonWaterNeighbors <= 0) {
-                            validBridgeLocations.add(hex1.getId() + ":" + hex2.getId());
+                            if (!validBridgeLocations.contains(hex2.getId() + ":" + hex1.getId())) {
+                                validBridgeLocations.add(hex1.getId() + ":" + hex2.getId());
+                            }
                         }
                     }
                 }
             }
         }
+        //System.err.println("Valid bridge spots: " + validBridgeLocations.size());
 
         for (Hex[] hexes : map) {
             Collections.addAll(allHexes, hexes);
