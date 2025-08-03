@@ -278,7 +278,7 @@ public abstract class Menus {
         new ActionMenuItem(game, miscMenu, "Auto Move", KeyEvent.VK_Q) {
             @Override
             public boolean canExecute(Game game) {
-                return game.phase != Game.Phase.CONFIRM_ACTION;
+                return game.phase != Game.Phase.CONFIRM_ACTION && game.phase != Game.Phase.END;
             }
 
             @Override

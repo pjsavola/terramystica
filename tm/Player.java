@@ -1446,6 +1446,7 @@ public class Player extends JPanel {
         //System.err.println("Coins: " + sinks.coins);
         //System.err.println("Workers: " + sinks.workers);
         //System.err.println("Priest: " + sinks.priests);
+        int score = points;
         final int round = game.getRound();
         if (round > 0) {
             int[] coinFlow = new int[7 - round];
@@ -1526,9 +1527,33 @@ public class Player extends JPanel {
                 }
                 shipping = originalShipping;
             }
+            switch (getBon()) {
+                case 6 -> score += (strongholds + sanctuaries) * 4;
+                case 7 -> score += tradingPosts * 2;
+                case 9 -> score += dwellings;
+                case 10 -> score += shipping * 3;
+                default -> { }
+            }
+            for (int i = 0; i < 7 - round; ++i) {
+                score += vpFlow[i];
+            }
+            score *= 100;
+            final int[] coinValues = { 200, 200, 200, 200, 166, 133, 100 };
+            final int[] workerValues = { 800, 800, 600, 400, 200, 150, 100 };
+            final int[] priestValues = { 1200, 1000, 800, 600, 400, 200, 100 };
+            final int[] spadeValues = { 1600, 1600, 1200, 800, 400, 300, 200 };
+            final int[] powerValues = { 300, 300, 300, 250, 200, 150, 100 };
+            for (int rnd = round; rnd < 7; ++rnd) {
+                final int i = rnd - round;
+                score += coinFlow[i] * coinValues[rnd];
+                score += workerFlow[i] * workerValues[rnd];
+                score += priestFlow[i] * priestValues[rnd];
+                score += spadeFlow[i] * spadeValues[rnd];
+                score += powerFlow[i] * powerValues[rnd];
+            }
         }
         Game.timerEvaluate += System.currentTimeMillis() - startEvaluate;
-        return getPoints();
+        return score;
     }
 
     private int getDwellingSpotCount() {
