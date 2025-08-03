@@ -1474,7 +1474,13 @@ public class Player extends JPanel {
                         int rewardCount = (cult < 4 ? cultSteps[cult] : getCultPriestCount()) / cultRequirements[cult];
                         while (rewardCount-- > 0) {
                             r.income.toArrays(delta, coinFlow, workerFlow, priestFlow, powerFlow);
-                            spadeFlow[delta] += r.spade;
+                            if (faction instanceof Acolytes) {
+                                // TODO: Cult step flow
+                            } else if (faction instanceof Giants) {
+                                spadeFlow[delta] += r.spade / 2;
+                            } else {
+                                spadeFlow[delta] += r.spade;
+                            }
                         }
                     }
                 }
