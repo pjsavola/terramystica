@@ -66,7 +66,7 @@ public class AIUtil {
                     } else {
                         cost = Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, effectiveType));
                     }
-                    if (player.canDig(cost, jump)) {
+                    if (player.canDig(cost, jump, -1)) {
                         ++threatLevel;
                     }
                 }

@@ -114,7 +114,7 @@ public class DigAction extends Action {
         // Partial usage of pending spades to anything but home terrain is not allowed.
         if (requiredDigging > 0 && pendingSpades > 0 && !player.allowExtraSpades) return false;
         if (pendingSpades > 1 && type != player.getHomeType() && requiredSpades < pendingSpades) return false;
-        return target.getStructure() == null && requiredSpades != 0 && player.canDig(requiredDigging, jump);
+        return target.getStructure() == null && requiredSpades != 0 && player.canDig(requiredDigging, jump, cult);
     }
 
     @Override

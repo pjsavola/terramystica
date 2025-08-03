@@ -630,7 +630,7 @@ public class Game extends JPanel {
         }
         if (player.getFaction().getHomeType() == Hex.Type.VOLCANO) {
             final int cost = getVolcanoDigCost(hex, player);
-            if (player.canDig(cost, jump)) {
+            if (player.canDig(cost, jump, -1)) {
                 if (player.getFaction() instanceof Acolytes) {
                     final List<String> options = new ArrayList<>();
                     for (int i = 0; i < 4; ++i) {
@@ -665,7 +665,7 @@ public class Game extends JPanel {
 
                 final int requiredSpades = Math.max(1, player.getFaction() instanceof Giants ? 2 : DigAction.getSpadeCost(hex, type));
                 final int requiredDigging = Math.max(0, requiredSpades - player.getPendingSpades());
-                if (!player.canDig(requiredDigging, jump)) continue;
+                if (!player.canDig(requiredDigging, jump, -1)) continue;
                 if (requiredDigging > 0 && player.getPendingSpades() > 0 && !player.allowExtraSpades) continue;
 
                 final Hex.Type finalType = iceDig && type == iceColor ? Hex.Type.ICE : type;

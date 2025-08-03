@@ -796,7 +796,7 @@ public class Player extends JPanel {
         allowExtraSpades = false;
     }
 
-    public boolean canDig(int amount, boolean useRange) {
+    public boolean canDig(int amount, boolean useRange, int cult) {
         if (useRange && jumpCost == Resources.zero) {
             throw new RuntimeException("Cannot use range to dig");
         }
@@ -805,12 +805,16 @@ public class Player extends JPanel {
         } else if (faction instanceof Dragonlords) {
             return getPowerTokenCount() >= amount;
         } else if (faction instanceof Acolytes) {
-            for (int i = 0; i < 4; ++i) {
-                if (cultSteps[i] >= amount) {
-                    return true;
+            if (cult < 0) {
+                for (int i = 0; i < 4; ++i) {
+                    if (cultSteps[i] >= amount) {
+                        return true;
+                    }
                 }
+                return false;
+            } else {
+                return cultSteps[cult] >= amount;
             }
-            return false;
         } else {
             if ((amount + pendingSpades) % 2 != 0 && faction instanceof Giants) return false;
             if (useRange) {
