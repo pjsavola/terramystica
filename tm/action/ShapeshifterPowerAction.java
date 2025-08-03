@@ -17,7 +17,7 @@ public class ShapeshifterPowerAction extends Action {
 
     @Override
     public boolean canExecute() {
-        return player.getFaction() instanceof Shapeshifters && (!response || player.getPoints() > 0);
+        return player.getFaction() instanceof Shapeshifters && (!response || player.getPoints() > 0) && game.leechTrigger == player;
     }
 
     @Override

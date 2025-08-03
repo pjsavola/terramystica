@@ -1531,12 +1531,15 @@ public class Player extends JPanel {
                 }
                 shipping = originalShipping;
             }
-            switch (getBon()) {
-                case 6 -> score += (strongholds + sanctuaries) * 4;
-                case 7 -> score += tradingPosts * 2;
-                case 9 -> score += dwellings;
-                case 10 -> score += shipping * 3;
-                default -> { }
+            if (!bons.isEmpty()) {
+                switch (getBon()) {
+                    case 6 -> score += (strongholds + sanctuaries) * 4;
+                    case 7 -> score += tradingPosts * 2;
+                    case 9 -> score += dwellings;
+                    case 10 -> score += shipping * 3;
+                    default -> {
+                    }
+                }
             }
             for (int i = 0; i < 7 - round; ++i) {
                 score += vpFlow[i];
