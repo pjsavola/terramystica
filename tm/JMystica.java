@@ -144,17 +144,23 @@ public class JMystica {
             panel.add(new JLabel("Randomize order"));
             final JCheckBox randomizeOrderChooser = new JCheckBox();
             panel.add(randomizeOrderChooser);
-            final List<JLabel> playerLabelList = new ArrayList<>();
+            final List<JPanel> playerLabelList = new ArrayList<>();
             final List<JTextField> playerFieldList = new ArrayList<>();
             final JButton addButton = new JButton("Add player");
             final JButton removeButton = new JButton("Remove player");
             addButton.addActionListener(al -> {
                 if (playerLabelList.size() < 7) {
                     final JLabel label = new JLabel("Player " + (playerLabelList.size() + 1));
+                    final JCheckBox ai = new JCheckBox("AI");
+                    final JPanel labelAndAI = new JPanel();
+                    ai.setSelected(true);
+                    labelAndAI.add(label);
+                    labelAndAI.add(ai);
+                    labelAndAI.setLayout(new GridLayout(1, 2));
                     final JTextField field = new JTextField();
-                    playerLabelList.add(label);
+                    playerLabelList.add(labelAndAI);
                     playerFieldList.add(field);
-                    panel.add(label, panel.getComponentCount() - 2);
+                    panel.add(labelAndAI, panel.getComponentCount() - 2);
                     panel.add(field, panel.getComponentCount() - 2);
                     panel.setLayout(new GridLayout(panel.getComponentCount() / 2, 2));
                     dialog.pack();
@@ -172,10 +178,16 @@ public class JMystica {
             panel.add(removeButton);
             for (int i = 0; i < 4; ++i) {
                 final JLabel label = new JLabel("Player " + (i + 1));
+                final JCheckBox ai = new JCheckBox("AI");
+                final JPanel labelAndAI = new JPanel();
+                ai.setSelected(i > 0);
+                labelAndAI.add(label);
+                labelAndAI.add(ai);
+                labelAndAI.setLayout(new GridLayout(1, 2));
                 final JTextField field = new JTextField();
-                playerLabelList.add(label);
+                playerLabelList.add(labelAndAI);
                 playerFieldList.add(field);
-                panel.add(label);
+                panel.add(labelAndAI);
                 panel.add(field);
             }
             final JButton start = new JButton("Start!");
