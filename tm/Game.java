@@ -888,6 +888,10 @@ public class Game extends JPanel {
                     resolveAction(new LeechAction(true));
                 }
             }
+        } else if (phase != Phase.END) {
+            if (!rewinding && getCurrentPlayer().isAI()) {
+                executeAI();
+            }
         }
     }
 

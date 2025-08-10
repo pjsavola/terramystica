@@ -116,6 +116,10 @@ public class Player extends JPanel {
         add(pool);
     }
 
+    public boolean isAI() {
+        return ai;
+    }
+
     public void reset() {
         coins = 0;
         workers = 0;
