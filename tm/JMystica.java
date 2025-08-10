@@ -229,7 +229,8 @@ public class JMystica {
                     }
                 }
                 final List<String> playerNames = playerFieldList.stream().map(JTextComponent::getText).toList();
-                final GameData gameData = new GameData(playerNames, seed);
+                final List<Boolean> playerAIs = playerLabelList.stream().map(labelAndAI -> ((JCheckBox) labelAndAI.getComponent(1)).isSelected()).toList();
+                final GameData gameData = new GameData(playerNames, playerAIs, seed);
                 gameData.mapData = mapData;
                 gameData.useRevisedStartingVPs = startingVPsChooser.getSelectedIndex() == 1;
                 gameData.useAuction = startingVPsChooser.getSelectedIndex() == 2;

@@ -186,7 +186,8 @@ public class Game extends JPanel {
             phase = Phase.PICK_FACTIONS;
             while (players.size() < gameData.playerCount) {
                 final String name = gameData.playerNames.get(players.size());
-                final Player player = new Player(this, name);
+                final boolean ai = gameData.playerAIs.get(players.size());
+                final Player player = new Player(this, name, ai);
                 players.add(player);
                 turnOrder.add(player);
             }
@@ -198,7 +199,8 @@ public class Game extends JPanel {
             phase = Phase.INITIAL_DWELLINGS;
             while (players.size() < gameData.playerCount) {
                 final String name = gameData.playerNames.get(players.size());
-                final Player player = new Player(this, name);
+                final boolean ai = gameData.playerAIs.get(players.size());
+                final Player player = new Player(this, name, ai);
                 final Faction faction = factions.remove(factions.size() - 1);
                 player.selectFaction(faction);
                 player.pendingColorPick = false; // Color is already picked for ice and variable colors.

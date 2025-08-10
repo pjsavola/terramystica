@@ -101,13 +101,15 @@ public class Player extends JPanel {
     private final PlayerInfo data;
     private final Pool pool;
     private final String name;
+    private final boolean ai;
     public boolean[] unlockedTerrain;
     public int initialUnlockedTerrainIndex = -1;
 
-    public Player(Game game, String name) {
+    public Player(Game game, String name, boolean ai) {
         super(new FlowLayout(FlowLayout.LEFT));
         this.game = game;
         this.name = name;
+        this.ai = ai;
         data = new PlayerInfo();
         pool = new Pool(game, this, bons, null, favs, towns, game.bonUsed, usedFav6);
         add(data);

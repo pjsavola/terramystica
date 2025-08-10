@@ -52,6 +52,7 @@ public class GameData implements Serializable {
 
     final int playerCount;
     List<String> playerNames;
+    List<Boolean> playerAIs;
     Map<String, Integer> results;
 
     final List<Integer> factionsIndices;
@@ -66,8 +67,9 @@ public class GameData implements Serializable {
     transient boolean silentMode;
     final transient List<String> logs = new ArrayList<>();
 
-    public GameData(List<String> playerNames, int seed) {
+    public GameData(List<String> playerNames, List<Boolean> playerAIs, int seed) {
         this.playerNames = playerNames;
+        this.playerAIs = playerAIs;
         this.playerCount = playerNames.size();
         final Random random = new Random(seed);
 
@@ -146,6 +148,7 @@ public class GameData implements Serializable {
 
     private int readInput(Scanner scanner) {
         playerNames = new ArrayList<>();
+        playerAIs = new ArrayList<>();
         int players = 0;
         boolean start = false;
         boolean scanningResults = false;
@@ -206,6 +209,7 @@ public class GameData implements Serializable {
                 ++players;
                 final String name = line.split(" ")[2].split("\\t")[0];
                 playerNames.add(name);
+                playerAIs.add(false);
             } else if (line.matches("[a-z]*\\t.*") && line.endsWith("setup")) {
                 final String factionName = line.split("\\t")[0];
                 final Faction faction = allFactions.stream().filter(f -> f.getClass().getSimpleName().equalsIgnoreCase(factionName)).findFirst().orElse(null);
